@@ -11,6 +11,7 @@
   import DetailModal from './components/DetailModal.vue';
   import EditModal from './components/EditModal.vue';
   import ReportView from './components/ReportView.vue';
+  import AgendaView from './components/AgendaView.vue';
 
   // DATA
   const agendaPunten = ref([]); 
@@ -309,6 +310,7 @@
         <button :class="{ active: viewMode === 'grid' }" @click="viewMode = 'grid'">🃏 Kaart</button>
         <button :class="{ active: viewMode === 'dots' }" @click="viewMode = 'dots'">🟣 Stippen</button>
         <button :class="{ active: viewMode === 'table' }" @click="viewMode = 'table'">📄 Tabel</button>
+        <button :class="{ active: viewMode === 'agenda' }" @click="viewMode = 'agenda'">🗓️ Agenda</button>
       </div>
 
       <transition name="fade">
@@ -382,9 +384,15 @@
         </div>
       </div>
 
-      <div v-else>
-         <ReportView :items="gefilterdeEvents" />
-      </div>
+    <div v-else-if="viewMode === 'table'">
+        <ReportView :items="gefilterdeEvents" />
+    </div>
+
+    <div v-else-if="viewMode === 'agenda'">
+        <AgendaView :items="gefilterdeEvents" />
+    </div>
+
+
     </div>
 
     <button v-if="activeFocusId" class="reset-focus-btn" @click="clearFocus">❌ Reset Weergave</button>
