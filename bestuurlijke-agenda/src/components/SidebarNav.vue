@@ -1,86 +1,150 @@
 <script setup>
+import { ref, onMounted, onUnmounted } from 'vue';
+
 const props = defineProps({
-  groepen: Array // We krijgen de lijst met maanden binnen
+  groepen: Array
 });
 
-// Functie om soepel naar de juiste maand te scrollen
-function scrollToMaand(sortKey) {
-  const element = document.getElementById('maand-' + sortKey);
-  if (element) {
-    // We scrollen ietsje hoger (-100px) zodat de header er niet overheen valt
-    const top = element.getBoundingClientRect().top + window.scrollY - 120;
-    window.scrollTo({ top: top, behavior: 'smooth' });
-  }
+const activeIndex = ref(0);
+
+// Scroll naar de juiste maand als je op een bolletje klikt
+function scrollTo(sortKey, index) {
+    activeIndex.value = index;
+    const element = document.getElementById('maand-' + sortKey);
+    if (element) {
+        // Scroll iets minder ver (offset) vanwege de sticky header
+        const y = element.getBoundingClientRect().top + window.scrollY - 180;
+        window.scrollTo({ top: y, behavior: 'smooth' });
+    }
 }
 
-// Hulpfunctie: Bepaal de kleur van het bolletje op basis van drukte
-function getHeatClass(itemCount) {
-  if (itemCount > 7) return 'heat-high'; // Druk (Rood)
-  if (itemCount >= 3) return 'heat-med'; // Gemiddeld (Oranje)
-  return 'heat-low';                     // Rustig (Groen)
+// Check welke maand nu in beeld is
+function updateActiveState() {
+    const blocks = document.querySelectorAll('.month-block');
+    let current = -1;
+    
+    // Loop door alle blokken en kijk of de bovenkant in de bovenste helft van het scherm zit
+    blocks.forEach((block, index) => {
+        const rect = block.getBoundingClientRect();
+        if (rect.top < (window.innerHeight / 2)) {
+            current = index;
+        }
+    });
+
+    // Als we nog helemaal bovenin zijn, selecteer de eerste
+    if (current === -1 && blocks.length > 0) current = 0;
+    
+    activeIndex.value = current;
 }
+
+onMounted(() => {
+    window.addEventListener('scroll', updateActiveState);
+    // Eerste keer direct checken
+    updateActiveState();
+});
+
+onUnmounted(() => {
+    window.removeEventListener('scroll', updateActiveState);
+});
 </script>
 
 <template>
-  <div class="sidebar-nav">
-    <div class="sidebar-line"></div>
-    
+  <nav class="sidebar-nav">
     <div 
-      v-for="groep in groepen" 
-      :key="groep.sortKey" 
-      class="nav-item"
-      @click="scrollToMaand(groep.sortKey)"
+        v-for="(groep, index) in groepen" 
+        :key="groep.sortKey"
+        class="nav-item"
+        :class="{ active: index === activeIndex }"
+        @click="scrollTo(groep.sortKey, index)"
     >
-      <span class="nav-label">
-        {{ groep.titel }} <span class="count">({{ groep.items.length }})</span>
-      </span>
-      
-      <div class="nav-dot" :class="getHeatClass(groep.items.length)"></div>
+        <span class="nav-label">
+            {{ groep.titel }}
+            <span class="count">({{ groep.items.length }})</span>
+        </span>
+        
+        <div class="nav-dot" 
+             :class="{
+                'high': groep.items.length > 7,
+                'med': groep.items.length >= 3 && groep.items.length <= 7,
+                'low': groep.items.length < 3
+             }"
+        ></div>
     </div>
-  </div>
+  </nav>
 </template>
 
 <style scoped>
 .sidebar-nav {
-  position: fixed;
-  right: 20px;
-  top: 50%;
-  transform: translateY(-50%);
-  display: flex;
-  flex-direction: column;
-  gap: 0;
-  z-index: 150;
-  pointer-events: none; /* Zodat je 'door' de lege ruimte heen kunt klikken */
+    position: fixed;
+    right: 20px;
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    z-index: 90;
 }
 
-.sidebar-line {
-  position: absolute;
-  right: 9px; top: 10px; bottom: 10px;
-  width: 2px; background: #e0e0e0; z-index: -1;
-}
-
+/* Nav Item Container */
 .nav-item {
-  display: flex; align-items: center; justify-content: flex-end;
-  cursor: pointer; padding: 6px 0; pointer-events: auto; position: relative; height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    cursor: pointer;
+    transition: transform 0.2s;
 }
+.nav-item:hover { transform: translateX(-5px); }
 
+/* Label (tekst) - Standaard onzichtbaar, zichtbaar bij hover of active */
 .nav-label {
-  background: rgba(44, 62, 80, 0.9); color: white; padding: 4px 8px; border-radius: 4px;
-  font-size: 0.75rem; margin-right: 12px; opacity: 0; transform: translateX(10px);
-  transition: all 0.3s ease; white-space: nowrap; box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    background: rgba(0,0,0,0.8);
+    color: white;
+    padding: 4px 10px;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    margin-right: 10px;
+    opacity: 0;
+    transform: translateX(10px);
+    transition: all 0.3s ease;
+    pointer-events: none;
+    white-space: nowrap;
 }
-/* Laat label zien als je over het bolletje muist */
-.nav-item:hover .nav-label { opacity: 1; transform: translateX(0); }
 
+.nav-item:hover .nav-label,
+.nav-item.active .nav-label {
+    opacity: 1;
+    transform: translateX(0);
+}
+
+.nav-item.active .nav-label {
+    background: #2c3e50;
+    font-weight: bold;
+}
+
+/* Bolletjes */
 .nav-dot {
-  width: 12px; height: 12px; border-radius: 50%;
-  transition: all 0.3s ease; border: 2px solid white; box-shadow: 0 0 2px rgba(0,0,0,0.3);
-  flex-shrink: 0;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background-color: #ddd;
+    border: 2px solid white;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    transition: all 0.3s ease;
 }
-.nav-item:hover .nav-dot { transform: scale(1.4); }
 
-/* De Heatmap kleuren */
-.heat-low { background-color: #2ecc71; border-color: #27ae60; }
-.heat-med { background-color: #f39c12; border-color: #e67e22; }
-.heat-high { background-color: #e74c3c; border-color: #c0392b; }
+/* Active State Dot */
+.nav-item.active .nav-dot {
+    transform: scale(1.4);
+    border-color: #2c3e50;
+}
+
+/* Heatmap kleuren voor de bolletjes */
+.nav-dot.low { background-color: #27ae60; }
+.nav-dot.med { background-color: #e67e22; }
+.nav-dot.high { background-color: #c0392b; }
+
+/* Mobiel verbergen */
+@media (max-width: 900px) {
+    .sidebar-nav { display: none; }
+}
 </style>

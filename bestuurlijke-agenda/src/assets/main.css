@@ -1,35 +1,60 @@
-/* Jouw eigen kleuren en instellingen */
+/* src/assets/main.css */
+
 :root {
-  --c-pfo: #8e44ad;         
-  --c-db-besluit: #2980b9;  
-  --c-db-schrift: #3498db; 
-  --c-db-informeel: #17a2b8; 
-  --c-ab-besluit: #c0392b;  
-  --c-ab-brief: #e67e22;    
-  --c-delta: #27ae60;       
-  
-  --bg-body: #f4f7f6;
-  --bg-card: #ffffff;
-  --text-main: #2c3e50;
+    /* Kleurenpalet (Gelijk aan v11.0) */
+    --c-pfo: #8e44ad;         
+    --c-db-besluit: #2980b9;  
+    --c-db-schrift: #3498db; 
+    --c-db-informeel: #17a2b8; 
+    --c-ab-besluit: #c0392b;  
+    --c-ab-brief: #e67e22;    
+    --c-delta: #27ae60;       
+    
+    --bg-body: #f4f7f6;
+    --text-main: #2c3e50;
 }
 
 body {
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  background-color: var(--bg-body);
-  color: var(--text-main);
-  margin: 0;
-  padding: 0;
-  line-height: 1.4;
-  min-height: 100vh;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: var(--bg-body);
+    color: var(--text-main);
+    margin: 0;
+    padding: 0;
+    line-height: 1.4;
+    overflow-x: hidden; /* Voorkom horizontale scroll door animaties */
 }
 
-#app {
-  width: 100%;
-  margin: 0 auto;
-  padding: 0;
-  display: block;
+/* --- PRINT STYLES --- */
+/* Dit zorgt ervoor dat de pagina er netjes uitziet op papier of PDF */
+@media print {
+    /* Verberg navigatie, knoppen en admin-tools */
+    header, 
+    .reset-focus-btn, 
+    .sidebar-nav,
+    .filter-bar,
+    .admin-toolbar,
+    .btn-icon,
+    .card-footer, 
+    .login-btn,
+    .add-btn {
+        display: none !important;
+    }
+
+    /* Reset layout voor papier */
+    body { background: white; margin: 0; padding: 0; }
+    .container { width: 100% !important; max-width: none !important; margin: 0 !important; padding: 0 !important; }
+    
+    /* Zorg dat kaarten niet halverwege worden afgekapt */
+    .card-wrapper, .month-block { 
+        break-inside: avoid; 
+        page-break-inside: avoid; 
+        border: 1px solid #ddd;
+        box-shadow: none !important;
+    }
+
+    /* Forceer achtergrondkleuren (sommige browsers printen die standaard niet) */
+    * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
 }
 
-*, *::before, *::after {
-  box-sizing: border-box;
-}
+/* Algemene reset voor knoppen */
+button { font-family: inherit; }
