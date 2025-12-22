@@ -23,7 +23,7 @@ watch(() => props.item, (newItem) => {
     // Nieuw item? Maak alles leeg
     formData.value = { id: Date.now(), title: '', schedule: {} };
   }
-});
+}, { immediate: true }); // <--- DEZE REGEL IS AANGEPAST (zorgt dat 'Nieuw' werkt)
 
 function opslaan() {
   emit('save', formData.value);
