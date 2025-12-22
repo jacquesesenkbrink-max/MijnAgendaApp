@@ -1,74 +1,70 @@
 <script setup>
 import { ref, computed, onMounted, watch } from 'vue';
-import { parseDate, getMonthName } from '../utils/dateHelpers.js';
+import { parseDate } from '../utils/dateHelpers.js';
 
 const props = defineProps({
-  items: Array // De ruwe lijst met agendapunten
+  items: Array // Dit zijn nu de 'platte' events uit App.vue
 });
 
 // Opslag voor vergaderdetails (tijd/locatie)
-// Key format: "DD-MM-YYYY_TYPE_PH(opt)"
 const meetingMeta = ref({});
 
-// Laad opgeslagen tijden/locaties bij start
 onMounted(() => {
   const saved = localStorage.getItem('meeting-meta-data');
   if (saved) meetingMeta.value = JSON.parse(saved);
 });
 
-// Sla wijzigingen direct op
 watch(meetingMeta, (newVal) => {
   localStorage.setItem('meeting-meta-data', JSON.stringify(newVal));
 }, { deep: true });
 
-// --- 1. DATA TRANSFORMATIE ---
+// --- DATA TRANSFORMATIE (AANGEPAST) ---
 const agendaMeetings = computed(() => {
     const meetingsMap = {};
 
-    props.items.forEach(item => {
-        if (!item.schedule) return;
+    // We lopen nu direct door de lijst met events heen
+    // (In plaats van door de schedule van elk hoofdonderwerp)
+    props.items.forEach(ev => {
+        const dateStr = ev.dateDisplay;
+        const type = ev.type;
 
-        Object.keys(item.schedule).forEach(type => {
-            const dateStr = item.schedule[type];
-            if (!dateStr || dateStr.toLowerCase().includes('q')) return; // Alleen echte datums
+        // Skip items zonder datum of met 'Q' notatie (kwartaalplanning)
+        if (!dateStr || dateStr.toLowerCase().includes('q')) return;
 
-            // Bepaal de unieke sleutel voor de vergadering
-            // PFO's worden gesplitst per PH, DB/AB zijn generiek op datum
-            let meetingKey = '';
-            let meetingTitle = '';
-            let groupPh = '';
+        // Logica voor groeperen:
+        let meetingKey = '';
+        let meetingTitle = '';
+        let groupPh = '';
 
-            if (type === 'PFO') {
-                // PFO is uniek per datum ÉN per PH
-                // Gebruik item.ph (of de eerste naam als er meerdere zijn)
-                groupPh = item.ph ? item.ph.split('/')[0].trim() : 'Onbekend';
-                meetingKey = `${dateStr}_${type}_${groupPh}`;
-                meetingTitle = `PFO ${groupPh}`;
-            } else {
-                // DB en AB zijn uniek per datum en type
-                meetingKey = `${dateStr}_${type}`;
-                meetingTitle = mapTypeToTitle(type);
-            }
+        if (type === 'PFO') {
+            // PFO splitsen we per PH
+            groupPh = ev.ph ? ev.ph.split('/')[0].trim() : 'Onbekend';
+            meetingKey = `${dateStr}_${type}_${groupPh}`;
+            meetingTitle = `PFO ${groupPh}`;
+        } else {
+            // DB en AB groeperen we puur op datum en type
+            meetingKey = `${dateStr}_${type}`;
+            meetingTitle = mapTypeToTitle(type);
+        }
 
-            // Maak vergadering aan als die nog niet bestaat
-            if (!meetingsMap[meetingKey]) {
-                meetingsMap[meetingKey] = {
-                    key: meetingKey,
-                    dateDisplay: dateStr,
-                    dateObj: parseDate(dateStr),
-                    title: meetingTitle,
-                    type: type,
-                    ph: groupPh,
-                    items: []
-                };
-            }
+        // Als deze vergadering nog niet bestaat in onze lijst, maak hem aan
+        if (!meetingsMap[meetingKey]) {
+            meetingsMap[meetingKey] = {
+                key: meetingKey,
+                dateDisplay: dateStr,
+                dateObj: ev.dateObj, // Deze hebben we al vanuit App.vue
+                title: meetingTitle,
+                type: type,
+                ph: groupPh,
+                items: []
+            };
+        }
 
-            // Voeg item toe aan deze vergadering
-            meetingsMap[meetingKey].items.push(item);
-        });
+        // Voeg dit punt toe aan de vergadering
+        meetingsMap[meetingKey].items.push(ev);
     });
 
-    // Zet om naar array en sorteer op datum
+    // Sorteren op datum
     return Object.values(meetingsMap).sort((a, b) => a.dateObj - b.dateObj);
 });
 
@@ -83,10 +79,10 @@ function mapTypeToTitle(type) {
 }
 
 function getDayName(dateObj) {
+    if(!dateObj) return '';
     return dateObj.toLocaleDateString('nl-NL', { weekday: 'long' });
 }
 
-// Kleuren voor de header balkjes
 const typeColors = { 
   'PFO':'var(--c-pfo)', 'DBBesluit':'var(--c-db-besluit)', 
   'DBSchrift':'var(--c-db-schrift)', 'DBInformeel': 'var(--c-db-informeel)',
@@ -94,7 +90,6 @@ const typeColors = {
   'Delta':'var(--c-delta)' 
 };
 
-// Print functie (simpel)
 function printAgenda() {
     window.print();
 }
@@ -109,7 +104,8 @@ function printAgenda() {
     </div>
 
     <div v-if="agendaMeetings.length === 0" class="empty-state">
-        Geen ingeplande vergaderingen gevonden.
+        Geen ingeplande vergaderingen gevonden. <br>
+        <small>(Controleer of je filters niet te streng staan of datums in de toekomst liggen)</small>
     </div>
 
     <div class="timeline-stream">
@@ -129,17 +125,11 @@ function printAgenda() {
             <div class="meeting-meta no-print">
                 <div class="input-group">
                     <label>🕐 Tijdstip:</label>
-                    <input 
-                        v-model="meetingMeta[meeting.key + '_time']" 
-                        placeholder="bijv. 09:00 - 10:30" 
-                    />
+                    <input v-model="meetingMeta[meeting.key + '_time']" placeholder="bijv. 09:00 - 10:30" />
                 </div>
                 <div class="input-group">
                     <label>📍 Bespreekruimte:</label>
-                    <input 
-                        v-model="meetingMeta[meeting.key + '_room']" 
-                        placeholder="bijv. Kamer 3.02" 
-                    />
+                    <input v-model="meetingMeta[meeting.key + '_room']" placeholder="bijv. Kamer 3.02" />
                 </div>
             </div>
 
@@ -158,7 +148,7 @@ function printAgenda() {
                     </tr>
                 </thead>
                 <tbody>
-                    <tr v-for="(item, index) in meeting.items" :key="item.id">
+                    <tr v-for="(item, index) in meeting.items" :key="item.uniqueId">
                         <td class="index-col">{{ index + 1 }}.</td>
                         <td>
                             <div class="topic-title">{{ item.title }}</div>
@@ -166,11 +156,15 @@ function printAgenda() {
                         </td>
                         <td>
                             <div class="role-text" v-if="meeting.type !== 'PFO'">PH: {{ item.ph }}</div>
+                            
+                            <div class="role-text highlight" v-if="item.originalItem && item.originalItem.administrativeContact">
+                                🗣️ {{ item.originalItem.administrativeContact }}
+                            </div>
+
                             <div class="role-text">Dir: {{ item.dir }}</div>
-                            <div class="role-text" v-if="item.administrativeContact">🗣️: {{ item.administrativeContact }}</div>
                         </td>
                         <td>
-                            <span class="badge">{{ item.strategicLabel || 'Geen label' }}</span>
+                            <span class="badge">{{ item.strategicLabel || '-' }}</span>
                         </td>
                     </tr>
                 </tbody>
@@ -187,6 +181,8 @@ function printAgenda() {
 .print-btn { background: #2c3e50; color: white; padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer; font-size: 1rem; }
 .print-btn:hover { background: #34495e; }
 
+.empty-state { text-align: center; padding: 40px; color: #7f8c8d; font-size: 1.1rem; }
+
 /* MEETING CARD */
 .meeting-card { 
     background: white; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); 
@@ -197,7 +193,7 @@ function printAgenda() {
 .meeting-header {
     display: flex; align-items: center; padding: 15px 20px;
     background: #f8f9fa; border-bottom: 1px solid #eee;
-    border-left: 6px solid #ccc; /* Kleur wordt dynamisch overschreven */
+    border-left: 6px solid #ccc; 
 }
 
 .meeting-date { 
@@ -211,15 +207,10 @@ function printAgenda() {
 .item-count { font-size: 0.85rem; color: #7f8c8d; }
 
 /* META INPUTS */
-.meeting-meta { 
-    display: flex; gap: 20px; padding: 15px 20px; background: #fffbe6; border-bottom: 1px solid #eee; 
-}
+.meeting-meta { display: flex; gap: 20px; padding: 15px 20px; background: #fffbe6; border-bottom: 1px solid #eee; }
 .input-group { display: flex; align-items: center; gap: 10px; flex: 1; }
 .input-group label { font-weight: bold; font-size: 0.9rem; color: #555; }
-.input-group input { 
-    flex: 1; padding: 6px; border: 1px solid #ccc; border-radius: 4px; 
-}
-
+.input-group input { flex: 1; padding: 6px; border: 1px solid #ccc; border-radius: 4px; }
 .meta-display { padding: 10px 20px; background: #f4f7f6; border-bottom: 1px solid #eee; font-size: 0.9rem; }
 
 /* TABLE */
@@ -232,6 +223,7 @@ function printAgenda() {
 .topic-title { font-weight: 600; color: #2c3e50; margin-bottom: 4px; }
 .topic-comment { font-size: 0.8rem; color: #c0392b; font-style: italic; }
 .role-text { font-size: 0.8rem; color: #666; margin-bottom: 2px; }
+.role-text.highlight { font-weight: bold; color: #2c3e50; } /* Nieuwe stijl voor aanspreekpunt */
 .badge { background: #eee; padding: 2px 6px; border-radius: 4px; font-size: 0.75rem; color: #555; }
 
 /* PRINT STYLES */
