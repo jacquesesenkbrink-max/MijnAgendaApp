@@ -1,0 +1,35 @@
+/* Jouw eigen kleuren en instellingen */
+:root {
+  --c-pfo: #8e44ad;         
+  --c-db-besluit: #2980b9;  
+  --c-db-schrift: #3498db; 
+  --c-db-informeel: #17a2b8; 
+  --c-ab-besluit: #c0392b;  
+  --c-ab-brief: #e67e22;    
+  --c-delta: #27ae60;       
+  
+  --bg-body: #f4f7f6;
+  --bg-card: #ffffff;
+  --text-main: #2c3e50;
+}
+
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background-color: var(--bg-body);
+  color: var(--text-main);
+  margin: 0;
+  padding: 0;
+  line-height: 1.4;
+  min-height: 100vh;
+}
+
+#app {
+  width: 100%;
+  margin: 0 auto;
+  padding: 0;
+  display: block;
+}
+
+*, *::before, *::after {
+  box-sizing: border-box;
+}
