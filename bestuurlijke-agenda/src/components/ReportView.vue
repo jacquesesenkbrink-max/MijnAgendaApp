@@ -36,10 +36,10 @@ const monthStats = computed(() => {
     return Object.values(stats).sort((a, b) => a.sortKey.localeCompare(b.sortKey));
 });
 
-// --- 2. ANALYSE TEKST (Waarschuwing bij drukte) ---
+// --- 2. ANALYSE TEKST ---
 const busyMonths = computed(() => {
     return monthStats.value
-        .filter(m => m.count > 7) // Grenswaarde voor "Druk"
+        .filter(m => m.count > 7) 
         .map(m => m.name);
 });
 
@@ -123,7 +123,11 @@ const typeLabels = {
                     <div v-if="ev.comments" class="table-note">Opmerking: {{ ev.comments }}</div>
                 </td>
                 <td>
-                    <small>PH: {{ ev.ph || '-' }}<br>Dir: {{ ev.dir || '-' }}</small>
+                    <small>PH: {{ ev.ph || '-' }}<br>
+                    <span v-if="ev.originalItem.administrativeContact">
+                        <strong>🗣️: {{ ev.originalItem.administrativeContact }}</strong><br>
+                    </span>
+                    Dir: {{ ev.dir || '-' }}</small>
                 </td>
                 <td><small>{{ ev.strategicLabel || '-' }}</small></td>
             </tr>
@@ -151,7 +155,6 @@ const typeLabels = {
     background: #fff; border: 1px solid #ddd; border-radius: 6px; padding: 15px 10px;
     text-align: center; box-shadow: 0 2px 4px rgba(0,0,0,0.05); border-top-width: 4px; border-top-style: solid;
 }
-/* Kleuren randen */
 .dashboard-card.border-low { border-top-color: #27ae60; }
 .dashboard-card.border-med { border-top-color: #e67e22; }
 .dashboard-card.border-high { border-top-color: #c0392b; }
@@ -160,7 +163,6 @@ const typeLabels = {
 .dashboard-card .count { font-size: 1.8rem; font-weight: bold; color: #2c3e50; margin-bottom: 5px; }
 .dashboard-card .status { font-size: 0.7rem; text-transform: uppercase; font-weight: bold; padding: 2px 8px; border-radius: 10px; color: white; display: inline-block;}
 
-/* Kleuren labels */
 .status.low { background-color: #27ae60; }
 .status.med { background-color: #e67e22; }
 .status.high { background-color: #c0392b; }

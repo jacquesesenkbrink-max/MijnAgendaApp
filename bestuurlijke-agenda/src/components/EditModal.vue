@@ -9,7 +9,6 @@ const props = defineProps({
 const emit = defineEmits(['close', 'save']);
 
 // We maken een lokale kopie van de data, zodat we niet direct in de 'live' data typen
-// (Pas als je op Opslaan klikt, sturen we het terug)
 const formData = ref({});
 
 // Zodra het venster opent, vullen we het formulier met de gegevens van het item
@@ -23,7 +22,7 @@ watch(() => props.item, (newItem) => {
     // Nieuw item? Maak alles leeg
     formData.value = { id: Date.now(), title: '', schedule: {} };
   }
-}, { immediate: true }); // <--- DEZE REGEL IS AANGEPAST (zorgt dat 'Nieuw' werkt)
+}, { immediate: true });
 
 function opslaan() {
   emit('save', formData.value);
@@ -62,6 +61,11 @@ function opslaan() {
                 <label>Portefeuillehouder (PH)</label>
                 <input v-model="formData.ph" type="text">
             </div>
+        </div>
+
+        <div class="form-group">
+            <label>Bestuurlijk Aanspreekpunt 🗣️</label>
+            <input v-model="formData.administrativeContact" type="text" placeholder="Wie is de trekkende bestuurder?">
         </div>
 
         <div class="form-group">

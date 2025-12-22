@@ -25,11 +25,11 @@ const labels = {
   'ABBrief':'AB Brief', 'Delta':'Delta' 
 };
 
-// Kleur bepalen (in compact mode is dit de achtergrond, anders de rand)
+// Kleur bepalen
 const borderColor = computed(() => colors[props.event.type] || '#ccc');
 const phaseLabel = computed(() => labels[props.event.type] || props.event.type);
 
-// Tooltip tekst voor de stippen-modus (anders zie je niet wat het is)
+// Tooltip tekst
 const tooltipText = computed(() => `${props.event.title} (${props.event.dateDisplay})`);
 </script>
 
@@ -64,6 +64,9 @@ const tooltipText = computed(() => `${props.event.title} (${props.event.dateDisp
             
             <div class="role-grid">
                 <div class="role-item"><strong>PH:</strong> {{ event.ph }}</div>
+                <div v-if="event.originalItem.administrativeContact" class="role-item highlight-contact">
+                    <strong>🗣️:</strong> {{ event.originalItem.administrativeContact }}
+                </div>
             </div>
 
             <div v-if="event.comments && isAdmin" class="comments-box">
@@ -81,29 +84,29 @@ const tooltipText = computed(() => `${props.event.title} (${props.event.dateDisp
 </template>
 
 <style scoped>
-/* --- BASIS STIJL (NORMALE KAART) --- */
+/* --- BASIS STIJL --- */
 .card-wrapper {
     background: white; border-radius: 6px; box-shadow: 0 2px 5px rgba(0,0,0,0.1);
     border-top: 4px solid #ccc; padding: 1rem; margin-bottom: 1rem; 
     transition: all 0.3s ease; position: relative; cursor: pointer;
-    min-height: 140px; /* Zorg voor gelijke hoogte in grid */
+    min-height: 140px; 
     opacity: 1; filter: grayscale(0%);
 }
 .card-wrapper:hover { transform: translateY(-3px); box-shadow: 0 8px 15px rgba(0,0,0,0.15); }
 
-/* --- STIPPEN MODUS (VIEW-DOTS) --- */
+/* --- STIPPEN MODUS --- */
 .card-wrapper.view-dots {
     width: 40px; height: 40px; 
     border-radius: 50%; 
     padding: 0; 
-    border-top: none !important; /* Overschrijf inline style van border-top */
+    border-top: none !important; 
     margin: 0 auto 5px auto;
     min-height: 0;
     display: flex; align-items: center; justify-content: center;
-    overflow: visible; /* Voor de tooltip die er buiten valt */
+    overflow: visible; 
 }
 
-/* Tooltip logica (alleen zichtbaar bij hover in dots modus) */
+/* Tooltip */
 .card-wrapper.view-dots::after {
     content: attr(data-tooltip);
     position: absolute; bottom: 50px; left: 50%; transform: translateX(-50%);
@@ -113,7 +116,6 @@ const tooltipText = computed(() => `${props.event.title} (${props.event.dateDisp
 }
 .card-wrapper.view-dots:hover::after { opacity: 1; }
 
-/* Driehoekje onder tooltip */
 .card-wrapper.view-dots::before {
     content: ''; position: absolute; bottom: 40px; left: 50%; transform: translateX(-50%);
     border-width: 5px; border-style: solid; border-color: #333 transparent transparent transparent;
@@ -123,13 +125,9 @@ const tooltipText = computed(() => `${props.event.title} (${props.event.dateDisp
 
 /* --- FOCUS MODUS --- */
 .is-focused { z-index: 20; transform: scale(1.05); opacity: 1 !important; filter: grayscale(0%) !important; }
+.card-wrapper.view-dots.is-focused { border: 3px solid white; box-shadow: 0 0 0 3px #333; transform: scale(1.3); }
 
-/* Focus in Dots mode heeft een extra randje nodig om op te vallen */
-.card-wrapper.view-dots.is-focused { 
-    border: 3px solid white; box-shadow: 0 0 0 3px #333; transform: scale(1.3); 
-}
-
-/* --- INTERNE ELEMENTEN (alleen zichtbaar in kaart modus) --- */
+/* --- INTERNE ELEMENTEN --- */
 .header-row { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.5rem; }
 .date-badge { font-family: monospace; font-size: 0.75rem; color: #666; font-weight: bold; }
 .strat-badge { background: #e2e8f0; padding: 2px 6px; border-radius: 4px; font-weight: bold; color: #475569; font-size: 0.7rem; display: inline-block; margin-bottom: 5px; }
@@ -139,6 +137,16 @@ h4 { margin: 0 0 10px 0; color: #2c3e50; font-size: 0.9rem; line-height: 1.3; }
 
 .role-grid { font-size: 0.75rem; color: #666; margin-bottom: 10px; }
 .comments-box { background: #fff3cd; color: #856404; padding: 5px; border-radius: 4px; font-size: 0.75rem; margin-bottom: 5px; }
+
+/* NIEUW: Highlight Contact stijl */
+.highlight-contact {
+    color: #2c3e50;
+    margin-top: 2px;
+    font-weight: 500;
+    background: rgba(0,0,0,0.03);
+    padding: 2px 4px;
+    border-radius: 3px;
+}
 
 .actions { display: flex; gap: 5px; }
 .btn-icon { background: none; border: none; cursor: pointer; font-size: 1rem; opacity: 0.5; transition: 0.2s; }

@@ -36,6 +36,10 @@ const fases = [
         <div class="meta-info">
             <span><strong>PH:</strong> {{ item.ph }}</span>
             <span><strong>Dir:</strong> {{ item.dir }}</span>
+            
+            <span v-if="item.administrativeContact" style="grid-column: span 2;">
+                <strong>🗣️ Aanspreekpunt:</strong> {{ item.administrativeContact }}
+            </span>
         </div>
         
         <hr>
