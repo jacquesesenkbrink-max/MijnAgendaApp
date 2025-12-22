@@ -25,6 +25,9 @@
   const isAdmin = ref(false); 
   const fileInput = ref(null);
 
+  // NIEUW: Header Toggle State
+  const isHeaderOpen = ref(true);
+
   // HISTORIE (Undo / Redo)
   const historyStack = ref([]);
   const futureStack = ref([]);
@@ -63,6 +66,16 @@
   watch(viewMode, () => {
     if(activeFocusId.value) nextTick(() => drawConnections());
   });
+
+  // --- NIEUW: Header Toggle Functie ---
+  function toggleHeader() {
+    isHeaderOpen.value = !isHeaderOpen.value;
+    
+    // Als we het menu openen, scrollen we soepel terug naar boven zodat de filters zichtbaar zijn
+    if (isHeaderOpen.value) {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  }
 
   // --- 1. HISTORIE FUNCTIES (UNDO / REDO) ---
   function addToHistory() {
@@ -274,7 +287,11 @@
 </script>
 
 <template>
-  <header>
+  <button class="header-toggle-btn" @click="toggleHeader" title="Menu openen/sluiten">
+    {{ isHeaderOpen ? '▼ Verberg Menu' : '☰ Menu' }}
+  </button>
+
+  <header :class="{ collapsed: !isHeaderOpen }">
     <div class="top-bar">
         <input type="file" ref="fileInput" @change="handleFileUpload" style="display: none" accept=".json">
         
@@ -357,8 +374,54 @@
 </template>
 
 <style scoped>
-/* HEADER STYLING */
-header { background: linear-gradient(135deg, #2c3e50, #4ca1af); color: white; padding: 1rem; position: relative; z-index: 100; box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
+/* NIEUWE MENU TOGGLE KNOP */
+.header-toggle-btn {
+  position: fixed;
+  top: 15px;
+  left: 15px;
+  z-index: 200; /* Zorgt dat hij boven alles zweeft */
+  background: #2c3e50;
+  color: white;
+  border: none;
+  padding: 8px 15px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: bold;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+  transition: background 0.3s;
+}
+.header-toggle-btn:hover { background: #34495e; }
+
+/* HEADER STYLING MET ANIMATIE */
+header { 
+    background: linear-gradient(135deg, #2c3e50, #4ca1af); 
+    color: white; 
+    padding: 1rem; 
+    position: relative; 
+    z-index: 100; 
+    box-shadow: 0 4px 10px rgba(0,0,0,0.2); 
+    
+    /* Animatie eigenschappen */
+    transition: max-height 0.4s ease-in-out, opacity 0.3s ease, padding 0.4s ease;
+    max-height: 500px; /* Genoeg ruimte voor het menu */
+    overflow: hidden;
+    opacity: 1;
+}
+
+header.collapsed {
+    max-height: 0;
+    padding: 0;
+    opacity: 0;
+    pointer-events: none;
+}
+
+/* Print aanpassing voor toggle knop */
+@media print {
+    .header-toggle-btn { display: none !important; }
+    header { display: none !important; } /* Of wil je de header WEL zien bij print? */
+}
+
+
 .top-bar { display: flex; justify-content: space-between; align-items: center; max-width: 1400px; margin: 0 auto; }
 .header-content { text-align: center; flex-grow: 1; }
 
@@ -373,7 +436,7 @@ header { background: linear-gradient(135deg, #2c3e50, #4ca1af); color: white; pa
 .login-btn { background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.4); color: white; padding: 5px 12px; border-radius: 4px; cursor: pointer; }
 .login-btn.active { background: #e67e22; border-color: #d35400; font-weight: bold; }
 
-/* ADMIN TOOLBAR (Nieuw in Stap 5/6) */
+/* ADMIN TOOLBAR */
 .admin-toolbar {
     background: rgba(0, 0, 0, 0.3); padding: 8px 15px; border-radius: 8px;
     display: flex; gap: 20px; align-items: center; flex-wrap: wrap;
