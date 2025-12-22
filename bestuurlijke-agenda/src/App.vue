@@ -25,14 +25,16 @@
   const isAdmin = ref(false); 
   const fileInput = ref(null);
 
-  // NIEUW: Header Toggle State
+  // NIEUW: Header Toggle & Login Modal State
   const isHeaderOpen = ref(true);
+  const isLoginOpen = ref(false);     // <--- Nieuw: bepaalt of login scherm open is
+  const wachtwoordInput = ref('');    // <--- Nieuw: slaat het getypte wachtwoord op
 
   // HISTORIE (Undo / Redo)
   const historyStack = ref([]);
   const futureStack = ref([]);
 
-  // Modals
+  // Modals (Edit / Detail)
   const isDetailOpen = ref(false);
   const isEditOpen = ref(false);
   const geselecteerdItem = ref(null);
@@ -67,62 +69,60 @@
     if(activeFocusId.value) nextTick(() => drawConnections());
   });
 
-  // --- NIEUW: Header Toggle Functie ---
+  // --- Header Toggle Functie ---
   function toggleHeader() {
     isHeaderOpen.value = !isHeaderOpen.value;
-    
-    // Als we het menu openen, scrollen we soepel terug naar boven zodat de filters zichtbaar zijn
-    if (isHeaderOpen.value) {
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
+    if (isHeaderOpen.value) window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
   // --- 1. HISTORIE FUNCTIES (UNDO / REDO) ---
   function addToHistory() {
-    // Sla een kopie van de HUIDIGE staat op in de geschiedenis
     historyStack.value.push(JSON.parse(JSON.stringify(agendaPunten.value)));
-    // Als je iets nieuws doet, is de 'toekomst' (redo) niet meer geldig
     futureStack.value = [];
   }
 
   function undo() {
     if (historyStack.value.length === 0) return;
-    
-    // Huidige staat naar future
     futureStack.value.push(JSON.parse(JSON.stringify(agendaPunten.value)));
-    
-    // Vorige staat ophalen
-    const vorigeStaat = historyStack.value.pop();
-    agendaPunten.value = vorigeStaat;
+    agendaPunten.value = historyStack.value.pop();
   }
 
   function redo() {
     if (futureStack.value.length === 0) return;
-
-    // Huidige staat naar history
     historyStack.value.push(JSON.parse(JSON.stringify(agendaPunten.value)));
-
-    // Volgende staat ophalen
-    const volgendeStaat = futureStack.value.pop();
-    agendaPunten.value = volgendeStaat;
+    agendaPunten.value = futureStack.value.pop();
   }
 
-  // --- 2. ADMIN & CRUD ---
-  function toggleAdmin() {
+  // --- 2. ADMIN & LOGIN FUNCTIES (AANGEPAST) ---
+  function handleAdminClick() {
     if (isAdmin.value) {
+        // Uitloggen
         isAdmin.value = false;
         sessionStorage.removeItem('is-admin');
     } else {
-        const ww = prompt("Wachtwoord:", "");
-        if (ww === "wdo" || ww === "admin") {
-            isAdmin.value = true;
-            sessionStorage.setItem('is-admin', 'true');
-        } else if (ww) {
-            alert("Onjuist wachtwoord");
-        }
+        // Login scherm openen
+        wachtwoordInput.value = ''; // Veld leegmaken
+        isLoginOpen.value = true;
     }
   }
 
+  function checkLogin() {
+    const ww = wachtwoordInput.value;
+    if (ww === "wdo" || ww === "admin") {
+        isAdmin.value = true;
+        sessionStorage.setItem('is-admin', 'true');
+        isLoginOpen.value = false; // Sluit modal
+    } else {
+        alert("Onjuist wachtwoord");
+        wachtwoordInput.value = ''; // Veld weer leegmaken
+    }
+  }
+
+  function closeLogin() {
+    isLoginOpen.value = false;
+  }
+
+  // --- 3. CRUD ---
   function openNieuw() { 
       editItem.value = null; 
       isEditOpen.value = true; 
@@ -134,14 +134,11 @@
   }
 
   function saveChanges(updatedItem) {
-      addToHistory(); // <--- Eerst huidige staat opslaan!
-
+      addToHistory();
       const index = agendaPunten.value.findIndex(i => i.id === updatedItem.id);
       if (index !== -1) {
-          // Update bestaand
           agendaPunten.value[index] = updatedItem;
       } else {
-          // Nieuw item (id genereren als die er niet is, of max id + 1)
           if(!updatedItem.id) {
              const maxId = agendaPunten.value.reduce((max, i) => Math.max(max, i.id), 0);
              updatedItem.id = maxId + 1;
@@ -153,7 +150,7 @@
 
   function deleteItem(item) {
       if(confirm(`Weet je zeker dat je "${item.title}" wilt verwijderen?`)) {
-          addToHistory(); // <--- Opslaan voor undo
+          addToHistory();
           agendaPunten.value = agendaPunten.value.filter(i => i.id !== item.id);
       }
   }
@@ -180,7 +177,7 @@
         try {
             const json = JSON.parse(e.target.result);
             if (Array.isArray(json)) {
-                addToHistory(); // Veiligheid voor alles
+                addToHistory();
                 agendaPunten.value = json;
                 alert("Import geslaagd!");
             } else {
@@ -301,7 +298,7 @@
         </div>
         
         <div class="login-container">
-            <button class="login-btn" @click="toggleAdmin" :class="{ active: isAdmin }">
+            <button class="login-btn" @click="handleAdminClick" :class="{ active: isAdmin }">
                 {{ isAdmin ? '🔓 Uitloggen' : '🔒 Admin Login' }}
             </button>
         </div>
@@ -343,6 +340,27 @@
     <DetailModal :show="isDetailOpen" :item="geselecteerdItem" @close="isDetailOpen = false" />
     <EditModal :show="isEditOpen" :item="editItem" @save="saveChanges" @close="isEditOpen = false" />
 
+    <div v-if="isLoginOpen" class="login-overlay" @click.self="closeLogin">
+        <div class="login-modal">
+            <div class="modal-header">
+                <h3>Beheerder Inloggen</h3>
+                <span class="close-btn" @click="closeLogin">&times;</span>
+            </div>
+            <div class="modal-body">
+                <p>Voer het wachtwoord in om bewerkingsrechten te krijgen.</p>
+                <input 
+                    type="password" 
+                    v-model="wachtwoordInput" 
+                    placeholder="Wachtwoord..." 
+                    @keyup.enter="checkLogin"
+                    class="login-input"
+                    autofocus
+                >
+                <button class="login-confirm-btn" @click="checkLogin">Inloggen</button>
+            </div>
+        </div>
+    </div>
+
     <div class="container" ref="timelineRef" :class="{ 'view-dots': viewMode === 'dots' }">
       
       <svg v-if="viewMode === 'grid' || viewMode === 'dots'" id="connections-layer">
@@ -374,12 +392,47 @@
 </template>
 
 <style scoped>
-/* NIEUWE MENU TOGGLE KNOP */
+/* NIEUW: LOGIN MODAL STYLING */
+.login-overlay {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0,0,0,0.6); z-index: 1000;
+    display: flex; justify-content: center; align-items: center;
+    animation: fadeIn 0.2s;
+}
+.login-modal {
+    background: white; padding: 25px; border-radius: 8px;
+    width: 90%; max-width: 400px;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.3);
+}
+.modal-header {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-bottom: 15px; border-bottom: 1px solid #eee; padding-bottom: 10px;
+}
+.modal-header h3 { margin: 0; color: #2c3e50; }
+.close-btn { font-size: 24px; cursor: pointer; color: #aaa; }
+.close-btn:hover { color: #000; }
+
+.login-input {
+    width: 100%; padding: 12px; margin: 15px 0;
+    border: 1px solid #ccc; border-radius: 4px;
+    font-size: 1rem;
+}
+.login-confirm-btn {
+    width: 100%; padding: 12px;
+    background: #27ae60; color: white; border: none;
+    border-radius: 4px; font-size: 1rem; cursor: pointer;
+    font-weight: bold;
+}
+.login-confirm-btn:hover { background: #219150; }
+
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+/* MENU TOGGLE KNOP */
 .header-toggle-btn {
   position: fixed;
   top: 15px;
   left: 15px;
-  z-index: 200; /* Zorgt dat hij boven alles zweeft */
+  z-index: 200; 
   background: #2c3e50;
   color: white;
   border: none;
@@ -392,7 +445,7 @@
 }
 .header-toggle-btn:hover { background: #34495e; }
 
-/* HEADER STYLING MET ANIMATIE */
+/* HEADER STYLING */
 header { 
     background: linear-gradient(135deg, #2c3e50, #4ca1af); 
     color: white; 
@@ -400,39 +453,27 @@ header {
     position: relative; 
     z-index: 100; 
     box-shadow: 0 4px 10px rgba(0,0,0,0.2); 
-    
-    /* Animatie eigenschappen */
     transition: max-height 0.4s ease-in-out, opacity 0.3s ease, padding 0.4s ease;
-    max-height: 500px; /* Genoeg ruimte voor het menu */
-    overflow: hidden;
-    opacity: 1;
+    max-height: 500px; overflow: hidden; opacity: 1;
 }
-
 header.collapsed {
-    max-height: 0;
-    padding: 0;
-    opacity: 0;
-    pointer-events: none;
+    max-height: 0; padding: 0; opacity: 0; pointer-events: none;
 }
-
-/* Print aanpassing voor toggle knop */
 @media print {
     .header-toggle-btn { display: none !important; }
-    header { display: none !important; } /* Of wil je de header WEL zien bij print? */
+    header { display: none !important; } 
 }
-
 
 .top-bar { display: flex; justify-content: space-between; align-items: center; max-width: 1400px; margin: 0 auto; }
 .header-content { text-align: center; flex-grow: 1; }
-
 .header-actions { display: flex; flex-direction: column; align-items: center; gap: 15px; margin-top: 15px; }
 
-/* View Toggle (Grid/Dots/Table) */
+/* View Toggle */
 .view-toggle { background: rgba(0,0,0,0.2); border-radius: 20px; padding: 3px; display: flex; }
 .view-toggle button { background: transparent; border: none; color: white; padding: 5px 15px; border-radius: 15px; cursor: pointer; transition: background 0.2s; }
 .view-toggle button.active { background: white; color: #2c3e50; font-weight: bold; }
 
-/* LOGIN KNOP */
+/* LOGIN KNOP HEADER */
 .login-btn { background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.4); color: white; padding: 5px 12px; border-radius: 4px; cursor: pointer; }
 .login-btn.active { background: #e67e22; border-color: #d35400; font-weight: bold; }
 
