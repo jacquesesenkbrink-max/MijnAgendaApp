@@ -371,60 +371,76 @@
 </template>
 
 <style scoped>
-/* Basis Styles */
-.login-overlay { position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); z-index:1000; display:flex; justify-content:center; align-items:center; }
-.login-modal { background:white; padding:25px; border-radius:8px; width:90%; max-width:400px; box-shadow:0 5px 20px rgba(0,0,0,0.3); }
-.login-input { width:100%; padding:12px; margin:15px 0; border:1px solid #ccc; border-radius:4px; font-size:1rem; }
-.login-confirm-btn { width:100%; padding:12px; background:#27ae60; color:white; border:none; border-radius:4px; font-weight:bold; cursor:pointer; }
-.header-toggle-btn { position:fixed; top:15px; left:15px; z-index:200; background:#2c3e50; color:white; border:none; padding:8px 15px; border-radius:4px; cursor:pointer; font-weight:bold; box-shadow:0 2px 5px rgba(0,0,0,0.3); }
+.app-container {
+  display: flex;
+  min-height: 100vh;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background-color: var(--bg-body);
+  overflow-x: hidden;
+}
 
-header { background: linear-gradient(135deg, #2c3e50, #4ca1af); color: white; padding: 1rem; position: relative; z-index: 100; box-shadow: 0 4px 10px rgba(0,0,0,0.2); transition: all 0.4s; max-height: 500px; overflow: hidden; }
-header.collapsed { max-height: 0; padding: 0; opacity: 0; pointer-events: none; }
-.top-bar { display: flex; justify-content: space-between; align-items: center; max-width: 1400px; margin: 0 auto; }
-.header-content { text-align: center; flex: 1; }
-.header-actions { display: flex; flex-direction: column; align-items: center; gap: 15px; margin-top: 15px; }
-.view-toggle { background: rgba(0,0,0,0.2); border-radius: 20px; padding: 3px; display: flex; }
-.view-toggle button { background: transparent; border: none; color: white; padding: 5px 15px; border-radius: 15px; cursor: pointer; transition: background 0.2s; }
-.view-toggle button.active { background: white; color: #2c3e50; font-weight: bold; }
-.admin-toolbar { background: rgba(0,0,0,0.3); padding: 8px 15px; border-radius: 8px; display: flex; gap: 20px; align-items: center; flex-wrap: wrap; margin-top: 5px; }
-.admin-group { display: flex; gap: 8px; align-items: center; border-right: 1px solid rgba(255,255,255,0.2); padding-right: 15px; }
-.admin-group:last-child { border-right: none; }
-.action-btn { background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: white; padding: 4px 10px; border-radius: 4px; cursor: pointer; }
-.action-btn.new { background: #27ae60; font-weight: bold; }
+.main-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  margin-left: 260px;
+}
 
-.container { max-width: 1400px; margin: 0 auto; padding: 20px; position: relative; min-height: 80vh; }
+/* --- DE NIEUWE GRADIENT HEADER --- */
+.top-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end; /* Zorgt dat filterbar netjes uitlijnt */
+  padding: 15px 30px;
+  
+  /* WDODelta Gradient: Van Primair Blauw naar Cyaan */
+  background: linear-gradient(135deg, var(--wdod-blue) 0%, var(--wdod-cyan) 100%);
+  
+  /* Subtiele schaduw */
+  box-shadow: 0 4px 12px rgba(7, 88, 149, 0.2);
+  
+  color: white; /* Alle tekst in de header wit */
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
 
-/* FIX: Z-INDEX LIJN NAAR ACHTEREN */
-#connections-layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 1; } 
-.connection-line { fill: none; stroke-width: 3; stroke-linecap: round; stroke-dasharray: 10; animation: dash 30s linear infinite; opacity: 0.8; }
+/* De rest blijft hetzelfde */
+.agenda-wrapper { position: relative; padding: 20px; flex: 1; }
+
+#connections-layer {
+  position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+  pointer-events: none; z-index: 1; 
+}
+
+.animated-line { animation: dash 30s linear infinite; opacity: 0.6; }
 @keyframes dash { to { stroke-dashoffset: -1000; } }
 
-/* FIX: KAARTEN HOGER DAN LIJN */
-.month-block { margin-bottom: 40px; scroll-margin-top: 140px; position: relative; z-index: 2; }
-.month-header { text-align: center; margin-bottom: 20px; position: relative; }
-.month-header::before { content: ''; position: absolute; left: 0; right: 0; top: 50%; height: 1px; background: #ccc; z-index: -1; }
-.month-badge { background-color: #fff; color: #2c3e50; border: 2px solid #2c3e50; padding: 5px 20px; border-radius: 30px; font-weight: bold; }
-.grid-layout { display: grid; gap: 15px; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); }
-@media (min-width: 1100px) { .grid-layout { grid-template-columns: repeat(7, 1fr); align-items: start; } }
+:deep(.month-block) { position: relative; z-index: 2; }
 
-/* Focus Dimming Effect */
-main.has-focus .month-block { z-index: 10; } 
-main.has-focus .card-wrapper { opacity: 0.2; filter: grayscale(100%); transition: opacity 0.3s; }
-/* Maar als Isolatie aan staat, verbergen we de rest helemaal (wordt geregeld via gefilterdeEvents), styling hier is voor focus zonder isolatie */
-
-/* Floating Controls */
 .floating-controls {
-    position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%);
-    display: flex; gap: 15px; z-index: 200; animation: popIn 0.3s;
-    background: white; padding: 5px; border-radius: 40px;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.2); border: 1px solid #ddd;
+  position: fixed; bottom: 30px; left: calc(50% + 130px);
+  transform: translateX(-50%); display: flex; gap: 15px; z-index: 200;
+  animation: popIn 0.3s; background: white; padding: 8px;
+  border-radius: 40px; box-shadow: 0 4px 15px rgba(0,0,0,0.2); border: 1px solid #ddd;
 }
-.control-btn { padding: 10px 20px; border-radius: 30px; font-weight: bold; border: none; cursor: pointer; font-size: 0.9rem; transition: all 0.2s; white-space: nowrap; }
-.reset-btn { background: #e74c3c; color: white; }
-.reset-btn:hover { background: #c0392b; }
-.toggle-btn { background: #f1c40f; color: #34495e; }
-.toggle-btn:hover { background: #f39c12; color: white; }
-.toggle-btn.active { background: #27ae60; color: white; }
 
-@keyframes popIn { from { transform: translate(-50%, 50px); } to { transform: translate(-50%, 0); } }
+.control-btn {
+  padding: 10px 20px; border-radius: 30px; font-weight: bold; border: none;
+  cursor: pointer; font-size: 0.9rem; transition: all 0.2s; white-space: nowrap;
+  display: flex; align-items: center; gap: 5px;
+}
+
+.reset-btn { background: var(--wdod-red); color: white; }
+.toggle-btn { background: var(--wdod-orange); color: white; }
+.toggle-btn:hover { transform: translateY(-2px); box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
+.toggle-btn.active { background: var(--wdod-green); }
+
+@keyframes popIn {
+  from { opacity: 0; transform: translate(-50%, 20px); }
+  to { opacity: 1; transform: translate(-50%, 0); }
+}
+
+.report-wrapper { padding: 20px; }
 </style>

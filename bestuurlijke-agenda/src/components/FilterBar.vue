@@ -76,66 +76,82 @@ function kiesJaar(event) {
 </template>
 
 <style scoped>
+/* Container is nu transparant omdat de header de kleur regelt */
 .filter-container {
-  padding: 20px; 
-  background: white; 
-  margin-bottom: 25px; 
-  border-bottom: 1px solid #e0e0e0;
-  box-shadow: 0 4px 6px -1px rgba(7, 88, 149, 0.05); /* Blue-ish shadow */
+  padding: 10px 0; 
+  background: transparent; 
+  margin-bottom: 0; 
+  border: none;
+  width: 100%;
 }
 
 .filters {
   display: flex; justify-content: center; flex-wrap: wrap; gap: 10px; margin-bottom: 10px;
 }
 
+/* Divider aangepast voor op donkere achtergrond */
 .filter-divider {
-  width: 100%; height: 1px; background: rgba(7, 88, 149, 0.1); margin: 20px 0;
+  width: 100%; height: 1px; 
+  background: rgba(255,255,255,0.2); 
+  margin: 15px 0;
   display: flex; align-items: center; justify-content: center;
 }
 .filter-divider span {
-  background: white; padding: 2px 15px; font-size: 0.7rem; text-transform: uppercase; 
-  color: #075895; font-weight: bold; letter-spacing: 0.5px;
+  background: rgba(0, 0, 0, 0.2); /* Donkere pil voor contrast */
+  backdrop-filter: blur(4px);
+  padding: 2px 15px; font-size: 0.7rem; text-transform: uppercase; 
+  color: rgba(255, 255, 255, 0.9); 
+  border-radius: 12px; 
+  border: 1px solid rgba(255,255,255,0.1);
+  letter-spacing: 0.5px;
 }
 
-/* Standard Button Style - Clean & Corporate */
+/* --- KNOPPEN STIJL (Glassmorphism) --- */
 .filter-btn {
-  background: white; 
-  border: 1px solid #cce4f2; 
+  background: rgba(255, 255, 255, 0.15); /* Semi-transparant */
+  border: 1px solid rgba(255, 255, 255, 0.3);
   padding: 8px 16px; 
-  border-radius: 4px; /* Boxier looks more "official" */
+  border-radius: 6px;
   cursor: pointer; 
   font-size: 0.9rem; 
   transition: all 0.2s; 
-  color: #075895; 
+  color: white; 
+  font-weight: 500;
 }
 
 .filter-btn:hover { 
-  background: #f0f8fc; 
-  border-color: #00b0ea; 
+  background: rgba(255, 255, 255, 0.3); 
+  transform: translateY(-2px);
 }
 
-/* Active State */
+/* --- ACTIEVE KNOP --- */
 .filter-btn.selected { 
-  background: #075895; 
-  color: white; 
-  border-color: #075895; 
-  font-weight: 600; 
-  box-shadow: 0 2px 4px rgba(7, 88, 149, 0.3);
+  background: white; 
+  color: var(--wdod-blue); /* Blauwe tekst op witte knop */
+  border-color: white; 
+  font-weight: bold; 
+  box-shadow: 0 4px 10px rgba(0,0,0,0.2);
 }
 
-/* Specific colors when active (Overrides) */
-.filter-btn.btn-PFO.selected { background: var(--c-pfo); border-color: var(--c-pfo); }
-.filter-btn.btn-DBBesluit.selected { background: var(--c-db-besluit); border-color: var(--c-db-besluit); }
-.filter-btn.btn-DBSchrift.selected { background: var(--c-db-schrift); border-color: var(--c-db-schrift); }
-.filter-btn.btn-DBInformeel.selected { background: var(--c-db-informeel); border-color: var(--c-db-informeel); }
-.filter-btn.btn-ABBesluit.selected { background: var(--c-ab-besluit); border-color: var(--c-ab-besluit); }
-.filter-btn.btn-ABBrief.selected { background: var(--c-ab-brief); border-color: var(--c-ab-brief); }
-.filter-btn.btn-Delta.selected { background: var(--c-delta); border-color: var(--c-delta); }
+/* Voor specifieke fases: als ze actief zijn, geven we ze toch hun eigen kleur
+   zodat het functioneel blijft, maar wel met witte tekst en rand */
+.filter-btn.btn-PFO.selected { background: var(--c-pfo); color: white; border-color: white; }
+.filter-btn.btn-DBBesluit.selected { background: var(--c-db-besluit); color: white; border-color: white; }
+.filter-btn.btn-DBSchrift.selected { background: var(--c-db-schrift); color: white; border-color: white; }
+.filter-btn.btn-DBInformeel.selected { background: var(--c-db-informeel); color: white; border-color: white; }
+.filter-btn.btn-ABBesluit.selected { background: var(--c-ab-besluit); color: white; border-color: white; }
+.filter-btn.btn-ABBrief.selected { background: var(--c-ab-brief); color: white; border-color: white; }
+.filter-btn.btn-Delta.selected { background: var(--c-delta); color: white; border-color: white; }
 
+/* Jaar Select Dropdown */
 .year-select { 
   padding-right: 35px; 
-  font-weight: bold; 
-  color: #075895; 
-  border: 2px solid #075895;
+  background-color: rgba(0,0,0,0.2); /* Iets donkerder voor onderscheid */
+  color: white;
+  border: 1px solid rgba(255,255,255,0.3);
+}
+.year-select option {
+    background-color: white;
+    color: #333;
 }
 </style>
