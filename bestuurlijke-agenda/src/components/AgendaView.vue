@@ -3,11 +3,15 @@ import { ref, computed, onMounted, watch } from 'vue';
 import { parseDate } from '../utils/dateHelpers.js';
 
 const props = defineProps({
-  items: Array // Dit zijn nu de 'platte' events uit App.vue
+  items: Array
 });
 
 // Opslag voor vergaderdetails (tijd/locatie)
 const meetingMeta = ref({});
+
+// Filters
+const selectedDate = ref('');
+const selectedPH = ref('');
 
 onMounted(() => {
   const saved = localStorage.getItem('meeting-meta-data');
@@ -18,23 +22,20 @@ watch(meetingMeta, (newVal) => {
   localStorage.setItem('meeting-meta-data', JSON.stringify(newVal));
 }, { deep: true });
 
-// --- DATA TRANSFORMATIE (AANGEPAST) ---
+// --- 1. DATA TRANSFORMATIE ---
 const agendaMeetings = computed(() => {
     const meetingsMap = {};
 
-    // We lopen nu direct door de lijst met events heen
-    // (In plaats van door de schedule van elk hoofdonderwerp)
     props.items.forEach(ev => {
         const dateStr = ev.dateDisplay;
         const type = ev.type;
 
-        // Skip items zonder datum of met 'Q' notatie (kwartaalplanning)
+        // Skip items zonder datum of met 'Q' notatie
         if (!dateStr || dateStr.toLowerCase().includes('q')) return;
 
-        // Logica voor groeperen:
         let meetingKey = '';
         let meetingTitle = '';
-        let groupPh = '';
+        let groupPh = ''; // Voor filtering
 
         if (type === 'PFO') {
             // PFO splitsen we per PH
@@ -42,17 +43,17 @@ const agendaMeetings = computed(() => {
             meetingKey = `${dateStr}_${type}_${groupPh}`;
             meetingTitle = `PFO ${groupPh}`;
         } else {
-            // DB en AB groeperen we puur op datum en type
+            // DB en AB zijn "Algemeen"
+            groupPh = 'Algemeen'; 
             meetingKey = `${dateStr}_${type}`;
             meetingTitle = mapTypeToTitle(type);
         }
 
-        // Als deze vergadering nog niet bestaat in onze lijst, maak hem aan
         if (!meetingsMap[meetingKey]) {
             meetingsMap[meetingKey] = {
                 key: meetingKey,
                 dateDisplay: dateStr,
-                dateObj: ev.dateObj, // Deze hebben we al vanuit App.vue
+                dateObj: ev.dateObj,
                 title: meetingTitle,
                 type: type,
                 ph: groupPh,
@@ -60,15 +61,47 @@ const agendaMeetings = computed(() => {
             };
         }
 
-        // Voeg dit punt toe aan de vergadering
         meetingsMap[meetingKey].items.push(ev);
     });
 
-    // Sorteren op datum
     return Object.values(meetingsMap).sort((a, b) => a.dateObj - b.dateObj);
 });
 
-// Helpers
+// --- 2. FILTER LOGICA ---
+
+// Lijst met unieke datums voor de dropdown
+const uniqueDates = computed(() => {
+    const dates = new Set(agendaMeetings.value.map(m => m.dateDisplay));
+    return Array.from(dates).sort((a, b) => {
+        // Simpele sorteer hack voor dd-mm-yyyy (anders alfabetisch)
+        const [d1, m1, y1] = a.split('-');
+        const [d2, m2, y2] = b.split('-');
+        return new Date(y1, m1-1, d1) - new Date(y2, m2-1, d2);
+    });
+});
+
+// Lijst met unieke PH's voor de dropdown
+const uniquePHs = computed(() => {
+    const phs = new Set(agendaMeetings.value.map(m => m.ph));
+    return Array.from(phs).sort();
+});
+
+// De gefilterde lijst die we tonen
+const filteredMeetings = computed(() => {
+    return agendaMeetings.value.filter(meeting => {
+        // Datum filter
+        if (selectedDate.value && meeting.dateDisplay !== selectedDate.value) {
+            return false;
+        }
+        // PH filter
+        if (selectedPH.value && meeting.ph !== selectedPH.value) {
+            return false;
+        }
+        return true;
+    });
+});
+
+// --- HELPERS ---
 function mapTypeToTitle(type) {
     const labels = { 
         'DBBesluit': 'DB Besluitvormend', 'DBSchrift': 'DB Schriftelijk', 
@@ -93,23 +126,57 @@ const typeColors = {
 function printAgenda() {
     window.print();
 }
+
+function resetFilters() {
+    selectedDate.value = '';
+    selectedPH.value = '';
+}
 </script>
 
 <template>
   <div class="agenda-view-container">
-    <div class="no-print header-controls">
-        <h2>🗓️ Agenda Samenstelling</h2>
-        <p>Beheer hieronder de tijden en locaties per vergadering. PFO's zijn gesplitst per bestuurder.</p>
-        <button @click="printAgenda" class="print-btn">🖨️ Print Lijsten</button>
+    
+    <div class="no-print header-block">
+        <div class="header-top">
+            <h2>🗓️ Agenda Samenstelling</h2>
+            <button @click="printAgenda" class="print-btn">🖨️ Print Lijst</button>
+        </div>
+        
+        <p class="intro-text">
+            Beheer tijden/locaties en filter de lijst voor export.
+        </p>
+
+        <div class="filters-bar">
+            <div class="filter-group">
+                <label>📅 Filter op Datum:</label>
+                <select v-model="selectedDate">
+                    <option value="">-- Alle Datums --</option>
+                    <option v-for="d in uniqueDates" :key="d" :value="d">{{ d }}</option>
+                </select>
+            </div>
+
+            <div class="filter-group">
+                <label>👤 Filter op Bestuurder:</label>
+                <select v-model="selectedPH">
+                    <option value="">-- Iedereen --</option>
+                    <option v-for="ph in uniquePHs" :key="ph" :value="ph">
+                        {{ ph === 'Algemeen' ? '🏛️ Algemeen (DB/AB)' : '👤 ' + ph }}
+                    </option>
+                </select>
+            </div>
+
+            <button v-if="selectedDate || selectedPH" class="reset-link" @click="resetFilters">
+                Filters wissen
+            </button>
+        </div>
     </div>
 
-    <div v-if="agendaMeetings.length === 0" class="empty-state">
-        Geen ingeplande vergaderingen gevonden. <br>
-        <small>(Controleer of je filters niet te streng staan of datums in de toekomst liggen)</small>
+    <div v-if="filteredMeetings.length === 0" class="empty-state">
+        Geen vergaderingen gevonden met deze filters.
     </div>
 
     <div class="timeline-stream">
-        <div v-for="meeting in agendaMeetings" :key="meeting.key" class="meeting-card">
+        <div v-for="meeting in filteredMeetings" :key="meeting.key" class="meeting-card">
             
             <div class="meeting-header" :style="{ borderLeftColor: typeColors[meeting.type] || '#ccc' }">
                 <div class="meeting-date">
@@ -177,11 +244,36 @@ function printAgenda() {
 
 <style scoped>
 .agenda-view-container { max-width: 1000px; margin: 0 auto; padding-bottom: 50px; }
-.header-controls { margin-bottom: 30px; text-align: center; }
-.print-btn { background: #2c3e50; color: white; padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer; font-size: 1rem; }
+
+/* HEADER & FILTERS */
+.header-block { 
+    background: white; padding: 20px; border-radius: 8px; 
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05); margin-bottom: 30px; border: 1px solid #eee;
+}
+.header-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+.header-top h2 { margin: 0; color: #2c3e50; }
+.intro-text { color: #666; margin-top: 0; font-size: 0.95rem; }
+
+.filters-bar { 
+    display: flex; gap: 15px; align-items: flex-end; margin-top: 15px; 
+    padding-top: 15px; border-top: 1px solid #f0f0f0; flex-wrap: wrap;
+}
+.filter-group { display: flex; flex-direction: column; gap: 5px; }
+.filter-group label { font-size: 0.85rem; font-weight: bold; color: #555; }
+.filter-group select { 
+    padding: 8px 12px; border: 1px solid #ccc; border-radius: 4px; font-size: 0.95rem; min-width: 180px;
+}
+
+.print-btn { background: #2c3e50; color: white; padding: 8px 16px; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; }
 .print-btn:hover { background: #34495e; }
 
-.empty-state { text-align: center; padding: 40px; color: #7f8c8d; font-size: 1.1rem; }
+.reset-link { 
+    background: none; border: none; color: #c0392b; text-decoration: underline; 
+    cursor: pointer; font-size: 0.9rem; padding-bottom: 8px;
+}
+
+/* EMPTY STATE */
+.empty-state { text-align: center; padding: 50px; color: #95a5a6; font-size: 1.1rem; border: 2px dashed #eee; border-radius: 8px; margin-top: 20px; }
 
 /* MEETING CARD */
 .meeting-card { 
@@ -223,7 +315,7 @@ function printAgenda() {
 .topic-title { font-weight: 600; color: #2c3e50; margin-bottom: 4px; }
 .topic-comment { font-size: 0.8rem; color: #c0392b; font-style: italic; }
 .role-text { font-size: 0.8rem; color: #666; margin-bottom: 2px; }
-.role-text.highlight { font-weight: bold; color: #2c3e50; } /* Nieuwe stijl voor aanspreekpunt */
+.role-text.highlight { font-weight: bold; color: #2c3e50; }
 .badge { background: #eee; padding: 2px 6px; border-radius: 4px; font-size: 0.75rem; color: #555; }
 
 /* PRINT STYLES */
