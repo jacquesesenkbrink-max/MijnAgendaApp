@@ -77,28 +77,53 @@ function kiesJaar(event) {
 
 <style scoped>
 .filter-container {
-  padding: 15px; background: rgba(0,0,0,0.03); margin-bottom: 20px; border-bottom: 1px solid #ddd;
+  padding: 20px; 
+  background: white; 
+  margin-bottom: 25px; 
+  border-bottom: 1px solid #e0e0e0;
+  box-shadow: 0 4px 6px -1px rgba(7, 88, 149, 0.05); /* Blue-ish shadow */
 }
+
 .filters {
-  display: flex; justify-content: center; flex-wrap: wrap; gap: 8px; margin-bottom: 10px;
+  display: flex; justify-content: center; flex-wrap: wrap; gap: 10px; margin-bottom: 10px;
 }
+
 .filter-divider {
-  width: 100%; height: 1px; background: rgba(0,0,0,0.1); margin: 15px 0;
+  width: 100%; height: 1px; background: rgba(7, 88, 149, 0.1); margin: 20px 0;
   display: flex; align-items: center; justify-content: center;
 }
 .filter-divider span {
-  background: #fff; padding: 2px 12px; font-size: 0.75rem; text-transform: uppercase; 
-  color: #999; border-radius: 12px; border: 1px solid #eee;
+  background: white; padding: 2px 15px; font-size: 0.7rem; text-transform: uppercase; 
+  color: #075895; font-weight: bold; letter-spacing: 0.5px;
 }
 
+/* Standard Button Style - Clean & Corporate */
 .filter-btn {
-  background: white; border: 1px solid #ccc; padding: 6px 12px; border-radius: 20px;
-  cursor: pointer; font-size: 0.9rem; transition: all 0.2s; color: #555;
+  background: white; 
+  border: 1px solid #cce4f2; 
+  padding: 8px 16px; 
+  border-radius: 4px; /* Boxier looks more "official" */
+  cursor: pointer; 
+  font-size: 0.9rem; 
+  transition: all 0.2s; 
+  color: #075895; 
 }
-.filter-btn:hover { transform: translateY(-2px); box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
-.filter-btn.selected { background: #2c3e50; color: white; border-color: #2c3e50; font-weight: bold; }
 
-/* Specifieke kleuren voor fases als ze actief zijn */
+.filter-btn:hover { 
+  background: #f0f8fc; 
+  border-color: #00b0ea; 
+}
+
+/* Active State */
+.filter-btn.selected { 
+  background: #075895; 
+  color: white; 
+  border-color: #075895; 
+  font-weight: 600; 
+  box-shadow: 0 2px 4px rgba(7, 88, 149, 0.3);
+}
+
+/* Specific colors when active (Overrides) */
 .filter-btn.btn-PFO.selected { background: var(--c-pfo); border-color: var(--c-pfo); }
 .filter-btn.btn-DBBesluit.selected { background: var(--c-db-besluit); border-color: var(--c-db-besluit); }
 .filter-btn.btn-DBSchrift.selected { background: var(--c-db-schrift); border-color: var(--c-db-schrift); }
@@ -107,5 +132,10 @@ function kiesJaar(event) {
 .filter-btn.btn-ABBrief.selected { background: var(--c-ab-brief); border-color: var(--c-ab-brief); }
 .filter-btn.btn-Delta.selected { background: var(--c-delta); border-color: var(--c-delta); }
 
-.year-select { padding-right: 30px; font-weight: bold; }
+.year-select { 
+  padding-right: 35px; 
+  font-weight: bold; 
+  color: #075895; 
+  border: 2px solid #075895;
+}
 </style>
