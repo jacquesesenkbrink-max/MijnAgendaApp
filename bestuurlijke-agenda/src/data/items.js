@@ -1,4 +1,4 @@
-export const defaultItems = [
+export const items = [
   { id: 1, title: "Archiefverordening 2025", ph: "D.S. Schoonman", on: "S. van den Barselaar", og: "K. Margry", dir: "M. Werges", strategicLabel: "Beleid", comments: "21/10 aangemeld als hamerstuk. 07/11 mail van Marieke met doorschuiven", schedule: { PFO: "25-11-2025", DBBesluit: "02-12-2025", ABBrief: "03-02-2026" } },
   { id: 2, title: "Het Algemeen Bestuur in positie: bestuurlijk ambtelijk samenspel DB", ph: "D.S. Schoonman", on: "A. Wullink", og: "D.S. Schoonman", dir: "I. Geveke", strategicLabel: "Organisatiegesteldheid", schedule: { DBInformeel: "06-01-2026" } },
   { id: 3, title: "Projectvoorstel verkiezingen", ph: "D.S. Schoonman", on: "M. van Rossum", og: "I. Geveke", dir: "I. Geveke", strategicLabel: "Organisatiegesteldheid", schedule: { PFO: "06-01-2026", DBBesluit: "13-01-2026" } },

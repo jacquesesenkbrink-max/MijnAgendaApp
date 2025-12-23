@@ -6,11 +6,11 @@ import FilterBar from './components/FilterBar.vue';
 import DetailModal from './components/DetailModal.vue';
 import EditModal from './components/EditModal.vue';
 import SidebarNav from './components/SidebarNav.vue';
-import { initialItems } from './data/items';
+import { items } from './data/items';
 import { getMonthName } from './utils/dateHelpers';
 
 // State
-const items = ref(initialItems);
+const allItems = ref(items);
 const activeView = ref('agenda'); // 'agenda' or 'report'
 const selectedYear = ref(2025);
 const activeFocusId = ref(null);
@@ -32,7 +32,7 @@ const filters = ref({
 
 // Computed: Filter items based on year and active phases
 const filteredItems = computed(() => {
-    return items.value.filter(item => {
+    return allItems.value.filter(item => {
         // Check if any schedule date falls in selected year
         const hasYear = Object.values(item.schedule).some(dateStr => {
             const parts = dateStr.split('-');
@@ -98,8 +98,8 @@ const openEdit = () => {
 };
 
 const saveItem = (updatedItem) => {
-    const idx = items.value.findIndex(i => i.id === updatedItem.id);
-    if (idx !== -1) items.value[idx] = updatedItem;
+    const idx = allItems.value.findIndex(i => i.id === updatedItem.id);
+    if (idx !== -1) allItems.value[idx] = updatedItem;
     showEditModal.value = false;
 };
 
