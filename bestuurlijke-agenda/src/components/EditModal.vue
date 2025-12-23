@@ -128,22 +128,44 @@ function opslaan() {
         <hr>
         
         <h3>Planning (Datums)</h3>
+        <p style="font-size: 0.8rem; color: #666; margin-top: -10px; margin-bottom: 10px;">
+            Vul in als dd-mm-jjjj of bijv. "Q1 2026". Leeg laten mag ook.
+        </p>
+        
         <div class="date-grid">
             <div class="form-group">
                 <label>PFO</label>
-                <input v-model="formData.schedule.PFO" type="text" placeholder="dd-mm-jjjj">
+                <input v-model="formData.schedule.PFO" type="text" placeholder="...">
             </div>
+            
             <div class="form-group">
                 <label>DB Besluit</label>
-                <input v-model="formData.schedule.DBBesluit" type="text" placeholder="dd-mm-jjjj">
+                <input v-model="formData.schedule.DBBesluit" type="text" placeholder="...">
             </div>
+            
+            <div class="form-group">
+                <label>DB Schriftelijk</label>
+                <input v-model="formData.schedule.DBSchrift" type="text" placeholder="...">
+            </div>
+
+            <div class="form-group">
+                <label>Informeel DB</label>
+                <input v-model="formData.schedule.DBInformeel" type="text" placeholder="...">
+            </div>
+
             <div class="form-group">
                 <label>AB Brief</label>
-                <input v-model="formData.schedule.ABBrief" type="text" placeholder="dd-mm-jjjj">
+                <input v-model="formData.schedule.ABBrief" type="text" placeholder="...">
             </div>
-             <div class="form-group">
-                <label>Delta</label>
-                <input v-model="formData.schedule.Delta" type="text" placeholder="dd-mm-jjjj">
+
+            <div class="form-group">
+                <label>Deltabijeenkomst</label>
+                <input v-model="formData.schedule.Delta" type="text" placeholder="...">
+            </div>
+            
+            <div class="form-group">
+                <label>AB Besluit</label>
+                <input v-model="formData.schedule.ABBesluit" type="text" placeholder="...">
             </div>
         </div>
 
@@ -162,7 +184,7 @@ function opslaan() {
 .modal-content {
   background: white; padding: 20px; border-radius: 8px;
   width: 90%; max-width: 600px;
-  max-height: 90vh; overflow-y: auto; /* Zorg dat het scrollt op kleine schermen */
+  max-height: 90vh; overflow-y: auto;
 }
 .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
 .close-btn { font-size: 28px; cursor: pointer; }
@@ -173,7 +195,17 @@ input, select, textarea {
     width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; font-family: inherit; font-size: 0.95rem;
 }
 .row { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
-.date-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; background: #f9f9f9; padding: 10px; border-radius: 4px; }
+
+/* Grid voor datums: 2 kolommen */
+.date-grid { 
+    display: grid; 
+    grid-template-columns: 1fr 1fr; 
+    gap: 10px; 
+    background: #f9f9f9; 
+    padding: 15px; 
+    border-radius: 4px; 
+    border: 1px solid #eee;
+}
 
 .save-btn {
     background: #27ae60; color: white; border: none; padding: 12px 20px;
