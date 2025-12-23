@@ -1,11 +1,11 @@
 <script setup>
 // We definiëren de headers hier zodat we ze een kleur kunnen geven
 const headers = [
-  { label: 'PFO', color: 'var(--c-pfo)' },
-  { label: 'DB Besluit', color: 'var(--c-db-besluit)' },
+  { label: 'Portefeuille overleg', color: 'var(--c-pfo)' },
+  { label: 'Formeel DB', color: 'var(--c-db-besluit)' },
   { label: 'Informeel DB', color: 'var(--c-db-informeel)' },
-  { label: 'Delta', color: 'var(--c-delta)' },
-  { label: 'AB Besluit', color: 'var(--c-ab-besluit)' }
+  { label: 'Deltabijeenkomst', color: 'var(--c-delta)' },
+  { label: 'Formeel AB', color: 'var(--c-ab-besluit)' }
 ];
 </script>
 
