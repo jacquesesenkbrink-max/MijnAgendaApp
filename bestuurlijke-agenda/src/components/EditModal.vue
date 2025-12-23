@@ -11,6 +11,31 @@ const emit = defineEmits(['close', 'save']);
 // We maken een lokale kopie van de data, zodat we niet direct in de 'live' data typen
 const formData = ref({});
 
+// --- OPTIES VOOR DROPDOWNS ---
+const directieLeden = [
+  "M. Boersen",
+  "I. Geveke",
+  "M. Werges"
+];
+
+const bestuurders = [
+  "D.S. Schoonman",
+  "H.J. Pereboom",
+  "N. Koks",
+  "J.C.G. Wijnen",
+  "M. Wesselink",
+  "F. Stienstra"
+];
+
+const strategischeLabels = [
+  "Beleid",
+  "Uitvoering",
+  "Kaders",
+  "Organisatiegesteldheid",
+  "Externe ontwikkelingen",
+  "Evaluatie"
+];
+
 // Zodra het venster opent, vullen we het formulier met de gegevens van het item
 watch(() => props.item, (newItem) => {
   if (newItem) {
@@ -20,7 +45,14 @@ watch(() => props.item, (newItem) => {
     if (!formData.value.schedule) formData.value.schedule = {};
   } else {
     // Nieuw item? Maak alles leeg
-    formData.value = { id: Date.now(), title: '', schedule: {} };
+    formData.value = { 
+        id: Date.now(), 
+        title: '', 
+        schedule: {},
+        ph: '',
+        dir: '',
+        administrativeContact: ''
+    };
   }
 }, { immediate: true });
 
@@ -48,24 +80,44 @@ function opslaan() {
             <div class="form-group">
                 <label>Strategisch Label</label>
                 <select v-model="formData.strategicLabel">
-                    <option value="">-- Kies --</option>
-                    <option value="Beleid">Beleid</option>
-                    <option value="Uitvoering">Uitvoering</option>
-                    <option value="Kaders">Kaders</option>
-                    <option value="Organisatiegesteldheid">Organisatiegesteldheid</option>
-                    <option value="Externe ontwikkelingen">Externe ontwikkelingen</option>
-                    <option value="Evaluatie">Evaluatie</option>
+                    <option value="">-- Kies Label --</option>
+                    <option v-for="label in strategischeLabels" :key="label" :value="label">
+                        {{ label }}
+                    </option>
                 </select>
             </div>
+            
             <div class="form-group">
-                <label>Portefeuillehouder (PH)</label>
-                <input v-model="formData.ph" type="text">
+                <label>Verantwoordelijk Directielid</label>
+                <select v-model="formData.dir">
+                    <option value="">-- Kies Directeur --</option>
+                    <option v-for="d in directieLeden" :key="d" :value="d">
+                        {{ d }}
+                    </option>
+                </select>
             </div>
         </div>
 
-        <div class="form-group">
-            <label>Bestuurlijk Aanspreekpunt 🗣️</label>
-            <input v-model="formData.administrativeContact" type="text" placeholder="Wie is de trekkende bestuurder?">
+        <div class="row">
+            <div class="form-group">
+                <label>Portefeuillehouder (PH)</label>
+                <select v-model="formData.ph">
+                    <option value="">-- Kies PH --</option>
+                    <option v-for="b in bestuurders" :key="b" :value="b">
+                        {{ b }}
+                    </option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>Bestuurlijk Aanspreekpunt 🗣️</label>
+                <select v-model="formData.administrativeContact">
+                    <option value="">-- Kies Aanspreekpunt --</option>
+                    <option v-for="b in bestuurders" :key="b" :value="b">
+                        {{ b }}
+                    </option>
+                </select>
+            </div>
         </div>
 
         <div class="form-group">
@@ -74,6 +126,7 @@ function opslaan() {
         </div>
 
         <hr>
+        
         <h3>Planning (Datums)</h3>
         <div class="date-grid">
             <div class="form-group">
@@ -109,6 +162,7 @@ function opslaan() {
 .modal-content {
   background: white; padding: 20px; border-radius: 8px;
   width: 90%; max-width: 600px;
+  max-height: 90vh; overflow-y: auto; /* Zorg dat het scrollt op kleine schermen */
 }
 .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
 .close-btn { font-size: 28px; cursor: pointer; }
@@ -116,14 +170,14 @@ function opslaan() {
 .form-group { margin-bottom: 15px; }
 label { display: block; font-weight: bold; margin-bottom: 5px; font-size: 0.9rem; }
 input, select, textarea { 
-    width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; font-family: inherit; 
+    width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; font-family: inherit; font-size: 0.95rem;
 }
-.row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.row { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
 .date-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; background: #f9f9f9; padding: 10px; border-radius: 4px; }
 
 .save-btn {
-    background: #27ae60; color: white; border: none; padding: 10px 20px;
-    width: 100%; font-size: 1rem; border-radius: 4px; cursor: pointer; margin-top: 15px;
+    background: #27ae60; color: white; border: none; padding: 12px 20px;
+    width: 100%; font-size: 1rem; border-radius: 4px; cursor: pointer; margin-top: 15px; font-weight: bold;
 }
 .save-btn:hover { background: #219150; }
 </style>
