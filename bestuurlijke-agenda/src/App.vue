@@ -32,7 +32,7 @@
 
   // UI States
   const isHeaderOpen = ref(true);
-  const isFiltersOpen = ref(true); // <--- NIEUW: State voor de filterbalk
+  const isFiltersOpen = ref(true);
   const isLoginOpen = ref(false);
   const wachtwoordInput = ref('');
   const isDateManagerOpen = ref(false);
@@ -292,12 +292,13 @@
     
     <DetailModal :show="isDetailOpen" :item="geselecteerdItem" @close="isDetailOpen = false" />
     <EditModal :show="isEditOpen" :item="editItem" :availableDates="activeDates" @save="saveChanges" @close="isEditOpen = false" />
+    
     <DateManager 
-      :isOpen="isDateManagerOpen" 
-      :initialDates="activeDates" 
-      @save-dates="saveDates" 
-      @close="isDateManagerOpen = false" 
-    />>
+        :isOpen="isDateManagerOpen" 
+        :initialDates="activeDates" 
+        @save-dates="saveDates" 
+        @close="isDateManagerOpen = false" 
+    />
 
     <div v-if="isLoginOpen" class="login-overlay" @click.self="isLoginOpen = false">
         <div class="login-modal">
@@ -324,7 +325,7 @@
     <div v-if="viewMode === 'grid' || viewMode === 'dots'">
         <SidebarNav :groepen="gegroepeerdeLijst" />
         
-        <SwimlaneHeaders v-if="viewMode === 'grid'" />
+        <SwimlaneHeaders v-if="viewMode === 'grid' || viewMode === 'dots'" />
 
         <div class="container" ref="timelineRef" :class="{ 'view-dots': viewMode === 'dots' }">
           
@@ -437,7 +438,13 @@ header.collapsed { max-height: 0; padding: 0; opacity: 0; pointer-events: none; 
 .month-header::before { content: ''; position: absolute; left: 0; right: 0; top: 50%; height: 1px; background: #ccc; z-index: -1; }
 .month-badge { background-color: #fff; color: #2c3e50; border: 2px solid #2c3e50; padding: 5px 20px; border-radius: 30px; font-weight: bold; }
 .grid-layout { display: grid; gap: 15px; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); }
-@media (min-width: 1100px) { .grid-layout { grid-template-columns: repeat(7, 1fr); align-items: start; } }
+@media (min-width: 1100px) { 
+    .grid-layout { 
+        /* AANGEPAST: Van 7 naar 5 kolommen */
+        grid-template-columns: repeat(5, 1fr); 
+        align-items: start; 
+    } 
+}
 
 main.has-focus .month-block { z-index: 10; } 
 main.has-focus .card-wrapper { opacity: 0.2; filter: grayscale(100%); transition: opacity 0.3s; }

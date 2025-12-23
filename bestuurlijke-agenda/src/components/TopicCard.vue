@@ -156,14 +156,14 @@ h4 { margin: 0 0 10px 0; color: #2c3e50; font-size: 0.9rem; line-height: 1.3; }
 .card-action-btn { font-size: 0.75rem; font-weight: bold; color: #3498db; text-transform: uppercase; cursor: pointer; }
 .card-action-btn:hover { text-decoration: underline; }
 
-/* Grid posities voor grote schermen */
+/* Grid posities voor grote schermen (5 kolommen update) */
 @media (min-width: 1100px) {
     .col-PFO { grid-column: 1; }
     .col-DBBesluit { grid-column: 2; }
-    .col-DBSchrift { grid-column: 3; }
-    .col-DBInformeel { grid-column: 4; }
-    .col-ABBrief { grid-column: 5; }
-    .col-Delta { grid-column: 6; }
-    .col-ABBesluit { grid-column: 7; }
+    /* .col-DBSchrift is vervallen (zat op 3) */
+    .col-DBInformeel { grid-column: 3; } /* Opgeschoven van 4 naar 3 */
+    /* .col-ABBrief is vervallen (zat op 5) */
+    .col-Delta { grid-column: 4; } /* Opgeschoven van 6 naar 4 */
+    .col-ABBesluit { grid-column: 5; } /* Opgeschoven van 7 naar 5 */
 }
 </style>
