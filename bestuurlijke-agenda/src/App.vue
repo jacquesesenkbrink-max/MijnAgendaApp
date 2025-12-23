@@ -521,7 +521,7 @@ header.collapsed {
 .fade-enter-from, .fade-leave-to { opacity: 0; transform: translateY(-10px); }
 
 .container { max-width: 1400px; margin: 0 auto; padding: 20px; position: relative; min-height: 80vh; }
-#connections-layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 15; }
+#connections-layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 1; }
 .connection-line { fill: none; stroke-width: 3; stroke-linecap: round; stroke-dasharray: 10; animation: dash 30s linear infinite; opacity: 0.8; }
 @keyframes dash { to { stroke-dashoffset: -1000; } }
 
@@ -530,7 +530,7 @@ main.has-focus .card-wrapper { opacity: 0.2; filter: grayscale(100%); transition
 .reset-focus-btn { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); background: #e74c3c; color: white; padding: 12px 24px; border-radius: 30px; font-weight: bold; border: none; cursor: pointer; box-shadow: 0 4px 15px rgba(0,0,0,0.3); z-index: 200; animation: popIn 0.3s; }
 @keyframes popIn { from { transform: translate(-50%, 50px); } to { transform: translate(-50%, 0); } }
 
-.month-block { margin-bottom: 40px; scroll-margin-top: 140px; position: relative; }
+.month-block { margin-bottom: 40px; scroll-margin-top: 140px; position: relative; z-index: 2; }
 .month-header { text-align: center; margin-bottom: 20px; position: relative; }
 .month-header::before { content: ''; position: absolute; left: 0; right: 0; top: 50%; height: 1px; background: #ccc; z-index: -1; }
 .month-badge { background-color: #fff; color: #2c3e50; border: 2px solid #2c3e50; padding: 5px 20px; border-radius: 30px; font-weight: bold; }
