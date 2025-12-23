@@ -10,7 +10,7 @@ const props = defineProps({
 
 const emit = defineEmits(['edit-item', 'open-detail'])
 
-// DEFINITIE VAN DE LANES (DBSchrift en ABBrief zijn hier verwijderd)
+// DEFINITIE VAN DE LANES (5 stuks overgebleven)
 const lanes = [
   { id: 'PFO', title: 'PFO' },
   { id: 'DBBesluit', title: 'DB Besluit' },
@@ -32,7 +32,7 @@ const getItemsForCell = (laneId, date) => {
 
 // Filter logica
 const filteredItems = computed(() => {
-  let result = props.items
+  let result = props.items || [] // Veiligheidshalve check op lege array
 
   if (props.selectedDomein) {
     result = result.filter(i => i.domein === props.selectedDomein)
@@ -41,7 +41,7 @@ const filteredItems = computed(() => {
   if (props.searchQuery) {
     const q = props.searchQuery.toLowerCase()
     result = result.filter(i => 
-      i.title.toLowerCase().includes(q) ||
+      (i.title && i.title.toLowerCase().includes(q)) ||
       (i.toelichting && i.toelichting.toLowerCase().includes(q))
     )
   }
@@ -49,7 +49,7 @@ const filteredItems = computed(() => {
   return result
 })
 
-// Unieke datums verzamelen (over alle resterende lanes heen) om de rijen te bepalen
+// Unieke datums verzamelen (over alle lanes heen) om de rijen te bepalen
 const uniqueDates = computed(() => {
   const dates = new Set()
   filteredItems.value.forEach(item => {
@@ -145,9 +145,8 @@ const uniqueDates = computed(() => {
 .lanes-container {
   flex: 1;
   display: grid;
-  /* We hebben nu 5 kolommen in plaats van 7 */
+  /* 5 kolommen voor de resterende lanes */
   grid-template-columns: repeat(5, 1fr); 
-  /* FOUTIEVE REGEL VERWIJDERD: divide-x... */
 }
 
 .lane-cell {
@@ -155,7 +154,7 @@ const uniqueDates = computed(() => {
   display: flex;
   flex-direction: column;
   gap: 8px;
-  /* CORRECTIE: We zetten de border hier */
+  /* Border rechts voor scheiding tussen kolommen */
   border-right: 1px solid #f0f0f0;
 }
 
