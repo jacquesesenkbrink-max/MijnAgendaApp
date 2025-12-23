@@ -1,23 +1,23 @@
 <script setup>
 import { ref, watch } from 'vue';
-// 1. Importeer de vaste datums
-import { meetingDates } from '../data/meetingDates.js';
 
 const props = defineProps({
   show: Boolean,       
-  item: Object         
+  item: Object,
+  availableDates: Object // <--- ONTVANGT DE DATA VAN APP.VUE
 });
 
 const emit = defineEmits(['close', 'save']);
 
 const formData = ref({});
-
-// 2. State om bij te houden of iemand "Handmatig typen" heeft gekozen per veld
 const manualInputMode = ref({
   PFO: false,
   DBBesluit: false,
   ABBrief: false,
-  Delta: false
+  Delta: false,
+  DBSchrift: false,
+  DBInformeel: false,
+  ABBesluit: false
 });
 
 watch(() => props.item, (newItem) => {
@@ -27,15 +27,16 @@ watch(() => props.item, (newItem) => {
 
     // Reset manual modes bij openen
     Object.keys(manualInputMode.value).forEach(key => {
-        // Als de datum in het item NIET in de vaste lijst staat, zet manual mode aan
         const currentDate = formData.value.schedule[key];
-        const isKnownDate = meetingDates[key]?.includes(currentDate);
+        // Check of de huidige datum in de lijst met availableDates staat
+        const isKnownDate = props.availableDates[key]?.includes(currentDate);
+        // Zo niet, zet dan manual mode aan zodat de tekst zichtbaar is
         manualInputMode.value[key] = currentDate && !isKnownDate;
     });
 
   } else {
+    // Nieuw item
     formData.value = { id: Date.now(), title: '', schedule: {} };
-    // Reset alles naar dropdowns
     Object.keys(manualInputMode.value).forEach(k => manualInputMode.value[k] = false);
   }
 }, { immediate: true });
@@ -45,12 +46,11 @@ function opslaan() {
   emit('close');
 }
 
-// Helper om te wisselen tussen selecteren en typen
 function toggleManual(field) {
     manualInputMode.value[field] = !manualInputMode.value[field];
-    // Als we teruggaan naar dropdown en de huidige waarde staat niet in de lijst, maak hem leeg
     if (!manualInputMode.value[field]) {
-        if (!meetingDates[field]?.includes(formData.value.schedule[field])) {
+        // Als we terugkeren naar de lijst en de waarde staat er niet in, resetten
+        if (!props.availableDates[field]?.includes(formData.value.schedule[field])) {
             formData.value.schedule[field] = '';
         }
     }
@@ -104,15 +104,11 @@ function toggleManual(field) {
         <h3>Planning (Kies vaste data)</h3>
         
         <div class="date-grid">
-            
-            <div v-for="field in ['PFO', 'DBBesluit', 'ABBrief', 'Delta']" :key="field" class="form-group">
+            <div v-for="field in ['PFO', 'DBBesluit', 'ABBrief', 'Delta', 'DBSchrift', 'DBInformeel', 'ABBesluit']" :key="field" class="form-group">
                 <div class="label-row">
                     <label>{{ field }}</label>
-                    <small 
-                        class="toggle-link" 
-                        @click="toggleManual(field)"
-                    >
-                        {{ manualInputMode[field] ? 'Terug naar lijst' : 'Handmatig typen' }}
+                    <small class="toggle-link" @click="toggleManual(field)">
+                        {{ manualInputMode[field] ? 'Terug naar lijst' : 'Handmatig' }}
                     </small>
                 </div>
 
@@ -122,7 +118,7 @@ function toggleManual(field) {
                     class="date-select"
                 >
                     <option value="">-- Geen datum --</option>
-                    <option v-for="date in meetingDates[field]" :key="date" :value="date">
+                    <option v-if="availableDates[field]" v-for="date in availableDates[field]" :key="date" :value="date">
                         {{ date }}
                     </option>
                 </select>
@@ -131,11 +127,10 @@ function toggleManual(field) {
                     v-else 
                     v-model="formData.schedule[field]" 
                     type="text" 
-                    placeholder="dd-mm-jjjj of tekst..."
+                    placeholder="dd-mm-jjjj..."
                     class="manual-input"
                 >
             </div>
-
         </div>
 
         <button type="submit" class="save-btn">💾 Opslaan</button>
@@ -167,7 +162,7 @@ label { display: block; font-weight: bold; margin-bottom: 5px; font-size: 0.9rem
 input, select, textarea { 
     width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; font-family: inherit; 
 }
-.manual-input { border-color: #e67e22; background: #fffdf9; } /* Visueel onderscheid voor handmatige modus */
+.manual-input { border-color: #e67e22; background: #fffdf9; }
 
 .row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 .date-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; background: #f9f9f9; padding: 15px; border-radius: 4px; border: 1px solid #eee; }

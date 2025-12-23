@@ -2,6 +2,8 @@
   import { ref, computed, watch, onMounted, nextTick } from 'vue';
   
   import { defaultItems } from './data/items.js';
+  // Zorg dat je dit bestand hebt aangemaakt in Stap 1 (van het vorige antwoord)
+  import { meetingDates as defaultDates } from './data/meetingDates.js'; 
   import { parseDate, getMonthName } from './utils/dateHelpers.js';
   
   import TopicCard from './components/TopicCard.vue';
@@ -12,8 +14,7 @@
   import EditModal from './components/EditModal.vue';
   import ReportView from './components/ReportView.vue';
   import AgendaView from './components/AgendaView.vue';
-  import DateManager from './components/DateManager.vue';
-  import { meetingDates as defaultDates } from './data/meetingDates.js'; // Importeer de defaults
+  import DateManager from './components/DateManager.vue'; // <--- NIEUW
 
   // DATA
   const agendaPunten = ref([]); 
@@ -24,17 +25,18 @@
   const filterWaarde = ref('all');
   const startJaar = ref(0);
   const activeFocusId = ref(null); 
-   
+  
   const isAdmin = ref(false); 
   const fileInput = ref(null);
 
-  const isDateManagerOpen = ref(false); // Nieuwe state voor de modal
-  const activeDates = ref({});          // Hierin slaan we de actuele datums op
-
   // NIEUW: Header Toggle & Login Modal State
   const isHeaderOpen = ref(true);
-  const isLoginOpen = ref(false);     // <--- Nieuw: bepaalt of login scherm open is
-  const wachtwoordInput = ref('');    // <--- Nieuw: slaat het getypte wachtwoord op
+  const isLoginOpen = ref(false);
+  const wachtwoordInput = ref('');
+
+  // NIEUW: Datumbeheer State
+  const isDateManagerOpen = ref(false); // <--- Bepaalt of het beheerscherm open is
+  const activeDates = ref({});          // <--- Hierin zitten de actieve datums (PFO, DB, etc.)
 
   // HISTORIE (Undo / Redo)
   const historyStack = ref([]);
@@ -52,27 +54,28 @@
   const timelineRef = ref(null);
 
   onMounted(() => {
+    // 1. Agenda Items Laden
     const opgeslagen = localStorage.getItem('mijn-agenda-data');
     if (opgeslagen) {
       agendaPunten.value = JSON.parse(opgeslagen);
     } else {
       agendaPunten.value = defaultItems;
     }
+
+    // 2. Datums Laden (NIEUW)
+    const opgeslagenDatums = localStorage.getItem('mijn-agenda-dates');
+    if (opgeslagenDatums) {
+        activeDates.value = JSON.parse(opgeslagenDatums);
+    } else {
+        // Fallback naar de defaults uit het bestand
+        activeDates.value = JSON.parse(JSON.stringify(defaultDates));
+    }
+
     // Check sessie
     if (sessionStorage.getItem('is-admin') === 'true') {
         isAdmin.value = true;
     }
     window.addEventListener('resize', drawConnections);
-
-    // DATUMS LADEN:
-    const opgeslagenDatums = localStorage.getItem('mijn-agenda-dates');
-    if (opgeslagenDatums) {
-        activeDates.value = JSON.parse(opgeslagenDatums);
-    } else {
-        // Als er niets is opgeslagen, gebruik de defaults uit het bestand
-        // We maken een kopie om problemen met references te voorkomen
-        activeDates.value = JSON.parse(JSON.stringify(defaultDates));
-    }
   });
 
   // Automatisch opslaan in LocalStorage bij wijzigingen
@@ -84,6 +87,11 @@
   watch(viewMode, () => {
     if(activeFocusId.value) nextTick(() => drawConnections());
   });
+
+  // --- NIEUW: Functie om datums op te slaan ---
+  function saveDates() {
+    localStorage.setItem('mijn-agenda-dates', JSON.stringify(activeDates.value));
+  }
 
   // --- Header Toggle Functie ---
   function toggleHeader() {
@@ -109,7 +117,7 @@
     agendaPunten.value = futureStack.value.pop();
   }
 
-  // --- 2. ADMIN & LOGIN FUNCTIES (AANGEPAST) ---
+  // --- 2. ADMIN & LOGIN FUNCTIES ---
   function handleAdminClick() {
     if (isAdmin.value) {
         // Uitloggen
@@ -117,7 +125,7 @@
         sessionStorage.removeItem('is-admin');
     } else {
         // Login scherm openen
-        wachtwoordInput.value = ''; // Veld leegmaken
+        wachtwoordInput.value = ''; 
         isLoginOpen.value = true;
     }
   }
@@ -127,10 +135,10 @@
     if (ww === "wdo" || ww === "admin") {
         isAdmin.value = true;
         sessionStorage.setItem('is-admin', 'true');
-        isLoginOpen.value = false; // Sluit modal
+        isLoginOpen.value = false; 
     } else {
         alert("Onjuist wachtwoord");
-        wachtwoordInput.value = ''; // Veld weer leegmaken
+        wachtwoordInput.value = ''; 
     }
   }
 
@@ -203,11 +211,6 @@
         event.target.value = '';
     };
     reader.readAsText(file);
-  }
-
-  // Functie om datums op te slaan (wordt aangeroepen vanuit DateManager)
-  function saveDates() {
-    localStorage.setItem('mijn-agenda-dates', JSON.stringify(activeDates.value));
   }
 
   // --- DATA TRANSFORMATIE & FILTERS ---
@@ -315,7 +318,7 @@
         
         <div class="header-content">
             <h1>Bestuurlijke Planning WDODelta</h1>
-            <p class="subtitle">Vue Versie v11.0</p>
+            <p class="subtitle">Vue Versie v11.1</p>
         </div>
         
         <div class="login-container">
@@ -340,14 +343,14 @@
                 <button class="action-btn new" @click="openNieuw">+ Nieuw</button>
             </div>
             <div class="admin-group">
-                <span class="label">Historie:</span>
-                <button class="action-btn" @click="undo" :disabled="historyStack.length === 0" title="Ongedaan maken">↩️ Undo</button>
-                <button class="action-btn" @click="redo" :disabled="futureStack.length === 0" title="Opnieuw uitvoeren">↪️ Redo</button>
+                <span class="label">Data:</span>
+                <button class="action-btn" @click="isDateManagerOpen = true">📅 Beheer Datums</button> <button class="action-btn" @click="downloadBackup">⬇️ Export</button>
+                <button class="action-btn" @click="triggerImport">⬆️ Import</button>
             </div>
             <div class="admin-group">
-                <span class="label">Data:</span>
-                <button class="action-btn" @click="downloadBackup">⬇️ Export</button>
-                <button class="action-btn" @click="triggerImport">⬆️ Import</button>
+                <span class="label">Historie:</span>
+                <button class="action-btn" @click="undo" :disabled="historyStack.length === 0" title="Ongedaan maken">↩️</button>
+                <button class="action-btn" @click="redo" :disabled="futureStack.length === 0" title="Opnieuw uitvoeren">↪️</button>
             </div>
         </div>
       </transition>
@@ -360,7 +363,21 @@
     <SwimlaneHeaders v-if="viewMode === 'grid'" />
 
     <DetailModal :show="isDetailOpen" :item="geselecteerdItem" @close="isDetailOpen = false" />
-    <EditModal :show="isEditOpen" :item="editItem" @save="saveChanges" @close="isEditOpen = false" />
+    
+    <EditModal 
+        :show="isEditOpen" 
+        :item="editItem" 
+        :availableDates="activeDates"
+        @save="saveChanges" 
+        @close="isEditOpen = false" 
+    />
+
+    <DateManager 
+        :show="isDateManagerOpen" 
+        :datesData="activeDates" 
+        @update-dates="saveDates" 
+        @close="isDateManagerOpen = false" 
+    />
 
     <div v-if="isLoginOpen" class="login-overlay" @click.self="closeLogin">
         <div class="login-modal">
@@ -412,7 +429,6 @@
         <AgendaView :items="gefilterdeEvents" :activeFilter="filterWaarde" />
     </div>
 
-
     </div>
 
     <button v-if="activeFocusId" class="reset-focus-btn" @click="clearFocus">❌ Reset Weergave</button>
@@ -420,7 +436,7 @@
 </template>
 
 <style scoped>
-/* NIEUW: LOGIN MODAL STYLING */
+/* Behoud hier je bestaande CSS uit App.vue, hieronder alleen de nieuwe styles voor de DateManager knop etc. worden automatisch meegenomen in de admin-toolbar class */
 .login-overlay {
     position: fixed; top: 0; left: 0; width: 100%; height: 100%;
     background: rgba(0,0,0,0.6); z-index: 1000;
@@ -455,57 +471,36 @@
 
 @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
-/* MENU TOGGLE KNOP */
 .header-toggle-btn {
-  position: fixed;
-  top: 15px;
-  left: 15px;
-  z-index: 200; 
-  background: #2c3e50;
-  color: white;
-  border: none;
-  padding: 8px 15px;
-  border-radius: 4px;
-  cursor: pointer;
-  font-weight: bold;
+  position: fixed; top: 15px; left: 15px; z-index: 200; 
+  background: #2c3e50; color: white; border: none; padding: 8px 15px;
+  border-radius: 4px; cursor: pointer; font-weight: bold;
   box-shadow: 0 2px 5px rgba(0,0,0,0.3);
   transition: background 0.3s;
 }
 .header-toggle-btn:hover { background: #34495e; }
 
-/* HEADER STYLING */
 header { 
     background: linear-gradient(135deg, #2c3e50, #4ca1af); 
-    color: white; 
-    padding: 1rem; 
-    position: relative; 
-    z-index: 100; 
+    color: white; padding: 1rem; position: relative; z-index: 100; 
     box-shadow: 0 4px 10px rgba(0,0,0,0.2); 
     transition: max-height 0.4s ease-in-out, opacity 0.3s ease, padding 0.4s ease;
     max-height: 500px; overflow: hidden; opacity: 1;
 }
-header.collapsed {
-    max-height: 0; padding: 0; opacity: 0; pointer-events: none;
-}
-@media print {
-    .header-toggle-btn { display: none !important; }
-    header { display: none !important; } 
-}
+header.collapsed { max-height: 0;Hv padding: 0; opacity: 0; pointer-events: none; }
+@media print { .header-toggle-btn, header { display: none !important; } }
 
 .top-bar { display: flex; justify-content: space-between; align-items: center; max-width: 1400px; margin: 0 auto; }
 .header-content { text-align: center; flex-grow: 1; }
 .header-actions { display: flex; flex-direction: column; align-items: center; gap: 15px; margin-top: 15px; }
 
-/* View Toggle */
 .view-toggle { background: rgba(0,0,0,0.2); border-radius: 20px; padding: 3px; display: flex; }
 .view-toggle button { background: transparent; border: none; color: white; padding: 5px 15px; border-radius: 15px; cursor: pointer; transition: background 0.2s; }
 .view-toggle button.active { background: white; color: #2c3e50; font-weight: bold; }
 
-/* LOGIN KNOP HEADER */
 .login-btn { background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.4); color: white; padding: 5px 12px; border-radius: 4px; cursor: pointer; }
 .login-btn.active { background: #e67e22; border-color: #d35400; font-weight: bold; }
 
-/* ADMIN TOOLBAR */
 .admin-toolbar {
     background: rgba(0, 0, 0, 0.3); padding: 8px 15px; border-radius: 8px;
     display: flex; gap: 20px; align-items: center; flex-wrap: wrap;
@@ -520,25 +515,19 @@ header.collapsed {
 .action-btn:disabled { opacity: 0.4; cursor: not-allowed; }
 .action-btn.new { background: #27ae60; border-color: #2ecc71; font-weight: bold; }
 
-/* ANIMATIE TOOLBAR */
 .fade-enter-active, .fade-leave-active { transition: opacity 0.3s, transform 0.3s; }
 .fade-enter-from, .fade-leave-to { opacity: 0; transform: translateY(-10px); }
 
-/* MAIN CONTAINER */
 .container { max-width: 1400px; margin: 0 auto; padding: 20px; position: relative; min-height: 80vh; }
-
-/* SVG */
 #connections-layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 15; }
 .connection-line { fill: none; stroke-width: 3; stroke-linecap: round; stroke-dasharray: 10; animation: dash 30s linear infinite; opacity: 0.8; }
 @keyframes dash { to { stroke-dashoffset: -1000; } }
 
-/* FOCUS EFFECT */
 main.has-focus .month-block { z-index: 10; } 
 main.has-focus .card-wrapper { opacity: 0.2; filter: grayscale(100%); transition: opacity 0.3s; }
 .reset-focus-btn { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); background: #e74c3c; color: white; padding: 12px 24px; border-radius: 30px; font-weight: bold; border: none; cursor: pointer; box-shadow: 0 4px 15px rgba(0,0,0,0.3); z-index: 200; animation: popIn 0.3s; }
 @keyframes popIn { from { transform: translate(-50%, 50px); } to { transform: translate(-50%, 0); } }
 
-/* GRID LAYOUT */
 .month-block { margin-bottom: 40px; scroll-margin-top: 140px; position: relative; }
 .month-header { text-align: center; margin-bottom: 20px; position: relative; }
 .month-header::before { content: ''; position: absolute; left: 0; right: 0; top: 50%; height: 1px; background: #ccc; z-index: -1; }
