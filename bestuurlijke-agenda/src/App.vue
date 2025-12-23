@@ -22,7 +22,7 @@
   const viewMode = ref('grid'); 
   const filterType = ref('fase');
   const filterWaarde = ref('all');
-  const filterPH = ref(''); // NIEUW: State voor gekozen PH
+  const filterPH = ref(''); // State voor gekozen PH
   const startJaar = ref(0);
   
   const activeFocusId = ref(null); 
@@ -89,6 +89,13 @@
       if(activeFocusId.value) nextTick(() => drawConnections());
   });
 
+  // Watcher toegevoegd: Als de gefilterde lijst verandert (bv door PH keuze), herteken lijnen
+  watch(filterPH, () => {
+      nextTick(() => {
+          if (activeFocusId.value) drawConnections();
+      });
+  });
+
   function saveDates() {
     localStorage.setItem('mijn-agenda-dates', JSON.stringify(activeDates.value));
   }
@@ -120,12 +127,10 @@
     return events.sort((a, b) => a.dateObj - b.dateObj);
   });
 
-  // NIEUW: Lijst met unieke portefeuillehouders genereren
   const uniekePortefeuillehouders = computed(() => {
     const phSet = new Set();
     agendaPunten.value.forEach(item => {
         if (item.ph) {
-            // Split op '/' voor als er meerdere PH's zijn (bv. "Stienstra / Wesselink")
             const parts = item.ph.split('/');
             parts.forEach(p => phSet.add(p.trim()));
         }
@@ -144,14 +149,27 @@
     
     if (filterWaarde.value !== 'all') {
         if (filterType.value === 'fase') {
-            list = list.filter(e => e.type === filterWaarde.value);
             
-            // NIEUW: Extra filter logic als we in PFO zitten én een PH hebben gekozen
+            // CRUCIALE WIJZIGING HIERONDER:
+            // Als we op PFO filteren EN er is een PH geselecteerd:
             if (filterWaarde.value === 'PFO' && filterPH.value) {
-                list = list.filter(e => e.ph && e.ph.includes(filterPH.value));
+                // Dan filteren we op het ONDERWERP (Topic) in plaats van alleen de PFO-fase.
+                // We willen alle fases (DB, AB etc.) zien van items die bij deze PH horen.
+                list = list.filter(e => {
+                    const item = e.originalItem;
+                    const matchesPH = item.ph && item.ph.includes(filterPH.value);
+                    // Check of het item überhaupt een PFO fase heeft (omdat we in PFO menu zitten)
+                    const hasPFO = !!item.schedule.PFO; 
+                    return matchesPH && hasPFO;
+                });
+            } 
+            else {
+                // Normaal gedrag: Alleen de specifieke kolom tonen (bv. alleen PFO kaartjes)
+                list = list.filter(e => e.type === filterWaarde.value);
             }
         }
         else {
+            // Label filter (Beleid, Uitvoering, etc.)
             list = list.filter(e => e.strategicLabel === filterWaarde.value);
         }
     }
@@ -221,17 +239,17 @@
   function updateHoofdFilter(p) { 
       filterType.value = p.type; 
       filterWaarde.value = p.value; 
-      // Als we wegklikken van PFO, reset dan de PH filter
       if (p.value !== 'PFO') filterPH.value = '';
       clearFocus(); 
   }
 
   function updateJaar(j) { startJaar.value = j; clearFocus(); }
   
-  // NIEUW: Update functie voor PH filter
   function updatePH(ph) {
       filterPH.value = ph;
       clearFocus();
+      // Als we een PH kiezen, resetten we eventuele focus om verwarring te voorkomen
+      // Maar als de gebruiker wil klikken, kan dat daarna gewoon.
   }
 
   function saveChanges(updatedItem) {
@@ -255,6 +273,7 @@
     const topicId = activeFocusId.value;
     const cards = Array.from(timelineRef.value.querySelectorAll(`[id^='card-${topicId}-']`));
     
+    // Sorteer kaarten op verticale positie (van boven naar beneden)
     cards.sort((a, b) => a.getBoundingClientRect().top - b.getBoundingClientRect().top);
 
     if (cards.length < 2) { connectionsPath.value = ''; return; }
@@ -265,14 +284,23 @@
 
     const containerRect = timelineRef.value.getBoundingClientRect();
     let pathD = '';
+    
     for (let i = 0; i < cards.length - 1; i++) {
         const rectA = cards[i].getBoundingClientRect();
         const rectB = cards[i+1].getBoundingClientRect();
+        
+        // Bereken centrum punten relatief aan container
         const x1 = rectA.left + (rectA.width / 2) - containerRect.left;
         const y1 = rectA.top + (rectA.height / 2) - containerRect.top;
         const x2 = rectB.left + (rectB.width / 2) - containerRect.left;
         const y2 = rectB.top + (rectB.height / 2) - containerRect.top;
+        
+        // Bezier curve logica
         const deltaY = y2 - y1;
+        // Als x2 > x1 (naar rechts), curve normaal. Als terug (naar links), pas curve aan.
+        const controlX = Math.abs(x2 - x1) * 0.5;
+        
+        // Simpele S-curve
         pathD += `M ${x1} ${y1} C ${x1} ${y1 + deltaY * 0.5}, ${x2} ${y2 - deltaY * 0.5}, ${x2} ${y2} `;
     }
     connectionsPath.value = pathD;
@@ -289,7 +317,7 @@
         <input type="file" ref="fileInput" @change="handleFileUpload" style="display: none" accept=".json">
         <div class="header-content">
             <h1>Bestuurlijke Planning WDODelta</h1>
-            <p class="subtitle">Vue Versie v11.3 (Met PH Filter)</p>
+            <p class="subtitle">Vue Versie v11.4 (Met PH Trace)</p>
         </div>
         <div class="login-container">
             <button class="login-btn" @click="handleAdminClick" :class="{ active: isAdmin }">
@@ -445,7 +473,6 @@ header.collapsed { max-height: 0; padding: 0; opacity: 0; pointer-events: none; 
 
 .container { max-width: 1400px; margin: 0 auto; padding: 20px; position: relative; min-height: 80vh; }
 
-/* NIEUWE STIJL VOOR FILTER TOGGLE */
 .controls-bar {
     text-align: center;
     padding: 10px;
@@ -469,12 +496,10 @@ header.collapsed { max-height: 0; padding: 0; opacity: 0; pointer-events: none; 
     border-color: #075895;
 }
 
-/* FIX: Z-INDEX LIJN NAAR ACHTEREN */
 #connections-layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 1; } 
 .connection-line { fill: none; stroke-width: 3; stroke-linecap: round; stroke-dasharray: 10; animation: dash 30s linear infinite; opacity: 0.8; }
 @keyframes dash { to { stroke-dashoffset: -1000; } }
 
-/* FIX: KAARTEN HOGER DAN LIJN */
 .month-block { margin-bottom: 40px; scroll-margin-top: 140px; position: relative; z-index: 2; }
 .month-header { text-align: center; margin-bottom: 20px; position: relative; }
 .month-header::before { content: ''; position: absolute; left: 0; right: 0; top: 50%; height: 1px; background: #ccc; z-index: -1; }
@@ -482,7 +507,6 @@ header.collapsed { max-height: 0; padding: 0; opacity: 0; pointer-events: none; 
 .grid-layout { display: grid; gap: 15px; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); }
 @media (min-width: 1100px) { 
     .grid-layout { 
-        /* AANGEPAST: Van 7 naar 5 kolommen */
         grid-template-columns: repeat(5, 1fr); 
         align-items: start; 
     } 
@@ -491,7 +515,6 @@ header.collapsed { max-height: 0; padding: 0; opacity: 0; pointer-events: none; 
 main.has-focus .month-block { z-index: 10; } 
 main.has-focus .card-wrapper { opacity: 0.2; filter: grayscale(100%); transition: opacity 0.3s; }
 
-/* Floating Controls */
 .floating-controls {
     position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%);
     display: flex; gap: 15px; z-index: 200; animation: popIn 0.3s;
