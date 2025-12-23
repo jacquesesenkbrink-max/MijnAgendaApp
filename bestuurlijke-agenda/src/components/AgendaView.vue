@@ -1,6 +1,5 @@
 <script setup>
 import { ref, computed, onMounted, watch } from 'vue';
-import { parseDate } from '../utils/dateHelpers.js';
 
 const props = defineProps({
   items: Array
@@ -219,8 +218,7 @@ function resetFilters() {
                         <td class="index-col">{{ index + 1 }}.</td>
                         <td>
                             <div class="topic-title">{{ item.title }}</div>
-                            <div v-if="item.comments" class="topic-comment">Opmerking: {{ item.comments }}</div>
-                        </td>
+                            </td>
                         <td>
                             <div class="role-text" v-if="meeting.type !== 'PFO'">PH: {{ item.ph }}</div>
                             
@@ -313,7 +311,8 @@ function resetFilters() {
 
 .index-col { color: #999; font-weight: bold; }
 .topic-title { font-weight: 600; color: #2c3e50; margin-bottom: 4px; }
-.topic-comment { font-size: 0.8rem; color: #c0392b; font-style: italic; }
+/* .topic-comment is verwijderd */
+
 .role-text { font-size: 0.8rem; color: #666; margin-bottom: 2px; }
 .role-text.highlight { font-weight: bold; color: #2c3e50; }
 .badge { background: #eee; padding: 2px 6px; border-radius: 4px; font-size: 0.75rem; color: #555; }
