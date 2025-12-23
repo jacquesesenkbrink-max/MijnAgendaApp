@@ -43,9 +43,7 @@ function kiesJaar(event) {
       
       <button class="filter-btn btn-PFO" :class="{ selected: actiefFilter === 'PFO' }" @click="kiesFase('PFO')">Portefeuilleoverleg</button>
       <button class="filter-btn btn-DBBesluit" :class="{ selected: actiefFilter === 'DBBesluit' }" @click="kiesFase('DBBesluit')">Besluitvorming DB</button>
-      <button class="filter-btn btn-DBSchrift" :class="{ selected: actiefFilter === 'DBSchrift' }" @click="kiesFase('DBSchrift')">Schriftelijk DB</button>
       <button class="filter-btn btn-DBInformeel" :class="{ selected: actiefFilter === 'DBInformeel' }" @click="kiesFase('DBInformeel')">Informeel DB</button>
-      <button class="filter-btn btn-ABBrief" :class="{ selected: actiefFilter === 'ABBrief' }" @click="kiesFase('ABBrief')">Brief DB aan AB</button>
       <button class="filter-btn btn-Delta" :class="{ selected: actiefFilter === 'Delta' }" @click="kiesFase('Delta')">Deltabijeenkomst</button>
       <button class="filter-btn btn-ABBesluit" :class="{ selected: actiefFilter === 'ABBesluit' }" @click="kiesFase('ABBesluit')">Besluitvorming AB</button>
     </div>
@@ -126,10 +124,10 @@ function kiesJaar(event) {
 /* Specific colors when active (Overrides) */
 .filter-btn.btn-PFO.selected { background: var(--c-pfo); border-color: var(--c-pfo); }
 .filter-btn.btn-DBBesluit.selected { background: var(--c-db-besluit); border-color: var(--c-db-besluit); }
-.filter-btn.btn-DBSchrift.selected { background: var(--c-db-schrift); border-color: var(--c-db-schrift); }
+/* DBSchrift verwijderd */
 .filter-btn.btn-DBInformeel.selected { background: var(--c-db-informeel); border-color: var(--c-db-informeel); }
 .filter-btn.btn-ABBesluit.selected { background: var(--c-ab-besluit); border-color: var(--c-ab-besluit); }
-.filter-btn.btn-ABBrief.selected { background: var(--c-ab-brief); border-color: var(--c-ab-brief); }
+/* ABBrief verwijderd */
 .filter-btn.btn-Delta.selected { background: var(--c-delta); border-color: var(--c-delta); }
 
 .year-select { 
