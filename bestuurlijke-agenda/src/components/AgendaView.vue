@@ -3,14 +3,14 @@ import { ref, computed } from 'vue'
 import TopicCard from './TopicCard.vue'
 
 const props = defineProps({
-  items: Array,
+  items: Array,         // Dit ontvangt nu de 'gefilterdeEvents' (platte events) uit App.vue
   searchQuery: String,
   selectedDomein: String
 })
 
 const emit = defineEmits(['edit-item', 'open-detail'])
 
-// DEFINITIE VAN DE LANES (5 stuks overgebleven)
+// 1. DEFINITIE VAN DE LANES (De 5 overgebleven stuks)
 const lanes = [
   { id: 'PFO', title: 'PFO' },
   { id: 'DBBesluit', title: 'DB Besluit' },
@@ -21,42 +21,39 @@ const lanes = [
   { id: 'ABBesluit', title: 'AB Besluit' }
 ]
 
-// Hulpfunctie: haal items op voor een specifieke lane en datum
-const getItemsForCell = (laneId, date) => {
-  return filteredItems.value.filter(item => {
-    // Check of item in deze lane en op deze datum staat
-    const scheduledDate = item.schedule?.[laneId]
-    return scheduledDate === date
-  })
-}
-
-// Filter logica
+// 2. Filter logica (indien nodig, App.vue doet het zware werk al)
 const filteredItems = computed(() => {
-  let result = props.items || [] // Veiligheidshalve check op lege array
-
-  if (props.selectedDomein) {
-    result = result.filter(i => i.domein === props.selectedDomein)
-  }
+  let result = props.items || [] 
 
   if (props.searchQuery) {
     const q = props.searchQuery.toLowerCase()
-    result = result.filter(i => 
-      (i.title && i.title.toLowerCase().includes(q)) ||
-      (i.toelichting && i.toelichting.toLowerCase().includes(q))
+    result = result.filter(ev => 
+      (ev.title && ev.title.toLowerCase().includes(q)) ||
+      (ev.comments && ev.comments.toLowerCase().includes(q))
     )
   }
-
   return result
 })
 
-// Unieke datums verzamelen (over alle lanes heen) om de rijen te bepalen
+// 3. Items ophalen voor een specifieke cel
+// AANGEPAST: We checken nu op 'type' en 'dateDisplay' van het event object
+const getItemsForCell = (laneId, date) => {
+  return filteredItems.value.filter(ev => {
+    return ev.type === laneId && ev.dateDisplay === date
+  })
+}
+
+// 4. Unieke datums verzamelen
+// AANGEPAST: We kijken alleen naar datums van events die in de ACTIEVE lanes vallen
 const uniqueDates = computed(() => {
   const dates = new Set()
-  filteredItems.value.forEach(item => {
-    if (item.schedule) {
-      Object.values(item.schedule).forEach(date => {
-        if (date) dates.add(date)
-      })
+  // Maak een set van de ID's die we tonen (PFO, Delta, etc.)
+  const activeLaneIds = new Set(lanes.map(l => l.id))
+
+  filteredItems.value.forEach(ev => {
+    // Check of dit event überhaupt in een kolom getoond wordt die we nog hebben
+    if (activeLaneIds.has(ev.type) && ev.dateDisplay) {
+        dates.add(ev.dateDisplay)
     }
   })
   
@@ -89,10 +86,10 @@ const uniqueDates = computed(() => {
           >
             <TopicCard 
               v-for="item in getItemsForCell(lane.id, date)"
-              :key="item.id"
-              :item="item"
-              @click="$emit('open-detail', item)"
-              @edit="$emit('edit-item', item)"
+              :key="item.uniqueId"
+              :event="item"
+              @open-details="$emit('open-detail', item.originalItem)"
+              @edit="$emit('edit-item', item.originalItem)"
             />
           </div>
         </div>
@@ -154,7 +151,6 @@ const uniqueDates = computed(() => {
   display: flex;
   flex-direction: column;
   gap: 8px;
-  /* Border rechts voor scheiding tussen kolommen */
   border-right: 1px solid #f0f0f0;
 }
 
