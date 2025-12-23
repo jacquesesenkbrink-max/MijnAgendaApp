@@ -76,79 +76,74 @@ function kiesJaar(event) {
 </template>
 
 <style scoped>
-/* Container is nu transparant omdat de header de kleur regelt */
 .filter-container {
-  padding: 10px 0; 
-  background: transparent; 
-  margin-bottom: 0; 
-  border: none;
-  width: 100%;
+  padding: 10px 0; background: transparent; margin-bottom: 0; border: none; width: 100%;
 }
-
 .filters {
   display: flex; justify-content: center; flex-wrap: wrap; gap: 10px; margin-bottom: 10px;
 }
 
-/* Divider aangepast voor op donkere achtergrond */
+/* Divider Styling - Beter contrast op blauw */
 .filter-divider {
   width: 100%; height: 1px; 
-  background: rgba(255,255,255,0.2); 
+  background: rgba(255,255,255,0.3); /* Iets feller lijntje */
   margin: 15px 0;
   display: flex; align-items: center; justify-content: center;
 }
 .filter-divider span {
-  background: rgba(0, 0, 0, 0.2); /* Donkere pil voor contrast */
+  background: rgba(0, 0, 0, 0.25); /* Donkere achtergrond voor tekst */
   backdrop-filter: blur(4px);
-  padding: 2px 15px; font-size: 0.7rem; text-transform: uppercase; 
-  color: rgba(255, 255, 255, 0.9); 
+  padding: 4px 15px; font-size: 0.75rem; text-transform: uppercase; 
+  color: white; 
   border-radius: 12px; 
-  border: 1px solid rgba(255,255,255,0.1);
-  letter-spacing: 0.5px;
+  border: 1px solid rgba(255,255,255,0.2);
+  letter-spacing: 1px; font-weight: bold;
 }
 
-/* --- KNOPPEN STIJL (Glassmorphism) --- */
+/* --- KNOPPEN (Glassmorphism Fix) --- */
 .filter-btn {
-  background: rgba(255, 255, 255, 0.15); /* Semi-transparant */
-  border: 1px solid rgba(255, 255, 255, 0.3);
+  background: rgba(255, 255, 255, 0.2); /* Iets meer zichtbaar */
+  border: 1px solid rgba(255, 255, 255, 0.4);
   padding: 8px 16px; 
   border-radius: 6px;
   cursor: pointer; 
   font-size: 0.9rem; 
   transition: all 0.2s; 
-  color: white; 
+  color: white !important; /* Forceer wit */
   font-weight: 500;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.1);
 }
 
 .filter-btn:hover { 
-  background: rgba(255, 255, 255, 0.3); 
+  background: rgba(255, 255, 255, 0.4); 
   transform: translateY(-2px);
 }
 
-/* --- ACTIEVE KNOP --- */
+/* --- ACTIEVE STATUS (Wit vlak, blauwe tekst) --- */
 .filter-btn.selected { 
-  background: white; 
-  color: var(--wdod-blue); /* Blauwe tekst op witte knop */
+  background: white !important; 
+  color: var(--wdod-blue) !important; /* Blauwe tekst op wit */
   border-color: white; 
   font-weight: bold; 
   box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+  text-shadow: none;
 }
 
-/* Voor specifieke fases: als ze actief zijn, geven we ze toch hun eigen kleur
-   zodat het functioneel blijft, maar wel met witte tekst en rand */
-.filter-btn.btn-PFO.selected { background: var(--c-pfo); color: white; border-color: white; }
-.filter-btn.btn-DBBesluit.selected { background: var(--c-db-besluit); color: white; border-color: white; }
-.filter-btn.btn-DBSchrift.selected { background: var(--c-db-schrift); color: white; border-color: white; }
-.filter-btn.btn-DBInformeel.selected { background: var(--c-db-informeel); color: white; border-color: white; }
-.filter-btn.btn-ABBesluit.selected { background: var(--c-ab-besluit); color: white; border-color: white; }
-.filter-btn.btn-ABBrief.selected { background: var(--c-ab-brief); color: white; border-color: white; }
-.filter-btn.btn-Delta.selected { background: var(--c-delta); color: white; border-color: white; }
+/* Specifieke fase-kleuren als ze actief zijn (met witte tekst) */
+.filter-btn.btn-PFO.selected { background: var(--c-pfo) !important; color: white !important; }
+.filter-btn.btn-DBBesluit.selected { background: var(--c-db-besluit) !important; color: white !important; }
+.filter-btn.btn-DBSchrift.selected { background: var(--c-db-schrift) !important; color: white !important; }
+.filter-btn.btn-DBInformeel.selected { background: var(--c-db-informeel) !important; color: white !important; }
+.filter-btn.btn-ABBesluit.selected { background: var(--c-ab-besluit) !important; color: white !important; }
+.filter-btn.btn-ABBrief.selected { background: var(--c-ab-brief) !important; color: white !important; }
+.filter-btn.btn-Delta.selected { background: var(--c-delta) !important; color: white !important; }
 
-/* Jaar Select Dropdown */
+/* Jaar Selectie */
 .year-select { 
   padding-right: 35px; 
-  background-color: rgba(0,0,0,0.2); /* Iets donkerder voor onderscheid */
+  background-color: rgba(0,0,0,0.2); 
   color: white;
-  border: 1px solid rgba(255,255,255,0.3);
+  border: 1px solid rgba(255,255,255,0.4);
 }
 .year-select option {
     background-color: white;

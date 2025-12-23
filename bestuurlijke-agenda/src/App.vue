@@ -387,60 +387,49 @@
   margin-left: 260px;
 }
 
-/* --- DE NIEUWE GRADIENT HEADER --- */
+/* --- HEADER MET GRADIENT --- */
 .top-bar {
   display: flex;
   justify-content: space-between;
-  align-items: flex-end; /* Zorgt dat filterbar netjes uitlijnt */
+  align-items: flex-end;
   padding: 15px 30px;
   
-  /* WDODelta Gradient: Van Primair Blauw naar Cyaan */
+  /* WDODelta Gradient */
   background: linear-gradient(135deg, var(--wdod-blue) 0%, var(--wdod-cyan) 100%);
-  
-  /* Subtiele schaduw */
   box-shadow: 0 4px 12px rgba(7, 88, 149, 0.2);
   
-  color: white; /* Alle tekst in de header wit */
-  position: sticky;
-  top: 0;
-  z-index: 100;
+  /* Forceer witte tekst */
+  color: white; 
+  position: sticky; top: 0; z-index: 100;
 }
 
-/* De rest blijft hetzelfde */
+/* BELANGRIJK: Forceer koppen in de header naar wit (overschrijft main.css) */
+.top-bar :deep(h1), 
+.top-bar :deep(h2), 
+.top-bar :deep(h3),
+.top-bar :deep(span),
+.top-bar :deep(p) {
+  color: white !important;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.1); /* Subtiele schaduw voor leesbaarheid */
+}
+
+/* Rest van de stijlen (ongewijzigd) */
 .agenda-wrapper { position: relative; padding: 20px; flex: 1; }
-
-#connections-layer {
-  position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-  pointer-events: none; z-index: 1; 
-}
-
+#connections-layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 1; }
 .animated-line { animation: dash 30s linear infinite; opacity: 0.6; }
 @keyframes dash { to { stroke-dashoffset: -1000; } }
-
 :deep(.month-block) { position: relative; z-index: 2; }
-
 .floating-controls {
   position: fixed; bottom: 30px; left: calc(50% + 130px);
   transform: translateX(-50%); display: flex; gap: 15px; z-index: 200;
   animation: popIn 0.3s; background: white; padding: 8px;
   border-radius: 40px; box-shadow: 0 4px 15px rgba(0,0,0,0.2); border: 1px solid #ddd;
 }
-
-.control-btn {
-  padding: 10px 20px; border-radius: 30px; font-weight: bold; border: none;
-  cursor: pointer; font-size: 0.9rem; transition: all 0.2s; white-space: nowrap;
-  display: flex; align-items: center; gap: 5px;
-}
-
+.control-btn { padding: 10px 20px; border-radius: 30px; font-weight: bold; border: none; cursor: pointer; font-size: 0.9rem; transition: all 0.2s; white-space: nowrap; display: flex; align-items: center; gap: 5px; }
 .reset-btn { background: var(--wdod-red); color: white; }
 .toggle-btn { background: var(--wdod-orange); color: white; }
 .toggle-btn:hover { transform: translateY(-2px); box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
 .toggle-btn.active { background: var(--wdod-green); }
-
-@keyframes popIn {
-  from { opacity: 0; transform: translate(-50%, 20px); }
-  to { opacity: 1; transform: translate(-50%, 0); }
-}
-
+@keyframes popIn { from { opacity: 0; transform: translate(-50%, 20px); } to { opacity: 1; transform: translate(-50%, 0); } }
 .report-wrapper { padding: 20px; }
 </style>
