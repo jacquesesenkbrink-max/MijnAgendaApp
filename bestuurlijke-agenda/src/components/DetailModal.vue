@@ -1,130 +1,183 @@
 <script setup>
-import { computed } from 'vue';
+import { ref, watch } from 'vue';
 
 const props = defineProps({
-  show: Boolean,       // Is de popup open?
-  item: Object         // Welk onderwerp laten we zien?
+  show: Boolean,       // Is het venster open?
+  item: Object         // Het item dat we gaan bewerken (of null voor nieuw)
 });
 
-const emit = defineEmits(['close']);
+const emit = defineEmits(['close', 'save']);
 
-// Hulpfunctie om te sluiten
-function sluit() {
+// We maken een lokale kopie van de data, zodat we niet direct in de 'live' data typen
+const formData = ref({});
+
+// --- OPTIES VOOR DROPDOWNS ---
+const directieLeden = [
+  "M. Boersen",
+  "I. Geveke",
+  "M. Werges"
+];
+
+const bestuurders = [
+  "D.S. Schoonman",
+  "H.J. Pereboom",
+  "N. Koks",
+  "J.C.G. Wijnen",
+  "M. Wesselink",
+  "F. Stienstra"
+];
+
+const strategischeLabels = [
+  "Beleid",
+  "Uitvoering",
+  "Kaders",
+  "Organisatiegesteldheid",
+  "Externe ontwikkelingen",
+  "Evaluatie"
+];
+
+// Zodra het venster opent, vullen we het formulier met de gegevens van het item
+watch(() => props.item, (newItem) => {
+  if (newItem) {
+    // We maken een 'deep copy' zodat we veilig kunnen rommelen
+    formData.value = JSON.parse(JSON.stringify(newItem));
+    // Zorg dat schedule bestaat
+    if (!formData.value.schedule) formData.value.schedule = {};
+  } else {
+    // Nieuw item? Maak alles leeg
+    formData.value = { 
+        id: Date.now(), 
+        title: '', 
+        schedule: {},
+        ph: '',
+        dir: '',
+        administrativeContact: ''
+    };
+  }
+}, { immediate: true });
+
+function opslaan() {
+  emit('save', formData.value);
   emit('close');
 }
-
-// We maken een lijstje van alle fases voor in de popup
-const fases = [
-  { key: 'PFO', label: 'PFO', color: 'var(--c-pfo)' },
-  { key: 'DBBesluit', label: 'DB Besluit', color: 'var(--c-db-besluit)' },
-  { key: 'DBSchrift', label: 'DB Schrift.', color: 'var(--c-db-schrift)' },
-  { key: 'DBInformeel', label: 'Informeel DB', color: 'var(--c-db-informeel)' },
-  { key: 'ABBrief', label: 'AB Brief', color: 'var(--c-ab-brief)' },
-  { key: 'Delta', label: 'Delta', color: 'var(--c-delta)' },
-  { key: 'ABBesluit', label: 'AB Besluit', color: 'var(--c-ab-besluit)' }
-];
 </script>
 
 <template>
-  <div v-if="show" class="modal-backdrop" @click="sluit">
-    
+  <div v-if="show" class="modal-backdrop" @click="$emit('close')">
     <div class="modal-content" @click.stop>
-      <span class="close-btn" @click="sluit">&times;</span>
-      
-      <div v-if="item">
-        <h2>{{ item.title }}</h2>
-        <div class="meta-info">
-            <span><strong>PH:</strong> {{ item.ph }}</span>
-            <span><strong>Dir:</strong> {{ item.dir }}</span>
-            
-            <span v-if="item.administrativeContact" style="grid-column: span 2;">
-                <strong>🗣️ Aanspreekpunt:</strong> {{ item.administrativeContact }}
-            </span>
+      <div class="modal-header">
+        <h2>✏️ Bewerken</h2>
+        <span class="close-btn" @click="$emit('close')">&times;</span>
+      </div>
+
+      <form @submit.prevent="opslaan">
+        <div class="form-group">
+            <label>Onderwerp Titel</label>
+            <input v-model="formData.title" type="text" required placeholder="Bijv. Archiefverordening...">
         </div>
-        
-        <hr>
-        
-        <h3>Planning Verloop</h3>
-        <div class="flow-list">
-            <div v-for="fase in fases" :key="fase.key" class="flow-row">
-                <div class="flow-label">
-                    <span class="dot" :style="{ background: fase.color }"></span>
-                    {{ fase.label }}
-                </div>
-                <div class="flow-date" :class="{ 'has-date': item.schedule[fase.key] }">
-                    {{ item.schedule[fase.key] || '-' }}
-                </div>
+
+        <div class="row">
+            <div class="form-group">
+                <label>Strategisch Label</label>
+                <select v-model="formData.strategicLabel">
+                    <option value="">-- Kies Label --</option>
+                    <option v-for="label in strategischeLabels" :key="label" :value="label">
+                        {{ label }}
+                    </option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label>Verantwoordelijk Directielid</label>
+                <select v-model="formData.dir">
+                    <option value="">-- Kies Directeur --</option>
+                    <option v-for="d in directieLeden" :key="d" :value="d">
+                        {{ d }}
+                    </option>
+                </select>
             </div>
         </div>
-      </div>
+
+        <div class="row">
+            <div class="form-group">
+                <label>Portefeuillehouder (PH)</label>
+                <select v-model="formData.ph">
+                    <option value="">-- Kies PH --</option>
+                    <option v-for="b in bestuurders" :key="b" :value="b">
+                        {{ b }}
+                    </option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>Bestuurlijk Aanspreekpunt 🗣️</label>
+                <select v-model="formData.administrativeContact">
+                    <option value="">-- Kies Aanspreekpunt --</option>
+                    <option v-for="b in bestuurders" :key="b" :value="b">
+                        {{ b }}
+                    </option>
+                </select>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label>Opmerkingen (Admin)</label>
+            <textarea v-model="formData.comments" rows="2"></textarea>
+        </div>
+
+        <hr>
+        
+        <h3>Planning (Datums)</h3>
+        <div class="date-grid">
+            <div class="form-group">
+                <label>PFO</label>
+                <input v-model="formData.schedule.PFO" type="text" placeholder="dd-mm-jjjj">
+            </div>
+            <div class="form-group">
+                <label>DB Besluit</label>
+                <input v-model="formData.schedule.DBBesluit" type="text" placeholder="dd-mm-jjjj">
+            </div>
+            <div class="form-group">
+                <label>AB Brief</label>
+                <input v-model="formData.schedule.ABBrief" type="text" placeholder="dd-mm-jjjj">
+            </div>
+             <div class="form-group">
+                <label>Delta</label>
+                <input v-model="formData.schedule.Delta" type="text" placeholder="dd-mm-jjjj">
+            </div>
+        </div>
+
+        <button type="submit" class="save-btn">💾 Opslaan</button>
+      </form>
     </div>
   </div>
 </template>
 
 <style scoped>
 .modal-backdrop {
-  position: fixed;
-  top: 0; left: 0; width: 100%; height: 100%;
-  background: rgba(0,0,0,0.6);
-  z-index: 999;
-  display: flex;
-  justify-content: center;
-  align-items: center;
+  position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+  background: rgba(0,0,0,0.6); z-index: 1000;
+  display: flex; justify-content: center; align-items: center;
 }
-
 .modal-content {
-  background: white;
-  padding: 2rem;
-  border-radius: 8px;
-  width: 90%;
-  max-width: 500px;
-  position: relative;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+  background: white; padding: 20px; border-radius: 8px;
+  width: 90%; max-width: 600px;
+  max-height: 90vh; overflow-y: auto; /* Zorg dat het scrollt op kleine schermen */
 }
+.modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+.close-btn { font-size: 28px; cursor: pointer; }
 
-.close-btn {
-  position: absolute;
-  top: 10px; right: 15px;
-  font-size: 28px;
-  cursor: pointer;
-  font-weight: bold;
-  color: #aaa;
+.form-group { margin-bottom: 15px; }
+label { display: block; font-weight: bold; margin-bottom: 5px; font-size: 0.9rem; }
+input, select, textarea { 
+    width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; font-family: inherit; font-size: 0.95rem;
 }
-.close-btn:hover { color: #000; }
+.row { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+.date-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; background: #f9f9f9; padding: 10px; border-radius: 4px; }
 
-h2 { margin-top: 0; color: #2c3e50; font-size: 1.4rem; }
-h3 { font-size: 1rem; margin-top: 20px; color: #666; text-transform: uppercase; }
-
-.meta-info {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 10px;
-    background: #f4f7f6;
-    padding: 10px;
-    border-radius: 4px;
-    margin-bottom: 15px;
-    font-size: 0.9rem;
+.save-btn {
+    background: #27ae60; color: white; border: none; padding: 12px 20px;
+    width: 100%; font-size: 1rem; border-radius: 4px; cursor: pointer; margin-top: 15px; font-weight: bold;
 }
-
-.flow-list {
-    background: #f9f9f9;
-    border-radius: 6px;
-    overflow: hidden;
-    border: 1px solid #eee;
-}
-
-.flow-row {
-    display: flex;
-    justify-content: space-between;
-    padding: 8px 12px;
-    border-bottom: 1px solid #eee;
-    font-size: 0.9rem;
-}
-.flow-row:last-child { border-bottom: none; }
-
-.flow-label { display: flex; align-items: center; font-weight: 600; color: #555; }
-.dot { width: 10px; height: 10px; border-radius: 50%; margin-right: 8px; display: inline-block; }
-
-.flow-date { font-family: monospace; color: #ccc; }
-.flow-date.has-date { color: #2c3e50; font-weight: bold; }
+.save-btn:hover { background: #219150; }
 </style>
