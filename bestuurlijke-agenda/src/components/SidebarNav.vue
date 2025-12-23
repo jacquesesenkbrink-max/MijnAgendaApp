@@ -76,74 +76,57 @@ onUnmounted(() => {
 <style scoped>
 .sidebar-nav {
     position: fixed;
-    right: 20px;
-    top: 50%;
+    right: 20px; top: 50%;
     transform: translateY(-50%);
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
+    display: flex; flex-direction: column; gap: 12px;
     z-index: 90;
 }
 
-/* Nav Item Container */
 .nav-item {
-    display: flex;
-    align-items: center;
-    justify-content: flex-end;
-    cursor: pointer;
-    transition: transform 0.2s;
+    display: flex; align-items: center; justify-content: flex-end;
+    cursor: pointer; transition: transform 0.2s;
 }
 .nav-item:hover { transform: translateX(-5px); }
 
-/* Label (tekst) - Standaard onzichtbaar, zichtbaar bij hover of active */
+/* Label styling */
 .nav-label {
-    background: rgba(0,0,0,0.8);
+    background: #075895; /* WDOD Blue */
     color: white;
-    padding: 4px 10px;
+    padding: 6px 12px;
     border-radius: 4px;
-    font-size: 0.75rem;
-    margin-right: 10px;
-    opacity: 0;
+    font-size: 0.75rem; font-weight: 600;
+    margin-right: 12px; opacity: 0;
     transform: translateX(10px);
     transition: all 0.3s ease;
-    pointer-events: none;
-    white-space: nowrap;
+    pointer-events: none; white-space: nowrap;
+    box-shadow: 0 2px 8px rgba(7, 88, 149, 0.25);
 }
 
 .nav-item:hover .nav-label,
 .nav-item.active .nav-label {
-    opacity: 1;
-    transform: translateX(0);
+    opacity: 1; transform: translateX(0);
 }
 
-.nav-item.active .nav-label {
-    background: #2c3e50;
-    font-weight: bold;
-}
-
-/* Bolletjes */
+/* Dots */
 .nav-dot {
-    width: 12px;
-    height: 12px;
+    width: 10px; height: 10px;
     border-radius: 50%;
-    background-color: #ddd;
-    border: 2px solid white;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    background-color: white;
+    border: 2px solid #ccc;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
     transition: all 0.3s ease;
 }
 
-/* Active State Dot */
 .nav-item.active .nav-dot {
-    transform: scale(1.4);
-    border-color: #2c3e50;
+    transform: scale(1.5);
+    border-color: #075895;
 }
 
-/* Heatmap kleuren voor de bolletjes */
-.nav-dot.low { background-color: #27ae60; }
-.nav-dot.med { background-color: #e67e22; }
-.nav-dot.high { background-color: #c0392b; }
+/* Traffic light / Heatmap colors mapped to WDOD Secondary Palette */
+.nav-dot.low { background-color: #93c01f; border-color: #93c01f; } /* Green */
+.nav-dot.med { background-color: #f29100; border-color: #f29100; } /* Orange */
+.nav-dot.high { background-color: #d74116; border-color: #d74116; } /* Red */
 
-/* Mobiel verbergen */
 @media (max-width: 900px) {
     .sidebar-nav { display: none; }
 }
