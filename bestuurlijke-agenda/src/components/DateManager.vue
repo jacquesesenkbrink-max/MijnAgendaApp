@@ -23,9 +23,22 @@ const tabs = [
 ]
 
 // Initialiseer bij openen
+// src/components/DateManager.vue
+
 const init = () => {
+  // Veiligheidscheck: als initialDates er niet is, stop dan (voorkomt wit scherm crash)
+  if (!props.initialDates) {
+      dates.value = {};
+      return;
+  }
+
   // Deep copy van props
-  dates.value = JSON.parse(JSON.stringify(props.initialDates))
+  try {
+      dates.value = JSON.parse(JSON.stringify(props.initialDates));
+  } catch (e) {
+      console.error("Fout bij laden datums:", e);
+      dates.value = {};
+  }
   
   // Zorg dat elke tab een array heeft
   tabs.forEach(tab => {

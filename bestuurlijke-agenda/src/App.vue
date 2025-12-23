@@ -292,7 +292,12 @@
     
     <DetailModal :show="isDetailOpen" :item="geselecteerdItem" @close="isDetailOpen = false" />
     <EditModal :show="isEditOpen" :item="editItem" :availableDates="activeDates" @save="saveChanges" @close="isEditOpen = false" />
-    <DateManager :show="isDateManagerOpen" :datesData="activeDates" @update-dates="saveDates" @close="isDateManagerOpen = false" />
+    <DateManager 
+      :isOpen="isDateManagerOpen" 
+      :initialDates="activeDates" 
+      @save-dates="saveDates" 
+      @close="isDateManagerOpen = false" 
+    />>
 
     <div v-if="isLoginOpen" class="login-overlay" @click.self="isLoginOpen = false">
         <div class="login-modal">
