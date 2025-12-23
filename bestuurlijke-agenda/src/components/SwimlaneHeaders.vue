@@ -11,16 +11,16 @@ const headers = [
 
 <template>
   <div class="headers-wrapper">
-    <div class="date-header-placeholder"></div> 
-    
-    <div class="headers-grid">
-      <div 
-        v-for="header in headers" 
-        :key="header.label" 
-        class="header-item"
-        :style="{ borderBottomColor: header.color }"
-      >
-        {{ header.label }}
+    <div class="headers-content">
+      <div class="headers-grid">
+        <div 
+          v-for="header in headers" 
+          :key="header.label" 
+          class="header-item"
+          :style="{ borderBottomColor: header.color }"
+        >
+          {{ header.label }}
+        </div>
       </div>
     </div>
   </div>
@@ -28,36 +28,34 @@ const headers = [
 
 <style scoped>
 .headers-wrapper {
-  display: flex;
   background: white;
   position: sticky;
   top: 0;
-  z-index: 10;
-  /* Schaduw iets subtieler gemaakt */
+  z-index: 80; /* Zorg dat hij onder de main header blijft maar boven content */
   box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+  width: 100%;
 }
 
-.date-header-placeholder {
-  width: 100px; /* Moet matchen met AgendaView/Grid width */
-  flex-shrink: 0;
-  background: #f9fafb;
-  border-right: 1px solid #e5e7eb;
-  border-bottom: 2px solid #e5e7eb; /* Grijze lijn onder het lege blokje */
+.headers-content {
+  /* Zelfde regels als .container in App.vue voor perfecte uitlijning */
+  max-width: 1400px; 
+  margin: 0 auto; 
+  padding: 0 20px;
 }
 
 .headers-grid {
-  flex: 1;
   display: grid;
-  /* 5 kolommen, even breed */
+  /* 5 kolommen, even breed + de gap die ook in App.vue wordt gebruikt */
   grid-template-columns: repeat(5, 1fr); 
+  gap: 15px; 
 }
 
 .header-item {
   padding: 12px 5px;
-  font-weight: 800; /* Iets dikker font zoals op screenshot */
+  font-weight: 800;
   color: #4b5563;
   text-align: center;
-  background: white; /* Wit in plaats van grijs */
+  background: white;
   font-size: 0.85rem;
   text-transform: uppercase;
   letter-spacing: 0.05em;
@@ -65,7 +63,6 @@ const headers = [
   /* De gekleurde balk onderaan */
   border-bottom-width: 5px; 
   border-bottom-style: solid;
-  /* border-color wordt via inline style geregeld in de HTML */
   
   /* Streepje rechts tussen de kolommen */
   border-right: 1px solid #f3f4f6;
@@ -78,5 +75,10 @@ const headers = [
 
 .header-item:last-child {
   border-right: none;
+}
+
+/* Zorg dat headers verbergen op kleine schermen waar de grid layout ook verandert */
+@media (max-width: 1100px) {
+    .headers-wrapper { display: none; }
 }
 </style>
