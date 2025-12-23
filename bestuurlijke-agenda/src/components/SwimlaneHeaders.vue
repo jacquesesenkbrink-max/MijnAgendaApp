@@ -1,46 +1,53 @@
 <template>
-  <div class="swimlane-headers">
-    <div class="header-item" style="border-color: var(--c-pfo)">PFO</div>
-    <div class="header-item" style="border-color: var(--c-db-besluit)">DB Besluit</div>
-    <div class="header-item" style="border-color: var(--c-db-schrift)">DB Schrift.</div>
-    <div class="header-item" style="border-color: var(--c-db-informeel)">Informeel DB</div>
-    <div class="header-item" style="border-color: var(--c-ab-brief)">AB Brief</div>
-    <div class="header-item" style="border-color: var(--c-delta)">Delta</div>
-    <div class="header-item" style="border-color: var(--c-ab-besluit)">AB Besluit</div>
+  <div class="headers-wrapper">
+    <div class="date-header-placeholder"></div> <div class="headers-grid">
+      <div class="header-item">PFO</div>
+      <div class="header-item">DB Besluit</div>
+      <div class="header-item">Informeel DB</div>
+      <div class="header-item">Delta</div>
+      <div class="header-item">AB Besluit</div>
+    </div>
   </div>
 </template>
 
 <style scoped>
-.swimlane-headers {
-  display: none; /* Op mobiel verbergen we dit */
-  grid-template-columns: repeat(7, 1fr); /* 7 gelijke kolommen */
-  gap: 10px;
-  max-width: 1400px;
-  margin: 0 auto;
-  padding: 10px 20px;
+.headers-wrapper {
+  display: flex;
+  background: white;
+  border-bottom: 2px solid #e5e7eb;
   position: sticky;
-  top: 0; /* Plakt aan de bovenkant */
-  background: var(--bg-body);
-  z-index: 90;
-  border-bottom: 2px solid #ddd;
+  top: 0;
+  z-index: 10;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
 }
 
-/* Op grote schermen tonen we het grid */
-@media (min-width: 1100px) {
-  .swimlane-headers {
-    display: grid;
-  }
+.date-header-placeholder {
+  width: 100px; /* Moet matchen met AgendaView .date-label width */
+  flex-shrink: 0;
+  background: #f9fafb;
+  border-right: 1px solid #e5e7eb;
+}
+
+.headers-grid {
+  flex: 1;
+  display: grid;
+  /* AANGEPAST: Nu 5 kolommen ipv 7 */
+  grid-template-columns: repeat(5, 1fr); 
 }
 
 .header-item {
+  padding: 12px;
+  font-weight: 700;
+  color: #374151;
   text-align: center;
-  font-weight: bold;
-  font-size: 0.85rem;
-  color: #555;
-  padding: 5px;
-  border-bottom: 4px solid transparent; /* Kleur komt uit de style tag */
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  border-right: 1px solid #f0f0f0;
+  background: #f9fafb;
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.header-item:last-child {
+  border-right: none;
 }
 </style>

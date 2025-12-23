@@ -1,18 +1,17 @@
-// src/data/meetingDates.js
-
 export const meetingDates = {
   PFO: [
     "25-11-2025",
     "08-12-2025",
-    "06-01-2026",
-    "20-01-2026",
-    "03-02-2026",
-    "17-02-2026",
-    "10-03-2026",
-    "24-03-2026",
-    "21-04-2026",
-    "19-05-2026",
-    // Voeg hier nieuwe PFO data toe
+    "22-12-2025",
+    "19-01-2026",
+    "02-02-2026",
+    "16-02-2026",
+    "16-03-2026",
+    "13-04-2026",
+    "11-05-2026",
+    "01-06-2026",
+    "15-06-2026",
+    "06-07-2026"
   ],
   DBBesluit: [
     "02-12-2025",
@@ -20,25 +19,25 @@ export const meetingDates = {
     "13-01-2026",
     "27-01-2026",
     "10-02-2026",
-    "17-03-2026",
-    "14-04-2026",
-    "05-05-2026",
-    "28-05-2026",
-    // Voeg hier nieuwe DB Besluit data toe
-  ],
-  ABBrief: [
-    "03-02-2026",
     "03-03-2026",
-    "26-05-2026",
-    // Voeg hier nieuwe AB Brief data toe
+    "24-03-2026",
+    "21-04-2026",
+    "19-05-2026",
+    "09-06-2026",
+    "23-06-2026",
+    "14-07-2026"
   ],
+  // 'DBSchrift' is verwijderd
+  DBInformeel: [],
+  // 'ABBrief' is verwijderd
   Delta: [
     "20-01-2026",
     "03-03-2026",
-    "07-04-2026",
-    "05-05-2026",
-    "22-09-2026",
-    // Voeg hier nieuwe Delta data toe
+    "17-03-2026",
+    "14-04-2026",
+    "12-05-2026",
+    "09-06-2026",
+    "30-06-2026"
   ],
-  // Voeg eventueel andere fases toe (DBSchrift, DBInformeel, ABBesluit) indien nodig
+  ABBesluit: []
 };

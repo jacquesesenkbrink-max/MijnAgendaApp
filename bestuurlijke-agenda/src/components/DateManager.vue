@@ -1,160 +1,178 @@
 <script setup>
-import { ref } from 'vue';
+import { ref } from 'vue'
 
 const props = defineProps({
-  show: Boolean,
-  datesData: Object // Dit object komt vanuit App.vue
-});
+  isOpen: Boolean,
+  initialDates: Object
+})
 
-const emit = defineEmits(['close', 'update-dates']);
+const emit = defineEmits(['close', 'save-dates'])
 
-const activeTab = ref('PFO'); // Welke tab staat open?
-const newDateInput = ref('');
+// Lokale kopie van de datums
+const dates = ref({})
+const activeTab = ref('PFO') // Standaard actieve tab
+const newDateInput = ref('')
 
-// Lijst van tabbladen gebaseerd op de keys in je data
-const tabs = ['PFO', 'DBBesluit', 'ABBrief', 'Delta', 'DBSchrift', 'DBInformeel', 'ABBesluit'];
+// Tabs definitie (DBSchrift en ABBrief verwijderd)
+const tabs = [
+  { id: 'PFO', label: 'PFO' },
+  { id: 'DBBesluit', label: 'DB Besluit' },
+  { id: 'DBInformeel', label: 'Informeel DB' },
+  { id: 'Delta', label: 'Delta' },
+  { id: 'ABBesluit', label: 'AB Besluit' }
+]
 
-// Helper om datum toe te voegen en direct te sorteren
-function addDate() {
-    if (!newDateInput.value) return;
-    
-    // Voeg toe aan de lijst
-    if (!props.datesData[activeTab.value]) props.datesData[activeTab.value] = [];
-    props.datesData[activeTab.value].push(newDateInput.value);
-    
-    // Sorteer de lijst chronologisch (dd-mm-jjjj)
-    props.datesData[activeTab.value].sort((a, b) => {
-        const [d1, m1, y1] = a.split('-');
-        const [d2, m2, y2] = b.split('-');
-        return new Date(`${y1}-${m1}-${d1}`) - new Date(`${y2}-${m2}-${d2}`);
-    });
-
-    // Reset input en geef seintje aan App.vue om op te slaan
-    newDateInput.value = '';
-    emit('update-dates');
-}
-
-function removeDate(dateToRemove) {
-    if(confirm(`Datum ${dateToRemove} verwijderen?`)) {
-        props.datesData[activeTab.value] = props.datesData[activeTab.value].filter(d => d !== dateToRemove);
-        emit('update-dates');
+// Initialiseer bij openen
+const init = () => {
+  // Deep copy van props
+  dates.value = JSON.parse(JSON.stringify(props.initialDates))
+  
+  // Zorg dat elke tab een array heeft
+  tabs.forEach(tab => {
+    if (!dates.value[tab.id]) {
+      dates.value[tab.id] = []
     }
+  })
 }
 
-// Functie om JSON te genereren voor de ontwikkelaar (jij dus)
-function copyCode() {
-    const code = `export const meetingDates = ${JSON.stringify(props.datesData, null, 2)};`;
-    navigator.clipboard.writeText(code).then(() => alert("Code gekopieerd naar klembord! Plak dit in src/data/meetingDates.js als je dit permanent wilt maken."));
+// Wordt aangeroepen door parent via v-if logic of watch, 
+// maar voor eenvoud doen we het hier direct bij setup als prop er is
+init()
+
+const addDate = () => {
+  if (!newDateInput.value) return
+  
+  // Simpele validatie dd-mm-yyyy (regex)
+  const datePattern = /^\d{2}-\d{2}-\d{4}$/
+  if (!datePattern.test(newDateInput.value)) {
+    alert("Gebruik formaat DD-MM-JJJJ")
+    return
+  }
+
+  // Toevoegen en sorteren
+  dates.value[activeTab.value].push(newDateInput.value)
+  dates.value[activeTab.value].sort((a, b) => {
+    const [d1, m1, y1] = a.split('-')
+    const [d2, m2, y2] = b.split('-')
+    return new Date(`${y1}-${m1}-${d1}`) - new Date(`${y2}-${m2}-${d2}`)
+  })
+
+  newDateInput.value = ''
+}
+
+const removeDate = (dateStr) => {
+  if (confirm(`Datum ${dateStr} verwijderen?`)) {
+    dates.value[activeTab.value] = dates.value[activeTab.value].filter(d => d !== dateStr)
+  }
+}
+
+const save = () => {
+  emit('save-dates', dates.value)
 }
 </script>
 
 <template>
-  <div v-if="show" class="modal-backdrop" @click="$emit('close')">
-    <div class="modal-content" @click.stop>
+  <div v-if="isOpen" class="modal-overlay" @click.self="$emit('close')">
+    <div class="modal-content">
       <div class="modal-header">
-        <h2>📅 Beheer Vergaderdata</h2>
-        <span class="close-btn" @click="$emit('close')">&times;</span>
+        <h2>Beheer Datums</h2>
+        <button class="close-btn" @click="$emit('close')">&times;</button>
       </div>
 
-      <div class="manager-container">
+      <div class="modal-body">
         <div class="tabs">
-            <button 
-                v-for="tab in tabs" 
-                :key="tab"
-                :class="{ active: activeTab === tab }"
-                @click="activeTab = tab"
-            >
-                {{ tab }}
-            </button>
+          <button 
+            v-for="tab in tabs" 
+            :key="tab.id"
+            class="tab-btn"
+            :class="{ active: activeTab === tab.id }"
+            @click="activeTab = tab.id"
+          >
+            {{ tab.label }}
+          </button>
         </div>
 
         <div class="tab-content">
-            <h3>Datums voor {{ activeTab }}</h3>
-            
-            <div class="add-row">
-                <input 
-                    v-model="newDateInput" 
-                    type="text" 
-                    placeholder="dd-mm-jjjj" 
-                    @keyup.enter="addDate"
-                >
-                <button class="add-btn" @click="addDate">➕ Toevoegen</button>
-            </div>
+          <h3>Datums voor: {{ tabs.find(t => t.id === activeTab)?.label }}</h3>
+          
+          <div class="add-box">
+            <input 
+              v-model="newDateInput" 
+              placeholder="DD-MM-JJJJ" 
+              @keyup.enter="addDate"
+            />
+            <button class="btn-add" @click="addDate">Toevoegen</button>
+          </div>
 
-            <ul class="date-list">
-                <li v-for="date in datesData[activeTab]" :key="date">
-                    <span>{{ date }}</span>
-                    <button class="del-btn" @click="removeDate(date)">🗑️</button>
-                </li>
-                <li v-if="!datesData[activeTab] || datesData[activeTab].length === 0" class="empty">
-                    Nog geen datums ingesteld.
-                </li>
-            </ul>
+          <ul class="date-list">
+            <li v-for="date in dates[activeTab]" :key="date">
+              {{ date }}
+              <span class="remove-icon" @click="removeDate(date)">&times;</span>
+            </li>
+            <li v-if="!dates[activeTab] || dates[activeTab].length === 0" class="empty">
+              Nog geen datums
+            </li>
+          </ul>
         </div>
       </div>
 
       <div class="modal-footer">
-        <button class="copy-btn" @click="copyCode">📋 Kopieer JS Config (voor Developer)</button>
-        <button class="close-main-btn" @click="$emit('close')">Sluiten</button>
+        <button class="btn-cancel" @click="$emit('close')">Annuleren</button>
+        <button class="btn-save" @click="save">Opslaan & Sluiten</button>
       </div>
     </div>
   </div>
 </template>
 
 <style scoped>
-.modal-backdrop {
+/* Dezelfde styling als EditModal, plus tabs */
+.modal-overlay {
   position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-  background: rgba(0,0,0,0.6); z-index: 1100; /* Hoger dan gewone modals */
-  display: flex; justify-content: center; align-items: center;
+  background: rgba(0,0,0,0.5); display: flex;
+  justify-content: center; align-items: center; z-index: 1000;
 }
 .modal-content {
-  background: white; width: 90%; max-width: 800px; height: 80vh;
+  background: white; width: 600px; max-width: 95%; height: 80vh;
   border-radius: 8px; display: flex; flex-direction: column;
-  box-shadow: 0 10px 25px rgba(0,0,0,0.3);
 }
 .modal-header {
-    padding: 15px 20px; border-bottom: 1px solid #eee;
-    display: flex; justify-content: space-between; align-items: center;
+  padding: 16px; border-bottom: 1px solid #eee;
+  display: flex; justify-content: space-between; align-items: center;
 }
-.close-btn { font-size: 28px; cursor: pointer; }
+.close-btn { background: none; border: none; font-size: 1.5rem; cursor: pointer; }
+.modal-body { padding: 0; flex: 1; display: flex; flex-direction: column; overflow: hidden; }
 
-.manager-container { display: flex; flex: 1; overflow: hidden; }
-
-/* Tabs Links */
+/* Tabs Styling */
 .tabs {
-    width: 200px; background: #f4f7f6; border-right: 1px solid #ddd;
-    display: flex; flex-direction: column; overflow-y: auto;
+  display: flex; background: #f1f5f9; border-bottom: 1px solid #e2e8f0;
+  overflow-x: auto; /* scrollen als het niet past */
 }
-.tabs button {
-    padding: 15px; border: none; background: transparent; text-align: left;
-    cursor: pointer; border-bottom: 1px solid #eee; font-weight: 600; color: #555;
-    transition: background 0.2s;
+.tab-btn {
+  padding: 12px 16px; border: none; background: transparent;
+  cursor: pointer; border-bottom: 3px solid transparent;
+  font-weight: 500; color: #64748b; white-space: nowrap;
 }
-.tabs button:hover { background: #e2e6ea; }
-.tabs button.active { background: #fff; color: #2c3e50; border-left: 4px solid #3498db; }
+.tab-btn.active {
+  color: #2563eb; border-bottom-color: #2563eb; background: white;
+}
 
-/* Content Rechts */
-.tab-content { flex: 1; padding: 20px; overflow-y: auto; }
+.tab-content { padding: 20px; flex: 1; overflow-y: auto; }
+.add-box { display: flex; gap: 10px; margin-bottom: 20px; }
+.add-box input { padding: 8px; border: 1px solid #ccc; border-radius: 4px; flex: 1; }
+.btn-add { padding: 8px 16px; background: #2563eb; color: white; border: none; border-radius: 4px; cursor: pointer; }
 
-.add-row { display: flex; gap: 10px; margin-bottom: 20px; border-bottom: 1px solid #eee; padding-bottom: 15px; }
-.add-row input { flex: 1; padding: 10px; border: 1px solid #ccc; border-radius: 4px; }
-.add-btn { background: #27ae60; color: white; border: none; padding: 0 20px; border-radius: 4px; cursor: pointer; }
-
-.date-list { list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 10px; }
+.date-list { list-style: none; padding: 0; margin: 0; border: 1px solid #eee; border-radius: 4px; }
 .date-list li {
-    background: #fff; border: 1px solid #ddd; padding: 8px 12px; border-radius: 4px;
-    display: flex; justify-content: space-between; align-items: center;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+  padding: 10px; border-bottom: 1px solid #eee;
+  display: flex; justify-content: space-between;
 }
-.date-list li.empty { grid-column: 1 / -1; background: transparent; border: none; color: #999; box-shadow: none; }
-
-.del-btn { background: none; border: none; cursor: pointer; opacity: 0.5; }
-.del-btn:hover { opacity: 1; transform: scale(1.1); color: #c0392b; }
+.date-list li:last-child { border-bottom: none; }
+.remove-icon { color: red; cursor: pointer; font-weight: bold; padding: 0 5px; }
+.empty { color: #999; font-style: italic; }
 
 .modal-footer {
-    padding: 15px 20px; border-top: 1px solid #eee; background: #f9f9f9;
-    display: flex; justify-content: space-between;
+  padding: 16px; border-top: 1px solid #eee; display: flex; justify-content: flex-end; gap: 10px;
 }
-.copy-btn { background: #34495e; color: white; border: none; padding: 10px 15px; border-radius: 4px; cursor: pointer; }
-.close-main-btn { background: #95a5a6; color: white; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer; }
+.btn-cancel { padding: 8px 16px; background: white; border: 1px solid #ddd; border-radius: 4px; cursor: pointer; }
+.btn-save { padding: 8px 16px; background: #27ae60; color: white; border: none; border-radius: 4px; cursor: pointer; }
 </style>

@@ -1,335 +1,172 @@
 <script setup>
-import { ref, computed, onMounted, watch } from 'vue';
+import { ref, computed } from 'vue'
+import TopicCard from './TopicCard.vue'
 
 const props = defineProps({
   items: Array,
-  activeFilter: String // We ontvangen nu welk filter er in de App actief is (bijv. 'PFO')
-});
+  searchQuery: String,
+  selectedDomein: String
+})
 
-// Opslag voor vergaderdetails (tijd/locatie)
-const meetingMeta = ref({});
+const emit = defineEmits(['edit-item', 'open-detail'])
 
-// Filters
-const selectedDate = ref('');
-const selectedPH = ref('');
+// DEFINITIE VAN DE LANES (DBSchrift en ABBrief zijn hier verwijderd)
+const lanes = [
+  { id: 'PFO', title: 'PFO' },
+  { id: 'DBBesluit', title: 'DB Besluit' },
+  // DBSchrift verwijderd
+  { id: 'DBInformeel', title: 'Informeel DB' },
+  // ABBrief verwijderd
+  { id: 'Delta', title: 'Delta' },
+  { id: 'ABBesluit', title: 'AB Besluit' }
+]
 
-onMounted(() => {
-  const saved = localStorage.getItem('meeting-meta-data');
-  if (saved) meetingMeta.value = JSON.parse(saved);
-});
+// Hulpfunctie: haal items op voor een specifieke lane en datum
+const getItemsForCell = (laneId, date) => {
+  return filteredItems.value.filter(item => {
+    // Check of item in deze lane en op deze datum staat
+    const scheduledDate = item.schedule?.[laneId]
+    return scheduledDate === date
+  })
+}
 
-watch(meetingMeta, (newVal) => {
-  localStorage.setItem('meeting-meta-data', JSON.stringify(newVal));
-}, { deep: true });
+// Filter logica
+const filteredItems = computed(() => {
+  let result = props.items
 
-// --- 1. DATA TRANSFORMATIE ---
-const agendaMeetings = computed(() => {
-    const meetingsMap = {};
+  if (props.selectedDomein) {
+    result = result.filter(i => i.domein === props.selectedDomein)
+  }
 
-    props.items.forEach(ev => {
-        const dateStr = ev.dateDisplay;
-        const type = ev.type;
+  if (props.searchQuery) {
+    const q = props.searchQuery.toLowerCase()
+    result = result.filter(i => 
+      i.title.toLowerCase().includes(q) ||
+      (i.toelichting && i.toelichting.toLowerCase().includes(q))
+    )
+  }
 
-        // Skip items zonder datum of met 'Q' notatie
-        if (!dateStr || dateStr.toLowerCase().includes('q')) return;
+  return result
+})
 
-        let meetingKey = '';
-        let meetingTitle = '';
-        let groupPh = ''; // Voor filtering
-
-        if (type === 'PFO') {
-            // PFO splitsen we per PH
-            groupPh = ev.ph ? ev.ph.split('/')[0].trim() : 'Onbekend';
-            meetingKey = `${dateStr}_${type}_${groupPh}`;
-            meetingTitle = `PFO ${groupPh}`;
-        } else {
-            // DB en AB zijn "Algemeen"
-            groupPh = 'Algemeen'; 
-            meetingKey = `${dateStr}_${type}`;
-            meetingTitle = mapTypeToTitle(type);
-        }
-
-        if (!meetingsMap[meetingKey]) {
-            meetingsMap[meetingKey] = {
-                key: meetingKey,
-                dateDisplay: dateStr,
-                dateObj: ev.dateObj,
-                title: meetingTitle,
-                type: type,
-                ph: groupPh,
-                items: []
-            };
-        }
-
-        meetingsMap[meetingKey].items.push(ev);
-    });
-
-    return Object.values(meetingsMap).sort((a, b) => a.dateObj - b.dateObj);
-});
-
-// --- 2. FILTER LOGICA ---
-
-// Lijst met unieke datums voor de dropdown
+// Unieke datums verzamelen (over alle resterende lanes heen) om de rijen te bepalen
 const uniqueDates = computed(() => {
-    const dates = new Set(agendaMeetings.value.map(m => m.dateDisplay));
-    return Array.from(dates).sort((a, b) => {
-        // Simpele sorteer hack voor dd-mm-yyyy (anders alfabetisch)
-        const [d1, m1, y1] = a.split('-');
-        const [d2, m2, y2] = b.split('-');
-        return new Date(y1, m1-1, d1) - new Date(y2, m2-1, d2);
-    });
-});
-
-// Lijst met unieke PH's voor de dropdown (ZONDER 'Algemeen')
-const uniquePHs = computed(() => {
-    const phs = new Set();
-    agendaMeetings.value.forEach(m => {
-        // We voegen 'Algemeen' NIET toe aan de lijst
-        if (m.ph && m.ph !== 'Algemeen') {
-            phs.add(m.ph);
-        }
-    });
-    return Array.from(phs).sort();
-});
-
-// De gefilterde lijst die we tonen
-const filteredMeetings = computed(() => {
-    return agendaMeetings.value.filter(meeting => {
-        // Datum filter
-        if (selectedDate.value && meeting.dateDisplay !== selectedDate.value) {
-            return false;
-        }
-        // PH filter (alleen actief als er iets gekozen is)
-        if (selectedPH.value && meeting.ph !== selectedPH.value) {
-            return false;
-        }
-        return true;
-    });
-});
-
-// --- HELPERS ---
-function mapTypeToTitle(type) {
-    const labels = { 
-        'DBBesluit': 'DB Besluitvormend', 'DBSchrift': 'DB Schriftelijk', 
-        'DBInformeel': 'DB Informeel', 'ABBesluit': 'AB Vergadering', 
-        'ABBrief': 'Verzendlijst AB Brieven', 'Delta': 'Deltabijeenkomst'
-    };
-    return labels[type] || type;
-}
-
-function getDayName(dateObj) {
-    if(!dateObj) return '';
-    return dateObj.toLocaleDateString('nl-NL', { weekday: 'long' });
-}
-
-const typeColors = { 
-  'PFO':'var(--c-pfo)', 'DBBesluit':'var(--c-db-besluit)', 
-  'DBSchrift':'var(--c-db-schrift)', 'DBInformeel': 'var(--c-db-informeel)',
-  'ABBesluit':'var(--c-ab-besluit)', 'ABBrief':'var(--c-ab-brief)', 
-  'Delta':'var(--c-delta)' 
-};
-
-function printAgenda() {
-    window.print();
-}
-
-function resetFilters() {
-    selectedDate.value = '';
-    selectedPH.value = '';
-}
+  const dates = new Set()
+  filteredItems.value.forEach(item => {
+    if (item.schedule) {
+      Object.values(item.schedule).forEach(date => {
+        if (date) dates.add(date)
+      })
+    }
+  })
+  
+  // Sorteer datums (DD-MM-YYYY)
+  return Array.from(dates).sort((a, b) => {
+    const [d1, m1, y1] = a.split('-')
+    const [d2, m2, y2] = b.split('-')
+    return new Date(`${y1}-${m1}-${d1}`) - new Date(`${y2}-${m2}-${d2}`)
+  })
+})
 </script>
 
 <template>
-  <div class="agenda-view-container">
-    
-    <div class="no-print header-block">
-        <div class="header-top">
-            <h2>🗓️ Agenda Samenstelling</h2>
-            <button @click="printAgenda" class="print-btn">🖨️ Print Lijst</button>
+  <div class="agenda-container">
+    <div class="agenda-grid">
+      <div 
+        v-for="date in uniqueDates" 
+        :key="date" 
+        class="agenda-row"
+      >
+        <div class="date-label">
+          {{ date }}
         </div>
-        
-        <p class="intro-text">
-            Beheer tijden/locaties en filter de lijst voor export.
-        </p>
 
-        <div class="filters-bar">
-            <div class="filter-group">
-                <label>📅 Filter op Datum:</label>
-                <select v-model="selectedDate">
-                    <option value="">-- Alle Datums --</option>
-                    <option v-for="d in uniqueDates" :key="d" :value="d">{{ d }}</option>
-                </select>
-            </div>
-
-            <div class="filter-group" v-if="activeFilter === 'PFO'">
-                <label>👤 Filter op Bestuurder:</label>
-                <select v-model="selectedPH">
-                    <option value="">-- Alle Bestuurders --</option>
-                    <option v-for="ph in uniquePHs" :key="ph" :value="ph">
-                        👤 {{ ph }}
-                    </option>
-                </select>
-            </div>
-
-            <button v-if="selectedDate || selectedPH" class="reset-link" @click="resetFilters">
-                Filters wissen
-            </button>
+        <div class="lanes-container">
+          <div 
+            v-for="lane in lanes" 
+            :key="lane.id" 
+            class="lane-cell"
+          >
+            <TopicCard 
+              v-for="item in getItemsForCell(lane.id, date)"
+              :key="item.id"
+              :item="item"
+              @click="$emit('open-detail', item)"
+              @edit="$emit('edit-item', item)"
+            />
+          </div>
         </div>
-    </div>
-
-    <div v-if="filteredMeetings.length === 0" class="empty-state">
-        Geen vergaderingen gevonden met deze filters.
-    </div>
-
-    <div class="timeline-stream">
-        <div v-for="meeting in filteredMeetings" :key="meeting.key" class="meeting-card">
-            
-            <div class="meeting-header" :style="{ borderLeftColor: typeColors[meeting.type] || '#ccc' }">
-                <div class="meeting-date">
-                    <span class="day">{{ getDayName(meeting.dateObj) }}</span>
-                    <span class="date">{{ meeting.dateDisplay }}</span>
-                </div>
-                <div class="meeting-title">
-                    <h3>{{ meeting.title }}</h3>
-                    <span class="item-count">{{ meeting.items.length }} agendapunten</span>
-                </div>
-            </div>
-
-            <div class="meeting-meta no-print">
-                <div class="input-group">
-                    <label>🕐 Tijdstip:</label>
-                    <input v-model="meetingMeta[meeting.key + '_time']" placeholder="bijv. 09:00 - 10:30" />
-                </div>
-                <div class="input-group">
-                    <label>📍 Bespreekruimte:</label>
-                    <input v-model="meetingMeta[meeting.key + '_room']" placeholder="bijv. Kamer 3.02" />
-                </div>
-            </div>
-
-            <div class="print-only meta-display" v-if="meetingMeta[meeting.key + '_time'] || meetingMeta[meeting.key + '_room']">
-                <span v-if="meetingMeta[meeting.key + '_time']"><strong>Tijd:</strong> {{ meetingMeta[meeting.key + '_time'] }}</span>
-                <span v-if="meetingMeta[meeting.key + '_room']" style="margin-left: 15px;"><strong>Locatie:</strong> {{ meetingMeta[meeting.key + '_room'] }}</span>
-            </div>
-
-            <table class="agenda-table">
-                <thead>
-                    <tr>
-                        <th style="width: 30px">#</th>
-                        <th>Onderwerp</th>
-                        <th style="width: 150px">Betrokkenen</th>
-                        <th style="width: 100px">Status</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr v-for="(item, index) in meeting.items" :key="item.uniqueId">
-                        <td class="index-col">{{ index + 1 }}.</td>
-                        <td>
-                            <div class="topic-title">{{ item.title }}</div>
-                        </td>
-                        <td>
-                            <div class="role-text" v-if="meeting.type !== 'PFO'">PH: {{ item.ph }}</div>
-                            
-                            <div class="role-text highlight" v-if="item.originalItem && item.originalItem.administrativeContact">
-                                🗣️ {{ item.originalItem.administrativeContact }}
-                            </div>
-
-                            <div class="role-text">Dir: {{ item.dir }}</div>
-                        </td>
-                        <td>
-                            <span class="badge">{{ item.strategicLabel || '-' }}</span>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
-
-        </div>
+      </div>
+      
+      <div v-if="uniqueDates.length === 0" class="no-items">
+        Geen agendapunten gevonden voor de huidige selectie.
+      </div>
     </div>
   </div>
 </template>
 
 <style scoped>
-.agenda-view-container { max-width: 1000px; margin: 0 auto; padding-bottom: 50px; }
-
-/* HEADER & FILTERS */
-.header-block { 
-    background: white; padding: 20px; border-radius: 8px; 
-    box-shadow: 0 2px 8px rgba(0,0,0,0.05); margin-bottom: 30px; border: 1px solid #eee;
-}
-.header-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
-.header-top h2 { margin: 0; color: #2c3e50; }
-.intro-text { color: #666; margin-top: 0; font-size: 0.95rem; }
-
-.filters-bar { 
-    display: flex; gap: 15px; align-items: flex-end; margin-top: 15px; 
-    padding-top: 15px; border-top: 1px solid #f0f0f0; flex-wrap: wrap;
-}
-.filter-group { display: flex; flex-direction: column; gap: 5px; }
-.filter-group label { font-size: 0.85rem; font-weight: bold; color: #555; }
-.filter-group select { 
-    padding: 8px 12px; border: 1px solid #ccc; border-radius: 4px; font-size: 0.95rem; min-width: 180px;
+.agenda-container {
+  flex: 1;
+  overflow-y: auto;
+  padding: 20px;
+  background-color: #f3f4f6;
 }
 
-.print-btn { background: #2c3e50; color: white; padding: 8px 16px; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; }
-.print-btn:hover { background: #34495e; }
-
-.reset-link { 
-    background: none; border: none; color: #c0392b; text-decoration: underline; 
-    cursor: pointer; font-size: 0.9rem; padding-bottom: 8px;
+.agenda-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
 }
 
-/* EMPTY STATE */
-.empty-state { text-align: center; padding: 50px; color: #95a5a6; font-size: 1.1rem; border: 2px dashed #eee; border-radius: 8px; margin-top: 20px; }
-
-/* MEETING CARD */
-.meeting-card { 
-    background: white; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); 
-    margin-bottom: 30px; overflow: hidden; page-break-inside: avoid;
-    border: 1px solid #eee;
+.agenda-row {
+  display: flex;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  overflow: hidden; 
+  min-height: 100px;
 }
 
-.meeting-header {
-    display: flex; align-items: center; padding: 15px 20px;
-    background: #f8f9fa; border-bottom: 1px solid #eee;
-    border-left: 6px solid #ccc; 
+.date-label {
+  width: 100px;
+  background: #eef2ff; 
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  color: #4f46e5;
+  border-right: 1px solid #e5e7eb;
+  padding: 10px;
+  font-size: 0.9rem;
+  flex-shrink: 0;
 }
 
-.meeting-date { 
-    display: flex; flex-direction: column; align-items: center; 
-    margin-right: 20px; min-width: 80px; padding-right: 20px; border-right: 1px solid #ddd; 
+.lanes-container {
+  flex: 1;
+  display: grid;
+  grid-template-columns: repeat(5, 1fr); 
+  /* FOUTIEVE REGEL VERWIJDERD: divide-x... */
 }
-.meeting-date .day { font-size: 0.8rem; text-transform: uppercase; color: #666; }
-.meeting-date .date { font-size: 1.2rem; font-weight: bold; color: #2c3e50; }
 
-.meeting-title h3 { margin: 0; font-size: 1.3rem; color: #2c3e50; }
-.item-count { font-size: 0.85rem; color: #7f8c8d; }
+.lane-cell {
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  /* CORRECTIE: We zetten de border hier */
+  border-right: 1px solid #f0f0f0;
+}
 
-/* META INPUTS */
-.meeting-meta { display: flex; gap: 20px; padding: 15px 20px; background: #fffbe6; border-bottom: 1px solid #eee; }
-.input-group { display: flex; align-items: center; gap: 10px; flex: 1; }
-.input-group label { font-weight: bold; font-size: 0.9rem; color: #555; }
-.input-group input { flex: 1; padding: 6px; border: 1px solid #ccc; border-radius: 4px; }
-.meta-display { padding: 10px 20px; background: #f4f7f6; border-bottom: 1px solid #eee; font-size: 0.9rem; }
+/* Zorg dat de laatste kolom geen lijn rechts heeft */
+.lane-cell:last-child {
+  border-right: none;
+}
 
-/* TABLE */
-.agenda-table { width: 100%; border-collapse: collapse; }
-.agenda-table th { text-align: left; padding: 10px 15px; background: #fff; border-bottom: 2px solid #eee; font-size: 0.8rem; text-transform: uppercase; color: #999; }
-.agenda-table td { padding: 12px 15px; border-bottom: 1px solid #f0f0f0; vertical-align: top; font-size: 0.95rem; }
-.agenda-table tr:last-child td { border-bottom: none; }
-
-.index-col { color: #999; font-weight: bold; }
-.topic-title { font-weight: 600; color: #2c3e50; margin-bottom: 4px; }
-
-.role-text { font-size: 0.8rem; color: #666; margin-bottom: 2px; }
-.role-text.highlight { font-weight: bold; color: #2c3e50; }
-.badge { background: #eee; padding: 2px 6px; border-radius: 4px; font-size: 0.75rem; color: #555; }
-
-/* PRINT STYLES */
-@media print {
-    .no-print { display: none !important; }
-    .print-only { display: block !important; }
-    .meeting-card { box-shadow: none; border: 1px solid #000; break-inside: avoid; }
-    .meeting-header { background: #eee !important; -webkit-print-color-adjust: exact; }
-    body { background: white; }
-    .agenda-view-container { width: 100%; max-width: none; }
+.no-items {
+  text-align: center;
+  padding: 40px;
+  color: #6b7280;
+  font-style: italic;
 }
 </style>

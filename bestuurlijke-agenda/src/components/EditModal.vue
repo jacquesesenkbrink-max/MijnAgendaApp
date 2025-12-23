@@ -2,8 +2,8 @@
 import { ref, watch } from 'vue'
 
 const props = defineProps({
-  show: Boolean,        // AANGEPAST: matcht nu met App.vue (:show)
-  item: Object,         // AANGEPAST: matcht nu met App.vue (:item)
+  show: Boolean,
+  item: Object,
   availableDates: {
     type: Object,
     default: () => ({})
@@ -16,18 +16,18 @@ const emit = defineEmits(['close', 'save'])
 const defaultForm = {
   id: null,
   title: '',
-  indiener: '',             // Nieuw veld
-  portefeuillehouder: '',   // Nieuw veld
-  domein: '',               // Nieuw veld
-  status: 'Concept',        // Nieuw veld
-  prioriteit: 'Normaal',    // Nieuw veld
-  toelichting: '',          // Nieuw veld
+  indiener: '',
+  portefeuillehouder: '',
+  domein: '',
+  status: 'Concept',
+  prioriteit: 'Normaal',
+  toelichting: '',
   schedule: {
     PFO: '',
     DBBesluit: '',
-    DBSchrift: '',
+    // DBSchrift verwijderd
     DBInformeel: '',
-    ABBrief: '',
+    // ABBrief verwijderd
     Delta: '',
     ABBesluit: ''
   },
@@ -43,24 +43,19 @@ const formData = ref({ ...defaultForm })
 // Wanneer het venster opent of het item wijzigt
 watch(() => props.item, (newItem) => {
   if (newItem) {
-    // We maken een kopie van het item
     const copy = JSON.parse(JSON.stringify(newItem))
-    
     // Zorg dat het schedule object bestaat
     if (!copy.schedule) copy.schedule = { ...defaultForm.schedule }
-    
     formData.value = copy
   } else {
     // Reset naar leeg bij "Nieuw"
     formData.value = JSON.parse(JSON.stringify(defaultForm))
-    formData.value.id = Date.now() // Tijdelijk ID voor nieuwe items
+    formData.value.id = Date.now()
   }
 }, { immediate: true })
 
 const save = () => {
-  // Sync oude velden met nieuwe voor compatibility (optioneel)
   if(formData.value.portefeuillehouder) formData.value.ph = formData.value.portefeuillehouder
-  
   emit('save', formData.value)
 }
 
@@ -158,30 +153,10 @@ const cancel = () => {
             </div>
             
             <div class="form-group">
-                <label>DB Schriftelijk</label>
-                <select v-model="formData.schedule.DBSchrift">
-                    <option value="">-- Geen / Kies datum --</option>
-                    <option v-for="date in (availableDates.DBSchrift || [])" :key="date" :value="date">
-                        {{ date }}
-                    </option>
-                </select>
-            </div>
-
-            <div class="form-group">
                 <label>Informeel DB</label>
                 <select v-model="formData.schedule.DBInformeel">
                     <option value="">-- Geen / Kies datum --</option>
                     <option v-for="date in (availableDates.DBInformeel || [])" :key="date" :value="date">
-                        {{ date }}
-                    </option>
-                </select>
-            </div>
-
-            <div class="form-group">
-                <label>AB Brief</label>
-                <select v-model="formData.schedule.ABBrief">
-                    <option value="">-- Geen / Kies datum --</option>
-                    <option v-for="date in (availableDates.ABBrief || [])" :key="date" :value="date">
                         {{ date }}
                     </option>
                 </select>
@@ -366,7 +341,6 @@ const cancel = () => {
   background: #219150;
 }
 
-/* Mobiel aanpassing */
 @media (max-width: 600px) {
     .grid-2 { grid-template-columns: 1fr; }
 }
