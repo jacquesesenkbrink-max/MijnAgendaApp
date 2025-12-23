@@ -487,7 +487,9 @@ header {
     transition: max-height 0.4s ease-in-out, opacity 0.3s ease, padding 0.4s ease;
     max-height: 500px; overflow: hidden; opacity: 1;
 }
-header.collapsed { max-height: 0;Hv padding: 0; opacity: 0; pointer-events: none; }
+header.collapsed {
+    max-height: 0; padding: 0; opacity: 0; pointer-events: none;
+}
 @media print { .header-toggle-btn, header { display: none !important; } }
 
 .top-bar { display: flex; justify-content: space-between; align-items: center; max-width: 1400px; margin: 0 auto; }
