@@ -89,7 +89,7 @@
       if(activeFocusId.value) nextTick(() => drawConnections());
   });
 
-  // Watcher toegevoegd: Als de gefilterde lijst verandert (bv door PH keuze), herteken lijnen
+  // Watcher: Als de gefilterde lijst verandert (bv door PH keuze), herteken lijnen
   watch(filterPH, () => {
       nextTick(() => {
           if (activeFocusId.value) drawConnections();
@@ -150,26 +150,30 @@
     if (filterWaarde.value !== 'all') {
         if (filterType.value === 'fase') {
             
-            // CRUCIALE WIJZIGING HIERONDER:
-            // Als we op PFO filteren EN er is een PH geselecteerd:
+            // LOGICA: Als PFO actief is EN er is een PH gekozen
             if (filterWaarde.value === 'PFO' && filterPH.value) {
-                // Dan filteren we op het ONDERWERP (Topic) in plaats van alleen de PFO-fase.
-                // We willen alle fases (DB, AB etc.) zien van items die bij deze PH horen.
+                // Toon alle fases van items die bij deze PH horen
                 list = list.filter(e => {
                     const item = e.originalItem;
-                    const matchesPH = item.ph && item.ph.includes(filterPH.value);
-                    // Check of het item überhaupt een PFO fase heeft (omdat we in PFO menu zitten)
+                    
+                    // VEILIGE CHECK: Split de string en kijk of de exacte naam erin zit
+                    // Dit voorkomt dat 'Jan' ook matcht met 'Jansen'
+                    const phList = item.ph ? item.ph.split('/').map(n => n.trim()) : [];
+                    const matchesPH = phList.includes(filterPH.value);
+                    
+                    // Check of het item wel een PFO fase heeft (anders hoort het niet in dit filter)
                     const hasPFO = !!item.schedule.PFO; 
+                    
                     return matchesPH && hasPFO;
                 });
             } 
             else {
-                // Normaal gedrag: Alleen de specifieke kolom tonen (bv. alleen PFO kaartjes)
+                // Normaal gedrag: Alleen de specifieke kolom tonen
                 list = list.filter(e => e.type === filterWaarde.value);
             }
         }
         else {
-            // Label filter (Beleid, Uitvoering, etc.)
+            // Label filter
             list = list.filter(e => e.strategicLabel === filterWaarde.value);
         }
     }
@@ -248,8 +252,6 @@
   function updatePH(ph) {
       filterPH.value = ph;
       clearFocus();
-      // Als we een PH kiezen, resetten we eventuele focus om verwarring te voorkomen
-      // Maar als de gebruiker wil klikken, kan dat daarna gewoon.
   }
 
   function saveChanges(updatedItem) {
@@ -273,7 +275,6 @@
     const topicId = activeFocusId.value;
     const cards = Array.from(timelineRef.value.querySelectorAll(`[id^='card-${topicId}-']`));
     
-    // Sorteer kaarten op verticale positie (van boven naar beneden)
     cards.sort((a, b) => a.getBoundingClientRect().top - b.getBoundingClientRect().top);
 
     if (cards.length < 2) { connectionsPath.value = ''; return; }
@@ -289,18 +290,12 @@
         const rectA = cards[i].getBoundingClientRect();
         const rectB = cards[i+1].getBoundingClientRect();
         
-        // Bereken centrum punten relatief aan container
         const x1 = rectA.left + (rectA.width / 2) - containerRect.left;
         const y1 = rectA.top + (rectA.height / 2) - containerRect.top;
         const x2 = rectB.left + (rectB.width / 2) - containerRect.left;
         const y2 = rectB.top + (rectB.height / 2) - containerRect.top;
         
-        // Bezier curve logica
         const deltaY = y2 - y1;
-        // Als x2 > x1 (naar rechts), curve normaal. Als terug (naar links), pas curve aan.
-        const controlX = Math.abs(x2 - x1) * 0.5;
-        
-        // Simpele S-curve
         pathD += `M ${x1} ${y1} C ${x1} ${y1 + deltaY * 0.5}, ${x2} ${y2 - deltaY * 0.5}, ${x2} ${y2} `;
     }
     connectionsPath.value = pathD;
@@ -317,7 +312,7 @@
         <input type="file" ref="fileInput" @change="handleFileUpload" style="display: none" accept=".json">
         <div class="header-content">
             <h1>Bestuurlijke Planning WDODelta</h1>
-            <p class="subtitle">Vue Versie v11.4 (Met PH Trace)</p>
+            <p class="subtitle">Vue Versie v11.5 (PH Strict Trace)</p>
         </div>
         <div class="login-container">
             <button class="login-btn" @click="handleAdminClick" :class="{ active: isAdmin }">

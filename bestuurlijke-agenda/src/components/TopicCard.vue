@@ -10,7 +10,7 @@ const props = defineProps({
 
 const emit = defineEmits(['edit', 'delete', 'toggle-focus', 'open-details']);
 
-// Kleuren per fase (opgeschoond)
+// Kleuren per fase (Gremium)
 const colors = { 
   'PFO':'var(--c-pfo)', 
   'DBBesluit':'var(--c-db-besluit)', 
@@ -19,7 +19,7 @@ const colors = {
   'ABBesluit':'var(--c-ab-besluit)'
 };
 
-// Labels voor weergave (opgeschoond)
+// Labels voor weergave fases
 const labels = { 
   'PFO':'PFO', 
   'DBBesluit':'DB Besluit', 
@@ -28,12 +28,23 @@ const labels = {
   'ABBesluit':'AB Besluit'
 };
 
-// Kleur bepalen
+// NIEUW: Kleuren voor de Status badges
+const statusColors = {
+    'Concept': '#95a5a6',     // Grijs
+    'Ingediend': '#f39c12',   // Oranje
+    'Geagendeerd': '#3498db', // Blauw
+    'Afgerond': '#27ae60'     // Groen
+};
+
+// Kleur bepalen voor rand
 const borderColor = computed(() => colors[props.event.type] || '#ccc');
 const phaseLabel = computed(() => labels[props.event.type] || props.event.type);
 
+// Huidige status ophalen uit het originele item
+const currentStatus = computed(() => props.event.originalItem.status || 'Concept');
+
 // Tooltip tekst
-const tooltipText = computed(() => `${props.event.title} (${props.event.dateDisplay})`);
+const tooltipText = computed(() => `${props.event.title} (${props.event.dateDisplay}) - ${currentStatus.value}`);
 </script>
 
 <template>
@@ -60,7 +71,16 @@ const tooltipText = computed(() => `${props.event.title} (${props.event.dateDisp
                 </div>
             </div>
             
-            <div class="strat-badge" v-if="event.strategicLabel">{{ event.strategicLabel }}</div>
+            <div class="badge-row">
+                <span class="strat-badge" v-if="event.strategicLabel">{{ event.strategicLabel }}</span>
+                
+                <span 
+                    class="status-badge" 
+                    :style="{ backgroundColor: statusColors[currentStatus] || '#999' }"
+                >
+                    {{ currentStatus }}
+                </span>
+            </div>
             
             <h3>{{ phaseLabel }}</h3>
             <h4>{{ event.title }}</h4>
@@ -133,7 +153,21 @@ const tooltipText = computed(() => `${props.event.title} (${props.event.dateDisp
 /* --- INTERNE ELEMENTEN --- */
 .header-row { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.5rem; }
 .date-badge { font-family: monospace; font-size: 0.75rem; color: #666; font-weight: bold; }
-.strat-badge { background: #e2e8f0; padding: 2px 6px; border-radius: 4px; font-weight: bold; color: #475569; font-size: 0.7rem; display: inline-block; margin-bottom: 5px; }
+
+/* Badge Container */
+.badge-row { display: flex; gap: 5px; flex-wrap: wrap; margin-bottom: 5px; }
+
+.strat-badge { 
+    background: #e2e8f0; padding: 2px 6px; border-radius: 4px; 
+    font-weight: bold; color: #475569; font-size: 0.7rem; 
+}
+
+/* NIEUW: Status Badge Stijl */
+.status-badge {
+    padding: 2px 6px; border-radius: 4px;
+    font-weight: bold; color: white; font-size: 0.7rem;
+    text-transform: uppercase;
+}
 
 h3 { margin: 0; font-size: 0.75rem; text-transform: uppercase; color: #999; }
 h4 { margin: 0 0 10px 0; color: #2c3e50; font-size: 0.9rem; line-height: 1.3; }
@@ -141,7 +175,6 @@ h4 { margin: 0 0 10px 0; color: #2c3e50; font-size: 0.9rem; line-height: 1.3; }
 .role-grid { font-size: 0.75rem; color: #666; margin-bottom: 10px; }
 .comments-box { background: #fff3cd; color: #856404; padding: 5px; border-radius: 4px; font-size: 0.75rem; margin-bottom: 5px; }
 
-/* NIEUW: Highlight Contact stijl */
 .highlight-contact {
     color: #2c3e50;
     margin-top: 2px;
@@ -159,7 +192,6 @@ h4 { margin: 0 0 10px 0; color: #2c3e50; font-size: 0.9rem; line-height: 1.3; }
 .card-action-btn { font-size: 0.75rem; font-weight: bold; color: #3498db; text-transform: uppercase; cursor: pointer; }
 .card-action-btn:hover { text-decoration: underline; }
 
-/* Grid posities voor grote schermen (Schoon 5-koloms grid) */
 @media (min-width: 1100px) {
     .col-PFO { grid-column: 1; }
     .col-DBBesluit { grid-column: 2; }
