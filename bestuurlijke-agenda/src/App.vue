@@ -2,7 +2,7 @@
   import { ref, computed, watch, onMounted, nextTick } from 'vue';
   
   // DATA IMPORTS (Correcte namen)
-  import { defaultItems } from './data/items.js';
+  import { items as defaultItems } from './data/items.js';
   import { meetingDates as defaultDates } from './data/meetingDates.js'; 
   import { parseDate, getMonthName } from './utils/dateHelpers.js';
   
@@ -349,8 +349,13 @@
         <ReportView :items="gefilterdeEvents" />
     </div>
 
-    <div v-else-if="viewMode === 'agenda'" class="container">
-        <AgendaView :items="gefilterdeEvents" :activeFilter="filterWaarde" />
+   <div v-else-if="viewMode === 'agenda'" class="container">
+        <AgendaView 
+        :events="gefilterdeEvents" 
+        :activeFocusId="activeFocusId" 
+        @toggle-focus="toggleFocus"
+        @item-click="openDetails" 
+        />
     </div>
 
     <div v-if="activeFocusId" class="floating-controls">
