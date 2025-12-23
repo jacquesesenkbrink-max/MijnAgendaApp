@@ -1,9 +1,9 @@
 <script setup>
 import { ref, computed, onMounted, watch } from 'vue';
-import { parseDate } from '../utils/dateHelpers.js';
 
 const props = defineProps({
-  items: Array
+  items: Array,
+  activeFilter: String // We ontvangen nu welk filter er in de App actief is (bijv. 'PFO')
 });
 
 // Opslag voor vergaderdetails (tijd/locatie)
@@ -80,9 +80,15 @@ const uniqueDates = computed(() => {
     });
 });
 
-// Lijst met unieke PH's voor de dropdown
+// Lijst met unieke PH's voor de dropdown (ZONDER 'Algemeen')
 const uniquePHs = computed(() => {
-    const phs = new Set(agendaMeetings.value.map(m => m.ph));
+    const phs = new Set();
+    agendaMeetings.value.forEach(m => {
+        // We voegen 'Algemeen' NIET toe aan de lijst
+        if (m.ph && m.ph !== 'Algemeen') {
+            phs.add(m.ph);
+        }
+    });
     return Array.from(phs).sort();
 });
 
@@ -93,7 +99,7 @@ const filteredMeetings = computed(() => {
         if (selectedDate.value && meeting.dateDisplay !== selectedDate.value) {
             return false;
         }
-        // PH filter
+        // PH filter (alleen actief als er iets gekozen is)
         if (selectedPH.value && meeting.ph !== selectedPH.value) {
             return false;
         }
@@ -155,12 +161,12 @@ function resetFilters() {
                 </select>
             </div>
 
-            <div class="filter-group">
+            <div class="filter-group" v-if="activeFilter === 'PFO'">
                 <label>👤 Filter op Bestuurder:</label>
                 <select v-model="selectedPH">
-                    <option value="">-- Iedereen --</option>
+                    <option value="">-- Alle Bestuurders --</option>
                     <option v-for="ph in uniquePHs" :key="ph" :value="ph">
-                        {{ ph === 'Algemeen' ? '🏛️ Algemeen (DB/AB)' : '👤 ' + ph }}
+                        👤 {{ ph }}
                     </option>
                 </select>
             </div>
@@ -219,7 +225,6 @@ function resetFilters() {
                         <td class="index-col">{{ index + 1 }}.</td>
                         <td>
                             <div class="topic-title">{{ item.title }}</div>
-                            <div v-if="item.comments" class="topic-comment">Opmerking: {{ item.comments }}</div>
                         </td>
                         <td>
                             <div class="role-text" v-if="meeting.type !== 'PFO'">PH: {{ item.ph }}</div>
@@ -313,7 +318,7 @@ function resetFilters() {
 
 .index-col { color: #999; font-weight: bold; }
 .topic-title { font-weight: 600; color: #2c3e50; margin-bottom: 4px; }
-.topic-comment { font-size: 0.8rem; color: #c0392b; font-style: italic; }
+
 .role-text { font-size: 0.8rem; color: #666; margin-bottom: 2px; }
 .role-text.highlight { font-weight: bold; color: #2c3e50; }
 .badge { background: #eee; padding: 2px 6px; border-radius: 4px; font-size: 0.75rem; color: #555; }
