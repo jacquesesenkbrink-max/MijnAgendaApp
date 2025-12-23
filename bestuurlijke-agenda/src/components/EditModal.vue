@@ -2,58 +2,63 @@
 import { ref, watch } from 'vue';
 
 const props = defineProps({
-  show: Boolean,       
-  item: Object,
-  availableDates: Object // <--- ONTVANGT DE DATA VAN APP.VUE
+  show: Boolean,       // Is het venster open?
+  item: Object         // Het item dat we gaan bewerken (of null voor nieuw)
 });
 
 const emit = defineEmits(['close', 'save']);
 
+// We maken een lokale kopie van de data
 const formData = ref({});
-const manualInputMode = ref({
-  PFO: false,
-  DBBesluit: false,
-  ABBrief: false,
-  Delta: false,
-  DBSchrift: false,
-  DBInformeel: false,
-  ABBesluit: false
-});
 
+// --- VASTE LIJSTEN VOOR DROPDOWNS ---
+const directieLeden = [
+  "M. Boersen",
+  "I. Geveke",
+  "M. Werges"
+];
+
+const bestuurders = [
+  "D.S. Schoonman",
+  "H.J. Pereboom",
+  "N. Koks",
+  "J.C.G. Wijnen",
+  "M. Wesselink",
+  "F. Stienstra"
+];
+
+const strategischeLabels = [
+  "Beleid",
+  "Uitvoering",
+  "Kaders",
+  "Organisatiegesteldheid",
+  "Externe ontwikkelingen",
+  "Evaluatie"
+];
+
+// Zodra het venster opent, vullen we het formulier
 watch(() => props.item, (newItem) => {
   if (newItem) {
+    // Deep copy
     formData.value = JSON.parse(JSON.stringify(newItem));
     if (!formData.value.schedule) formData.value.schedule = {};
-
-    // Reset manual modes bij openen
-    Object.keys(manualInputMode.value).forEach(key => {
-        const currentDate = formData.value.schedule[key];
-        // Check of de huidige datum in de lijst met availableDates staat
-        const isKnownDate = props.availableDates[key]?.includes(currentDate);
-        // Zo niet, zet dan manual mode aan zodat de tekst zichtbaar is
-        manualInputMode.value[key] = currentDate && !isKnownDate;
-    });
-
   } else {
     // Nieuw item
-    formData.value = { id: Date.now(), title: '', schedule: {} };
-    Object.keys(manualInputMode.value).forEach(k => manualInputMode.value[k] = false);
+    formData.value = { 
+        id: Date.now(), 
+        title: '', 
+        schedule: {},
+        ph: '',
+        dir: '',
+        administrativeContact: '',
+        strategicLabel: ''
+    };
   }
 }, { immediate: true });
 
 function opslaan() {
   emit('save', formData.value);
   emit('close');
-}
-
-function toggleManual(field) {
-    manualInputMode.value[field] = !manualInputMode.value[field];
-    if (!manualInputMode.value[field]) {
-        // Als we terugkeren naar de lijst en de waarde staat er niet in, resetten
-        if (!props.availableDates[field]?.includes(formData.value.schedule[field])) {
-            formData.value.schedule[field] = '';
-        }
-    }
 }
 </script>
 
@@ -75,24 +80,44 @@ function toggleManual(field) {
             <div class="form-group">
                 <label>Strategisch Label</label>
                 <select v-model="formData.strategicLabel">
-                    <option value="">-- Kies --</option>
-                    <option value="Beleid">Beleid</option>
-                    <option value="Uitvoering">Uitvoering</option>
-                    <option value="Kaders">Kaders</option>
-                    <option value="Organisatiegesteldheid">Organisatiegesteldheid</option>
-                    <option value="Externe ontwikkelingen">Externe ontwikkelingen</option>
-                    <option value="Evaluatie">Evaluatie</option>
+                    <option value="">-- Kies Label --</option>
+                    <option v-for="label in strategischeLabels" :key="label" :value="label">
+                        {{ label }}
+                    </option>
                 </select>
             </div>
+            
             <div class="form-group">
-                <label>Portefeuillehouder (PH)</label>
-                <input v-model="formData.ph" type="text">
+                <label>Verantwoordelijk Directielid</label>
+                <select v-model="formData.dir">
+                    <option value="">-- Kies Directeur --</option>
+                    <option v-for="d in directieLeden" :key="d" :value="d">
+                        {{ d }}
+                    </option>
+                </select>
             </div>
         </div>
 
-        <div class="form-group">
-            <label>Bestuurlijk Aanspreekpunt 🗣️</label>
-            <input v-model="formData.administrativeContact" type="text" placeholder="Wie is de trekkende bestuurder?">
+        <div class="row">
+            <div class="form-group">
+                <label>Portefeuillehouder (PH)</label>
+                <select v-model="formData.ph">
+                    <option value="">-- Kies PH --</option>
+                    <option v-for="b in bestuurders" :key="b" :value="b">
+                        {{ b }}
+                    </option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>Bestuurlijk Aanspreekpunt 🗣️</label>
+                <select v-model="formData.administrativeContact">
+                    <option value="">-- Kies Aanspreekpunt --</option>
+                    <option v-for="b in bestuurders" :key="b" :value="b">
+                        {{ b }}
+                    </option>
+                </select>
+            </div>
         </div>
 
         <div class="form-group">
@@ -101,35 +126,44 @@ function toggleManual(field) {
         </div>
 
         <hr>
-        <h3>Planning (Kies vaste data)</h3>
+        
+        <h3>Planning (Datums)</h3>
+        <p class="hint-text">Vul in als dd-mm-jjjj of bijv. "Q1 2026".</p>
         
         <div class="date-grid">
-            <div v-for="field in ['PFO', 'DBBesluit', 'ABBrief', 'Delta', 'DBSchrift', 'DBInformeel', 'ABBesluit']" :key="field" class="form-group">
-                <div class="label-row">
-                    <label>{{ field }}</label>
-                    <small class="toggle-link" @click="toggleManual(field)">
-                        {{ manualInputMode[field] ? 'Terug naar lijst' : 'Handmatig' }}
-                    </small>
-                </div>
+            <div class="form-group">
+                <label>PFO</label>
+                <input v-model="formData.schedule.PFO" type="text">
+            </div>
+            
+            <div class="form-group">
+                <label>DB Besluit</label>
+                <input v-model="formData.schedule.DBBesluit" type="text">
+            </div>
+            
+            <div class="form-group">
+                <label>DB Schriftelijk</label>
+                <input v-model="formData.schedule.DBSchrift" type="text">
+            </div>
 
-                <select 
-                    v-if="!manualInputMode[field]" 
-                    v-model="formData.schedule[field]"
-                    class="date-select"
-                >
-                    <option value="">-- Geen datum --</option>
-                    <option v-if="availableDates[field]" v-for="date in availableDates[field]" :key="date" :value="date">
-                        {{ date }}
-                    </option>
-                </select>
+            <div class="form-group">
+                <label>Informeel DB</label>
+                <input v-model="formData.schedule.DBInformeel" type="text">
+            </div>
 
-                <input 
-                    v-else 
-                    v-model="formData.schedule[field]" 
-                    type="text" 
-                    placeholder="dd-mm-jjjj..."
-                    class="manual-input"
-                >
+            <div class="form-group">
+                <label>AB Brief</label>
+                <input v-model="formData.schedule.ABBrief" type="text">
+            </div>
+
+            <div class="form-group">
+                <label>Delta</label>
+                <input v-model="formData.schedule.Delta" type="text">
+            </div>
+            
+            <div class="form-group">
+                <label>AB Besluit</label>
+                <input v-model="formData.schedule.ABBesluit" type="text">
             </div>
         </div>
 
@@ -146,30 +180,48 @@ function toggleManual(field) {
   display: flex; justify-content: center; align-items: center;
 }
 .modal-content {
-  background: white; padding: 20px; border-radius: 8px;
-  width: 90%; max-width: 600px; max-height: 90vh; overflow-y: auto;
+  background: white; padding: 25px; border-radius: 8px;
+  width: 90%; max-width: 650px;
+  max-height: 90vh; overflow-y: auto;
+  box-shadow: 0 5px 20px rgba(0,0,0,0.2);
 }
 .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-.close-btn { font-size: 28px; cursor: pointer; }
+.modal-header h2 { margin: 0; color: #2c3e50; }
+.close-btn { font-size: 28px; cursor: pointer; color: #999; }
+.close-btn:hover { color: #333; }
 
 .form-group { margin-bottom: 15px; }
-label { display: block; font-weight: bold; margin-bottom: 5px; font-size: 0.9rem; }
-.label-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px; }
-
-.toggle-link { color: #3498db; cursor: pointer; font-size: 0.75rem; text-decoration: underline; }
-.toggle-link:hover { color: #2980b9; }
-
+label { display: block; font-weight: 600; margin-bottom: 5px; font-size: 0.9rem; color: #34495e; }
 input, select, textarea { 
-    width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; font-family: inherit; 
+    width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; 
+    font-family: inherit; font-size: 0.95rem; background: #fff;
+    transition: border-color 0.2s;
 }
-.manual-input { border-color: #e67e22; background: #fffdf9; }
+input:focus, select:focus, textarea:focus { border-color: #3498db; outline: none; }
 
-.row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-.date-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; background: #f9f9f9; padding: 15px; border-radius: 4px; border: 1px solid #eee; }
+.row { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+
+/* Planning Grid */
+.date-grid { 
+    display: grid; 
+    grid-template-columns: 1fr 1fr; 
+    gap: 15px; 
+    background: #f8f9fa; 
+    padding: 15px; 
+    border-radius: 6px; 
+    border: 1px solid #eee;
+}
+.hint-text { font-size: 0.8rem; color: #7f8c8d; margin-top: -10px; margin-bottom: 15px; }
 
 .save-btn {
-    background: #27ae60; color: white; border: none; padding: 10px 20px;
-    width: 100%; font-size: 1rem; border-radius: 4px; cursor: pointer; margin-top: 15px;
+    background: #27ae60; color: white; border: none; padding: 12px 20px;
+    width: 100%; font-size: 1rem; border-radius: 6px; cursor: pointer; margin-top: 20px; font-weight: bold;
+    transition: background 0.2s;
 }
 .save-btn:hover { background: #219150; }
+
+/* Mobiel aanpassing */
+@media (max-width: 600px) {
+    .row, .date-grid { grid-template-columns: 1fr; gap: 10px; }
+}
 </style>
