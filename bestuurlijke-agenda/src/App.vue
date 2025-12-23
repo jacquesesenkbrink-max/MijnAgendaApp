@@ -389,7 +389,7 @@
     </div>
 
     <div v-else-if="viewMode === 'agenda'">
-        <AgendaView :items="gefilterdeEvents" />
+        <AgendaView :items="gefilterdeEvents" :activeFilter="filterWaarde" />
     </div>
 
 
