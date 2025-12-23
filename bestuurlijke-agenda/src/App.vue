@@ -12,6 +12,8 @@
   import EditModal from './components/EditModal.vue';
   import ReportView from './components/ReportView.vue';
   import AgendaView from './components/AgendaView.vue';
+  import DateManager from './components/DateManager.vue';
+  import { meetingDates as defaultDates } from './data/meetingDates.js'; // Importeer de defaults
 
   // DATA
   const agendaPunten = ref([]); 
@@ -22,9 +24,12 @@
   const filterWaarde = ref('all');
   const startJaar = ref(0);
   const activeFocusId = ref(null); 
-  
+   
   const isAdmin = ref(false); 
   const fileInput = ref(null);
+
+  const isDateManagerOpen = ref(false); // Nieuwe state voor de modal
+  const activeDates = ref({});          // Hierin slaan we de actuele datums op
 
   // NIEUW: Header Toggle & Login Modal State
   const isHeaderOpen = ref(true);
@@ -58,6 +63,16 @@
         isAdmin.value = true;
     }
     window.addEventListener('resize', drawConnections);
+
+    // DATUMS LADEN:
+    const opgeslagenDatums = localStorage.getItem('mijn-agenda-dates');
+    if (opgeslagenDatums) {
+        activeDates.value = JSON.parse(opgeslagenDatums);
+    } else {
+        // Als er niets is opgeslagen, gebruik de defaults uit het bestand
+        // We maken een kopie om problemen met references te voorkomen
+        activeDates.value = JSON.parse(JSON.stringify(defaultDates));
+    }
   });
 
   // Automatisch opslaan in LocalStorage bij wijzigingen
@@ -188,6 +203,11 @@
         event.target.value = '';
     };
     reader.readAsText(file);
+  }
+
+  // Functie om datums op te slaan (wordt aangeroepen vanuit DateManager)
+  function saveDates() {
+    localStorage.setItem('mijn-agenda-dates', JSON.stringify(activeDates.value));
   }
 
   // --- DATA TRANSFORMATIE & FILTERS ---
