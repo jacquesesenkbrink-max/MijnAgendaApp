@@ -25,13 +25,10 @@ const defaultForm = {
   schedule: {
     PFO: '',
     DBBesluit: '',
-    // DBSchrift verwijderd
     DBInformeel: '',
-    // ABBrief verwijderd
     Delta: '',
     ABBesluit: ''
   },
-  // Oude velden behouden voor backward compatibility
   ph: '', 
   dir: '',
   strategicLabel: '',

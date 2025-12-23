@@ -9,8 +9,8 @@
     --wdod-green: #93c01f;  /* Secondary */
     
     /* Backgrounds */
-    --bg-body: #f0f8fc;     /* Light blue tint typical of water authority branding */
-    --text-main: #075895;   /* Dark blue text instead of harsh black */
+    --bg-body: #f0f8fc;
+    --text-main: #075895;
     --text-body: #333333;
 
     /* --- Functional Phase Mapping --- */
@@ -18,23 +18,15 @@
     /* DB Besluit -> Primary Blue */
     --c-db-besluit: var(--wdod-blue);  
     
-    /* DB Schriftelijk -> Primary Cyan */
-    --c-db-schrift: var(--wdod-cyan); 
-
-    /* AB Besluit -> Corporate Red (Signal color for highest decision) */
+    /* AB Besluit -> Corporate Red */
     --c-ab-besluit: var(--wdod-red);  
 
-    /* AB Brief -> Corporate Orange */
-    --c-ab-brief: var(--wdod-orange);    
-    
     /* Delta -> Corporate Green */
     --c-delta: var(--wdod-green);       
 
-    /* PFO & Informeel: 
-       Since the palette is limited, we use complementary tones 
-       that fit the "Water" theme but remain distinct. */
-    --c-pfo: #5b2c6f;         /* Deep Purple (Maintains distinction) */
-    --c-db-informeel: #1d7e91; /* Teal/Grey-Blue (Distinct from Cyan) */
+    /* PFO & Informeel */
+    --c-pfo: #5b2c6f;          /* Deep Purple */
+    --c-db-informeel: #1d7e91; /* Teal/Grey-Blue */
 }
 
 body {

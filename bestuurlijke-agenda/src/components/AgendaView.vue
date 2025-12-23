@@ -110,9 +110,10 @@ const filteredMeetings = computed(() => {
 // --- HELPERS ---
 function mapTypeToTitle(type) {
     const labels = { 
-        'DBBesluit': 'DB Besluitvormend', 'DBSchrift': 'DB Schriftelijk', 
-        'DBInformeel': 'DB Informeel', 'ABBesluit': 'AB Vergadering', 
-        'ABBrief': 'Verzendlijst AB Brieven', 'Delta': 'Deltabijeenkomst'
+        'DBBesluit': 'DB Besluitvormend', 
+        'DBInformeel': 'DB Informeel', 
+        'ABBesluit': 'AB Vergadering', 
+        'Delta': 'Deltabijeenkomst'
     };
     return labels[type] || type;
 }
@@ -123,9 +124,10 @@ function getDayName(dateObj) {
 }
 
 const typeColors = { 
-  'PFO':'var(--c-pfo)', 'DBBesluit':'var(--c-db-besluit)', 
-  'DBSchrift':'var(--c-db-schrift)', 'DBInformeel': 'var(--c-db-informeel)',
-  'ABBesluit':'var(--c-ab-besluit)', 'ABBrief':'var(--c-ab-brief)', 
+  'PFO':'var(--c-pfo)', 
+  'DBBesluit':'var(--c-db-besluit)', 
+  'DBInformeel': 'var(--c-db-informeel)',
+  'ABBesluit':'var(--c-ab-besluit)', 
   'Delta':'var(--c-delta)' 
 };
 

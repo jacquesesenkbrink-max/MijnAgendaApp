@@ -56,18 +56,21 @@ function getStatusText(count) {
     return 'Rustig';
 }
 
-// Kleurcodes en labels voor de tabel
+// Kleurcodes en labels voor de tabel (opgeschoond)
 const typeColors = { 
-  'PFO':'var(--c-pfo)', 'DBBesluit':'var(--c-db-besluit)', 
-  'DBSchrift':'var(--c-db-schrift)', 'DBInformeel': 'var(--c-db-informeel)',
-  'ABBesluit':'var(--c-ab-besluit)', 'ABBrief':'var(--c-ab-brief)', 
+  'PFO':'var(--c-pfo)', 
+  'DBBesluit':'var(--c-db-besluit)', 
+  'DBInformeel': 'var(--c-db-informeel)',
+  'ABBesluit':'var(--c-ab-besluit)', 
   'Delta':'var(--c-delta)' 
 };
 
 const typeLabels = { 
-  'PFO':'PFO', 'DBBesluit':'DB Besluit', 'DBSchrift':'DB Schrift.', 
-  'DBInformeel': 'Informeel DB', 'ABBesluit':'AB Besluit', 
-  'ABBrief':'AB Brief', 'Delta':'Delta' 
+  'PFO':'PFO', 
+  'DBBesluit':'DB Besluit', 
+  'DBInformeel': 'Informeel DB', 
+  'ABBesluit':'AB Besluit', 
+  'Delta':'Delta' 
 };
 </script>
 

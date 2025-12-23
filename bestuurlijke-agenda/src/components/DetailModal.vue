@@ -1,25 +1,20 @@
 <script setup>
-import { computed } from 'vue';
-
 const props = defineProps({
-  show: Boolean,       // Is de popup open?
-  item: Object         // Welk onderwerp laten we zien?
+  show: Boolean,
+  item: Object
 });
 
 const emit = defineEmits(['close']);
 
-// Hulpfunctie om te sluiten
 function sluit() {
   emit('close');
 }
 
-// We maken een lijstje van alle fases voor in de popup
+// Lijst opgeschoond: DBSchrift en ABBrief verwijderd
 const fases = [
   { key: 'PFO', label: 'PFO', color: 'var(--c-pfo)' },
   { key: 'DBBesluit', label: 'DB Besluit', color: 'var(--c-db-besluit)' },
-  { key: 'DBSchrift', label: 'DB Schrift.', color: 'var(--c-db-schrift)' },
   { key: 'DBInformeel', label: 'Informeel DB', color: 'var(--c-db-informeel)' },
-  { key: 'ABBrief', label: 'AB Brief', color: 'var(--c-ab-brief)' },
   { key: 'Delta', label: 'Delta', color: 'var(--c-delta)' },
   { key: 'ABBesluit', label: 'AB Besluit', color: 'var(--c-ab-besluit)' }
 ];
