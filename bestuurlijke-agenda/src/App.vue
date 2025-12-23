@@ -351,7 +351,8 @@
 
    <div v-else-if="viewMode === 'agenda'" class="container">
         <AgendaView 
-        :events="gefilterdeEvents" 
+        :items="gefilterdeEvents" 
+        :activeFilter="filterWaarde"
         :activeFocusId="activeFocusId" 
         @toggle-focus="toggleFocus"
         @item-click="openDetails" 
