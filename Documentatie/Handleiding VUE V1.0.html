@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Handleiding Bestuurlijke Planning WDODelta</title>
+    <style>
+        :root {
+            --primary: #2c3e50;
+            --secondary: #4ca1af;
+            --accent: #27ae60;
+            --highlight: #f1c40f;
+            --bg: #f4f7f6;
+            --text: #333;
+            --sidebar-width: 280px;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            background-color: var(--bg);
+            color: var(--text);
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* SIDEBAR */
+        nav {
+            width: var(--sidebar-width);
+            background: white;
+            position: fixed;
+            height: 100vh;
+            overflow-y: auto;
+            border-right: 1px solid #ddd;
+            box-shadow: 2px 0 10px rgba(0,0,0,0.05);
+            display: flex;
+            flex-direction: column;
+            z-index: 100;
+        }
+
+        .nav-header {
+            background: var(--primary);
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .search-box {
+            padding: 15px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .search-box input {
+            width: 90%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+
+        .nav-links {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .nav-links li a {
+            display: block;
+            padding: 15px 20px;
+            text-decoration: none;
+            color: var(--text);
+            border-bottom: 1px solid #f0f0f0;
+            transition: background 0.2s;
+            font-size: 15px;
+        }
+
+        .nav-links li a:hover {
+            background-color: #eef2f5;
+            color: var(--secondary);
+            padding-left: 25px; /* Schuif effect */
+        }
+
+        .nav-links li a.active {
+            border-left: 5px solid var(--secondary);
+            background: #f9f9f9;
+            font-weight: bold;
+        }
+
+        /* MAIN CONTENT */
+        main {
+            margin-left: var(--sidebar-width);
+            padding: 40px;
+            max-width: 900px;
+            width: 100%;
+        }
+
+        h1 { color: var(--primary); border-bottom: 3px solid var(--secondary); padding-bottom: 10px; }
+        h2 { color: var(--secondary); margin-top: 40px; border-bottom: 1px solid #ddd; padding-bottom: 5px; }
+        h3 { color: var(--primary); margin-top: 25px; }
+
+        p, li { line-height: 1.6; }
+
+        .feature-box {
+            background: white;
+            border-left: 5px solid var(--secondary);
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 0 5px 5px 0;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+
+        .feature-box.warning { border-color: #e74c3c; background: #fff5f5; }
+        .feature-box.tip { border-color: var(--highlight); background: #fffcf0; }
+
+        .btn-example {
+            display: inline-block;
+            padding: 5px 10px;
+            border-radius: 4px;
+            font-size: 0.9em;
+            font-weight: bold;
+            margin: 0 5px;
+        }
+        .btn-edit { background: #27ae60; color: white; }
+        .btn-focus { background: #f1c40f; color: #333; }
+        .btn-view { background: #2c3e50; color: white; }
+
+        img.screenshot-placeholder {
+            display: block;
+            width: 100%;
+            height: 150px;
+            background: #ddd;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #666;
+            margin: 15px 0;
+            border: 2px dashed #bbb;
+            border-radius: 5px;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            nav { width: 100%; height: auto; position: relative; }
+            main { margin-left: 0; padding: 20px; }
+            body { flex-direction: column; }
+        }
+    </style>
+</head>
+<body>
+
+<nav>
+    <div class="nav-header">
+        <h3>📘 Handleiding</h3>
+        <small>Bestuurlijke Planning</small>
+    </div>
+    <div class="search-box">
+        <input type="text" id="searchInput" placeholder="Zoek op trefwoord..." onkeyup="filterMenu()">
+    </div>
+    <ul class="nav-links" id="menuList">
+        <li><a href="#intro">1. Inleiding</a></li>
+        <li><a href="#basis">2. Basisgebruik</a></li>
+        <li><a href="#views">3. Weergaven</a></li>
+        <li><a href="#focus">4. Focus & Verbindingen</a></li>
+        <li><a href="#admin">5. Voor Beheerders (Admin)</a></li>
+        <li><a href="#beheer">6. Gegevens Beheren</a></li>
+        <li><a href="#faq">7. Veelgestelde Vragen</a></li>
+    </ul>
+</nav>
+
+<main>
+
+    <section id="intro">
+        <h1>Welkom bij de Bestuurlijke Planning</h1>
+        <p>Deze applicatie biedt een visueel overzicht van de besluitvormingsprocessen binnen WDODelta. In tegenstelling tot een statische Excel-lijst, laat deze tool zien hoe onderwerpen met elkaar verbonden zijn door de tijd heen.</p>
+        
+        <div class="feature-box">
+            <strong>Doel van de tool:</strong> Inzicht geven in de samenhang tussen verschillende bestuurlijke fases (Beeldvormend, Oordeelsvormend, Besluitvormend) en strategische labels.
+        </div>
+    </section>
+
+    <section id="basis">
+        <h2>2. Basisgebruik</h2>
+        <p>Wanneer u de applicatie opent, ziet u direct het overzicht van het huidige jaar.</p>
+        
+        <h3>Navigatiebalk (Bovenin)</h3>
+        <ul>
+            <li><strong>Jaar Selectie:</strong> Klik op de pijltjes naast het jaartal om naar het verleden of de toekomst te navigeren.</li>
+            <li><strong>Filters:</strong> Gebruik de filterknoppen om alleen specifieke fases (bijv. "Besluitvormend") of labels (bijv. "Waterveiligheid") te zien.</li>
+            <li><strong>Zoeken:</strong> Rechtsboven vindt u een zoekbalk om snel een specifiek onderwerp te vinden op titel.</li>
+            <li><strong>Menu:</strong> Met de knop linksboven kunt u het menu in- of uitklappen voor meer schermruimte.</li>
+        </ul>
+    </section>
+
+    <section id="views">
+        <h2>3. Weergaven</h2>
+        <p>Rechtsboven kunt u kiezen hoe u de data wilt bekijken. Er zijn 4 smaken:</p>
+
+        <ul>
+            <li><span class="btn-example btn-view">🃏 Kaart</span> <strong>(Standaard)</strong>: De meest gedetailleerde weergave. Toont titels, datums en labels in een maand-grid.</li>
+            <li><span class="btn-example btn-view">🟣 Stippen</span>: Een compacte weergave. Handig om in één oogopslag de drukte per maand te zien zonder veel tekst.</li>
+            <li><span class="btn-example btn-view">📄 Tabel</span>: Een klassieke lijstweergave, handig om te printen of snel doorheen te lezen.</li>
+            <li><span class="btn-example btn-view">🗓️ Agenda</span>: Een chronologische tijdlijn van boven naar beneden.</li>
+        </ul>
+    </section>
+
+    <section id="focus">
+        <h2>4. Focus & Verbindingen (Uniek!)</h2>
+        <p>Dit is de krachtigste functie van de applicatie. Veel onderwerpen komen meerdere keren terug in vergaderingen.</p>
+
+        <h3>Hoe werkt het?</h3>
+        <ol>
+            <li>Klik op een kaartje of stip in het overzicht.</li>
+            <li>Er verschijnt een <strong>blauwe stippellijn</strong> die alle gerelateerde vergaderingen van dit onderwerp met elkaar verbindt.</li>
+            <li>De rest van de kaartjes wordt "gedimd" (grijs gemaakt) zodat de route duidelijk zichtbaar is.</li>
+        </ol>
+
+        <div class="feature-box tip">
+            <h3>Nieuw: Focus Isoleren 🔍</h3>
+            <p>Als u op een kaartje klikt, verschijnt onderin beeld een gele knop: <strong>"Focus Isoleren"</strong>.</p>
+            <p>Klik hierop om <em>alle andere onderwerpen te verbergen</em>. U ziet dan alleen nog de keten van uw geselecteerde onderwerp, compact onder elkaar. Klik op <strong>"Toon Alles"</strong> om weer terug te keren naar het volledige overzicht.</p>
+        </div>
+    </section>
+
+    <section id="admin">
+        <h2>5. Voor Beheerders (Admin)</h2>
+        <p>Wilt u nieuwe punten toevoegen of datums wijzigen? Dan moet u inloggen.</p>
+
+        <h3>Inloggen</h3>
+        <ol>
+            <li>Klik rechtsboven op de knop <strong>🔒 Admin Login</strong>.</li>
+            <li>Voer het wachtwoord in (standaard: <em>wdo</em> of <em>admin</em>).</li>
+            <li>Na succesvol inloggen verschijnt er een groene werkbalk met extra opties.</li>
+        </ol>
+
+        <h3>Items Bewerken</h3>
+        <p>Als beheerder ziet u op elk kaartje een potlood-icoontje ✏️. Klik hierop om:</p>
+        <ul>
+            <li>De titel of opmerkingen aan te passen.</li>
+            <li>De planning te wijzigen (datums selecteren via dropdowns).</li>
+            <li>Een strategisch label toe te wijzen.</li>
+        </ul>
+    </section>
+
+    <section id="beheer">
+        <h2>6. Gegevens Beheren</h2>
+        <p>De applicatie biedt geavanceerde opties voor databeheer in de groene Admin-balk.</p>
+
+        <h3>📅 Beheer Datums</h3>
+        <p>Hier stelt u de vaste vergaderdata in (bijv. wanneer de DB of AB vergaderingen zijn). Deze data verschijnen vervolgens in de dropdown-menu's bij het bewerken van een item.</p>
+
+        <h3>⬇️ Export / ⬆️ Import</h3>
+        <p>U kunt een back-up maken van de huidige planning. Dit downloadt een <code>.json</code> bestand naar uw computer. Dit bestand kunt u later weer importeren via de Import-knop.</p>
+
+        <div class="feature-box warning">
+            <strong>Let op:</strong> Deze applicatie slaat standaard gegevens op in uw <em>lokale browser</em> (LocalStorage). Als u uw browsergeschiedenis wist, zijn de gegevens weg, tenzij u exporteert of de ICT-afdeling een databasekoppeling heeft gemaakt.
+        </div>
+    </section>
+
+    <section id="faq">
+        <h2>7. Veelgestelde Vragen</h2>
+        
+        <h3>Mijn scherm is leeg?</h3>
+        <p>Controleer of er filters aan staan die alles verbergen (bijv. een filter op een jaar waar geen items in staan). Klik op "Reset Filters".</p>
+
+        <h3>Kan ik dit op mijn mobiel bekijken?</h3>
+        <p>Ja, de applicatie is responsive. Kantel uw telefoon naar liggend formaat (landscape) voor het beste overzicht van de tijdslijnen.</p>
+
+        <h3>De verbindingslijn loopt door tekst heen?</h3>
+        <p>Dit is in de laatste versie opgelost. De lijn loopt nu netjes achter de kaartjes langs. Ververs de pagina (F5) als u nog een oude versie ziet.</p>
+    </section>
+
+    <footer style="margin-top: 50px; border-top: 1px solid #ddd; padding-top: 20px; text-align: center; color: #888;">
+        &copy; 2025 WDODelta - Bestuurlijke Planning App Handleiding
+    </footer>
+
+</main>
+
+<script>
+    // Smooth scrollen voor navigatie
+    document.querySelectorAll('nav a').forEach(anchor => {
+        anchor.addEventListener('click', function (e) {
+            e.preventDefault();
+            document.querySelector(this.getAttribute('href')).scrollIntoView({
+                behavior: 'smooth'
+            });
+            
+            // Active class zetten
+            document.querySelectorAll('nav a').forEach(a => a.classList.remove('active'));
+            this.classList.add('active');
+        });
+    });
+
+    // Zoekfunctie in menu
+    function filterMenu() {
+        let input = document.getElementById('searchInput');
+        let filter = input.value.toUpperCase();
+        let ul = document.getElementById("menuList");
+        let li = ul.getElementsByTagName('li');
+
+        // Zoek ook in de content zelf en highlight secties (simpel)
+        let main = document.querySelector('main');
+        let sections = main.getElementsByTagName('section');
+
+        for (let i = 0; i < sections.length; i++) {
+            let txtValue = sections[i].textContent || sections[i].innerText;
+            if (txtValue.toUpperCase().indexOf(filter) > -1) {
+                sections[i].style.display = "";
+            } else {
+                if(filter !== "") sections[i].style.display = "none";
+                else sections[i].style.display = "";
+            }
+        }
+    }
+</script>
+
+</body>
+</html>

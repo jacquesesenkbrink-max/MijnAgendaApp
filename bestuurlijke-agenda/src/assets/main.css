@@ -1,60 +1,71 @@
 /* src/assets/main.css */
 
 :root {
-    /* Kleurenpalet (Gelijk aan v11.0) */
-    --c-pfo: #8e44ad;         
-    --c-db-besluit: #2980b9;  
-    --c-db-schrift: #3498db; 
-    --c-db-informeel: #17a2b8; 
-    --c-ab-besluit: #c0392b;  
-    --c-ab-brief: #e67e22;    
-    --c-delta: #27ae60;       
+    /* --- WDODelta Corporate Palette --- */
+    --wdod-blue: #075895;   /* Pantone 541 - Primary */
+    --wdod-cyan: #00b0ea;   /* Pantone 2925 - Primary Accent */
+    --wdod-orange: #f29100; /* Secondary */
+    --wdod-red: #d74116;    /* Secondary */
+    --wdod-green: #93c01f;  /* Secondary */
     
-    --bg-body: #f4f7f6;
-    --text-main: #2c3e50;
+    /* Backgrounds */
+    --bg-body: #f0f8fc;     /* Light blue tint typical of water authority branding */
+    --text-main: #075895;   /* Dark blue text instead of harsh black */
+    --text-body: #333333;
+
+    /* --- Functional Phase Mapping --- */
+    
+    /* DB Besluit -> Primary Blue */
+    --c-db-besluit: var(--wdod-blue);  
+    
+    /* DB Schriftelijk -> Primary Cyan */
+    --c-db-schrift: var(--wdod-cyan); 
+
+    /* AB Besluit -> Corporate Red (Signal color for highest decision) */
+    --c-ab-besluit: var(--wdod-red);  
+
+    /* AB Brief -> Corporate Orange */
+    --c-ab-brief: var(--wdod-orange);    
+    
+    /* Delta -> Corporate Green */
+    --c-delta: var(--wdod-green);       
+
+    /* PFO & Informeel: 
+       Since the palette is limited, we use complementary tones 
+       that fit the "Water" theme but remain distinct. */
+    --c-pfo: #5b2c6f;         /* Deep Purple (Maintains distinction) */
+    --c-db-informeel: #1d7e91; /* Teal/Grey-Blue (Distinct from Cyan) */
 }
 
 body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     background-color: var(--bg-body);
-    color: var(--text-main);
+    color: var(--text-body);
     margin: 0;
     padding: 0;
     line-height: 1.4;
-    overflow-x: hidden; /* Voorkom horizontale scroll door animaties */
+    overflow-x: hidden;
 }
+
+/* Align headings with corporate blue */
+h1, h2, h3, h4, h5, h6 {
+    color: var(--wdod-blue);
+}
+
+button { font-family: inherit; }
 
 /* --- PRINT STYLES --- */
-/* Dit zorgt ervoor dat de pagina er netjes uitziet op papier of PDF */
 @media print {
-    /* Verberg navigatie, knoppen en admin-tools */
-    header, 
-    .reset-focus-btn, 
-    .sidebar-nav,
-    .filter-container,
-    .admin-toolbar,
-    .btn-icon,
-    .card-footer, 
-    .login-btn,
-    .add-btn {
+    header, .reset-focus-btn, .sidebar-nav, .filter-container,
+    .admin-toolbar, .btn-icon, .card-footer, .login-btn,
+    .add-btn, .floating-controls {
         display: none !important;
     }
-
-    /* Reset layout voor papier */
     body { background: white; margin: 0; padding: 0; }
-    .container { width: 100% !important; max-width: none !important; margin: 0 !important; padding: 0 !important; }
-    
-    /* Zorg dat kaarten niet halverwege worden afgekapt */
+    .container { width: 100% !important; max-width: none !important; margin: 0 !important; }
     .card-wrapper, .month-block { 
-        break-inside: avoid; 
-        page-break-inside: avoid; 
-        border: 1px solid #ddd;
-        box-shadow: none !important;
+        break-inside: avoid; page-break-inside: avoid; 
+        border: 1px solid #ddd; box-shadow: none !important;
     }
-
-    /* Forceer achtergrondkleuren (sommige browsers printen die standaard niet) */
     * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
 }
-
-/* Algemene reset voor knoppen */
-button { font-family: inherit; }
