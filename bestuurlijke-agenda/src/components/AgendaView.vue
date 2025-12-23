@@ -145,6 +145,7 @@ const uniqueDates = computed(() => {
 .lanes-container {
   flex: 1;
   display: grid;
+  /* We hebben nu 5 kolommen in plaats van 7 */
   grid-template-columns: repeat(5, 1fr); 
   /* FOUTIEVE REGEL VERWIJDERD: divide-x... */
 }
