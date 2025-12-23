@@ -28,7 +28,7 @@ const labels = {
   'ABBesluit':'AB Besluit'
 };
 
-// NIEUW: Kleuren voor de Status badges
+// Kleuren voor de Status badges
 const statusColors = {
     'Concept': '#95a5a6',     // Grijs
     'Ingediend': '#f39c12',   // Oranje
@@ -40,8 +40,15 @@ const statusColors = {
 const borderColor = computed(() => colors[props.event.type] || '#ccc');
 const phaseLabel = computed(() => labels[props.event.type] || props.event.type);
 
-// Huidige status ophalen uit het originele item
-const currentStatus = computed(() => props.event.originalItem.status || 'Concept');
+// CRUCIALE WIJZIGING: Status per fase ophalen
+// We kijken in 'scheduleStatus' of er voor deze fase (bv. PFO) een status is.
+const currentStatus = computed(() => {
+    const item = props.event.originalItem;
+    if (item.scheduleStatus && item.scheduleStatus[props.event.type]) {
+        return item.scheduleStatus[props.event.type];
+    }
+    return 'Concept'; // Standaard waarde als er niks is ingevuld
+});
 
 // Tooltip tekst
 const tooltipText = computed(() => `${props.event.title} (${props.event.dateDisplay}) - ${currentStatus.value}`);
@@ -154,7 +161,6 @@ const tooltipText = computed(() => `${props.event.title} (${props.event.dateDisp
 .header-row { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.5rem; }
 .date-badge { font-family: monospace; font-size: 0.75rem; color: #666; font-weight: bold; }
 
-/* Badge Container */
 .badge-row { display: flex; gap: 5px; flex-wrap: wrap; margin-bottom: 5px; }
 
 .strat-badge { 
@@ -162,7 +168,6 @@ const tooltipText = computed(() => `${props.event.title} (${props.event.dateDisp
     font-weight: bold; color: #475569; font-size: 0.7rem; 
 }
 
-/* NIEUW: Status Badge Stijl */
 .status-badge {
     padding: 2px 6px; border-radius: 4px;
     font-weight: bold; color: white; font-size: 0.7rem;
