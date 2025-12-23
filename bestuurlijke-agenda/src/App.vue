@@ -22,6 +22,7 @@
   const viewMode = ref('grid'); 
   const filterType = ref('fase');
   const filterWaarde = ref('all');
+  const filterPH = ref(''); // NIEUW: State voor gekozen PH
   const startJaar = ref(0);
   
   const activeFocusId = ref(null); 
@@ -119,6 +120,19 @@
     return events.sort((a, b) => a.dateObj - b.dateObj);
   });
 
+  // NIEUW: Lijst met unieke portefeuillehouders genereren
+  const uniekePortefeuillehouders = computed(() => {
+    const phSet = new Set();
+    agendaPunten.value.forEach(item => {
+        if (item.ph) {
+            // Split op '/' voor als er meerdere PH's zijn (bv. "Stienstra / Wesselink")
+            const parts = item.ph.split('/');
+            parts.forEach(p => phSet.add(p.trim()));
+        }
+    });
+    return Array.from(phSet).sort();
+  });
+
   const gefilterdeEvents = computed(() => {
     let list = alleEvents.value;
 
@@ -127,9 +141,19 @@
     }
 
     if (startJaar.value > 0) list = list.filter(e => e.dateObj.getFullYear() >= startJaar.value);
+    
     if (filterWaarde.value !== 'all') {
-        if (filterType.value === 'fase') list = list.filter(e => e.type === filterWaarde.value);
-        else list = list.filter(e => e.strategicLabel === filterWaarde.value);
+        if (filterType.value === 'fase') {
+            list = list.filter(e => e.type === filterWaarde.value);
+            
+            // NIEUW: Extra filter logic als we in PFO zitten én een PH hebben gekozen
+            if (filterWaarde.value === 'PFO' && filterPH.value) {
+                list = list.filter(e => e.ph && e.ph.includes(filterPH.value));
+            }
+        }
+        else {
+            list = list.filter(e => e.strategicLabel === filterWaarde.value);
+        }
     }
     return list;
   });
@@ -193,8 +217,22 @@
   function openDetails(item) { geselecteerdItem.value = item; isDetailOpen.value = true; }
   function openNieuw() { editItem.value = null; isEditOpen.value = true; }
   function openEdit(item) { editItem.value = item; isEditOpen.value = true; }
-  function updateHoofdFilter(p) { filterType.value = p.type; filterWaarde.value = p.value; clearFocus(); }
+  
+  function updateHoofdFilter(p) { 
+      filterType.value = p.type; 
+      filterWaarde.value = p.value; 
+      // Als we wegklikken van PFO, reset dan de PH filter
+      if (p.value !== 'PFO') filterPH.value = '';
+      clearFocus(); 
+  }
+
   function updateJaar(j) { startJaar.value = j; clearFocus(); }
+  
+  // NIEUW: Update functie voor PH filter
+  function updatePH(ph) {
+      filterPH.value = ph;
+      clearFocus();
+  }
 
   function saveChanges(updatedItem) {
       addToHistory();
@@ -251,7 +289,7 @@
         <input type="file" ref="fileInput" @change="handleFileUpload" style="display: none" accept=".json">
         <div class="header-content">
             <h1>Bestuurlijke Planning WDODelta</h1>
-            <p class="subtitle">Vue Versie v11.2</p>
+            <p class="subtitle">Vue Versie v11.3 (Met PH Filter)</p>
         </div>
         <div class="login-container">
             <button class="login-btn" @click="handleAdminClick" :class="{ active: isAdmin }">
@@ -317,8 +355,10 @@
     <div v-show="isFiltersOpen">
         <FilterBar 
             :jaren="uniekeJaren" 
+            :portefeuillehouders="uniekePortefeuillehouders"
             @change-filter="updateHoofdFilter" 
             @change-jaar="updateJaar" 
+            @change-ph="updatePH"
         />
     </div>
 
@@ -333,7 +373,9 @@
             <path v-if="connectionsPath" :d="connectionsPath" class="connection-line" :style="{ stroke: strokeColor }" />
           </svg>
 
-          <div v-if="gegroepeerdeLijst.length === 0" class="empty-state">Geen punten gevonden.</div>
+          <div v-if="gegroepeerdeLijst.length === 0" class="empty-state">
+             Geen punten gevonden. Probeer een ander filter.
+          </div>
           
           <div v-for="groep in gegroepeerdeLijst" :key="groep.sortKey" :id="'maand-' + groep.sortKey" class="month-block">
             <div class="month-header"><span class="month-badge">{{ groep.titel }}</span></div>

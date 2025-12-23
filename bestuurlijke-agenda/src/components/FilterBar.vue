@@ -1,26 +1,40 @@
 <script setup>
-import { ref } from 'vue';
+import { ref, watch } from 'vue';
 
-// We ontvangen de beschikbare jaren vanuit App.vue
+// We ontvangen de beschikbare jaren én portefeuillehouders vanuit App.vue
 const props = defineProps({
-  jaren: { type: Array, default: () => [] }
+  jaren: { type: Array, default: () => [] },
+  portefeuillehouders: { type: Array, default: () => [] }
 });
 
-const emit = defineEmits(['change-filter', 'change-jaar']);
+const emit = defineEmits(['change-filter', 'change-jaar', 'change-ph']);
 
 const actiefFilter = ref('all');     // Welke knop is actief?
 const actiefType = ref('fase');      // Is het een 'fase' of 'label' knop?
 const geselecteerdJaar = ref(0);     // 0 = Alles tonen
+const geselecteerdePH = ref('');     // Welke PH is gekozen?
 
 function kiesFase(naam) {
   actiefFilter.value = naam;
   actiefType.value = 'fase';
+  
+  // Reset PH selectie als we wegklikken van PFO
+  if (naam !== 'PFO') {
+      geselecteerdePH.value = '';
+      emit('change-ph', '');
+  }
+  
   emit('change-filter', { type: 'fase', value: naam });
 }
 
 function kiesLabel(naam) {
   actiefFilter.value = naam;
   actiefType.value = 'label';
+  
+  // Ook hier PH resetten
+  geselecteerdePH.value = '';
+  emit('change-ph', '');
+  
   emit('change-filter', { type: 'label', value: naam });
 }
 
@@ -28,6 +42,11 @@ function kiesJaar(event) {
   const jaar = parseInt(event.target.value);
   geselecteerdJaar.value = jaar;
   emit('change-jaar', jaar);
+}
+
+// Functie voor de dropdown
+function kiesPH() {
+    emit('change-ph', geselecteerdePH.value);
 }
 </script>
 
@@ -47,6 +66,18 @@ function kiesJaar(event) {
       <button class="filter-btn btn-Delta" :class="{ selected: actiefFilter === 'Delta' }" @click="kiesFase('Delta')">Deltabijeenkomst</button>
       <button class="filter-btn btn-ABBesluit" :class="{ selected: actiefFilter === 'ABBesluit' }" @click="kiesFase('ABBesluit')">Formeel AB</button>
     </div>
+
+    <transition name="fade">
+        <div v-if="actiefFilter === 'PFO'" class="ph-filter-wrapper">
+            <span class="ph-label">👤 Filter op Portefeuillehouder:</span>
+            <select v-model="geselecteerdePH" @change="kiesPH" class="ph-select">
+                <option value="">-- Alle Bestuurders --</option>
+                <option v-for="ph in portefeuillehouders" :key="ph" :value="ph">
+                    {{ ph }}
+                </option>
+            </select>
+        </div>
+    </transition>
 
     <div class="filter-divider"><span>Filter op Strategische Duiding</span></div>
 
@@ -136,4 +167,34 @@ function kiesJaar(event) {
   color: #075895; 
   border: 2px solid #075895;
 }
+
+/* NIEUW: PH SELECT STYLE */
+.ph-filter-wrapper {
+    background: #f8fafc;
+    border: 1px solid var(--c-pfo);
+    border-radius: 6px;
+    padding: 10px;
+    margin: 15px auto;
+    max-width: 400px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+}
+.ph-label {
+    color: var(--c-pfo);
+    font-weight: bold;
+    font-size: 0.9rem;
+}
+.ph-select {
+    padding: 6px 12px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 0.9rem;
+    color: #333;
+}
+
+/* Transition voor soepel in/uitklappen */
+.fade-enter-active, .fade-leave-active { transition: opacity 0.3s; }
+.fade-enter-from, .fade-leave-to { opacity: 0; }
 </style>
