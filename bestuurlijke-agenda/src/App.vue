@@ -1,7 +1,7 @@
 <script setup>
   import { ref, computed, watch, onMounted, nextTick } from 'vue';
   
-  // DATA IMPORTS (Correcte namen)
+  // DATA IMPORTS
   import { items as defaultItems } from './data/items.js';
   import { meetingDates as defaultDates } from './data/meetingDates.js'; 
   import { parseDate, getMonthName } from './utils/dateHelpers.js';
@@ -19,19 +19,20 @@
 
   // --- DATA & STATE ---
   const agendaPunten = ref([]); 
-  const viewMode = ref('grid'); // 'grid', 'dots', 'table', 'agenda'
+  const viewMode = ref('grid'); 
   const filterType = ref('fase');
   const filterWaarde = ref('all');
   const startJaar = ref(0);
   
   const activeFocusId = ref(null); 
-  const showOnlyFocus = ref(false); // NIEUW: Toggle voor isolatie modus
+  const showOnlyFocus = ref(false); 
 
   const isAdmin = ref(false); 
   const fileInput = ref(null);
 
   // UI States
   const isHeaderOpen = ref(true);
+  const isFiltersOpen = ref(true); // <--- NIEUW: State voor de filterbalk
   const isLoginOpen = ref(false);
   const wachtwoordInput = ref('');
   const isDateManagerOpen = ref(false);
@@ -54,7 +55,6 @@
 
   // --- INITIALISATIE ---
   onMounted(() => {
-    // 1. Agenda Items Laden
     const opgeslagen = localStorage.getItem('mijn-agenda-data');
     if (opgeslagen) {
       agendaPunten.value = JSON.parse(opgeslagen);
@@ -62,7 +62,6 @@
       agendaPunten.value = defaultItems;
     }
 
-    // 2. Datums Laden
     const opgeslagenDatums = localStorage.getItem('mijn-agenda-dates');
     if (opgeslagenDatums) {
         activeDates.value = JSON.parse(opgeslagenDatums);
@@ -70,14 +69,12 @@
         activeDates.value = JSON.parse(JSON.stringify(defaultDates));
     }
 
-    // 3. Admin check
     if (sessionStorage.getItem('is-admin') === 'true') {
         isAdmin.value = true;
     }
     window.addEventListener('resize', drawConnections);
   });
 
-  // Opslaan bij wijzigingen
   watch(agendaPunten, (nieuweLijst) => {
     localStorage.setItem('mijn-agenda-data', JSON.stringify(nieuweLijst));
     if(activeFocusId.value) nextTick(() => drawConnections());
@@ -87,7 +84,6 @@
     if(activeFocusId.value) nextTick(() => drawConnections());
   });
 
-  // NIEUW: Als focus-isolatie verandert, herteken de lijnen
   watch(showOnlyFocus, () => {
       if(activeFocusId.value) nextTick(() => drawConnections());
   });
@@ -98,7 +94,6 @@
 
   // --- LOGICA & TRANSFORMATIE ---
   
-  // Stap 1: Maak platte lijst van alle events
   const alleEvents = computed(() => {
     const events = [];
     agendaPunten.value.forEach(item => {
@@ -124,16 +119,13 @@
     return events.sort((a, b) => a.dateObj - b.dateObj);
   });
 
-  // Stap 2: Filteren (Inclusief de nieuwe isolatie-optie!)
   const gefilterdeEvents = computed(() => {
     let list = alleEvents.value;
 
-    // NIEUW: Als er een focus is én isolatie staat aan -> Toon alleen deze keten
     if (activeFocusId.value && showOnlyFocus.value) {
         return list.filter(e => e.topicId === activeFocusId.value);
     }
 
-    // Anders: reguliere filters
     if (startJaar.value > 0) list = list.filter(e => e.dateObj.getFullYear() >= startJaar.value);
     if (filterWaarde.value !== 'all') {
         if (filterType.value === 'fase') list = list.filter(e => e.type === filterWaarde.value);
@@ -142,7 +134,6 @@
     return list;
   });
 
-  // Stap 3: Groeperen per maand (voor de Grid weergave)
   const gegroepeerdeLijst = computed(() => {
     const groepen = {};
     gefilterdeEvents.value.forEach(ev => {
@@ -184,12 +175,11 @@
     } else { alert("Onjuist wachtwoord"); }
   }
 
-  // Focus & Lijnen
   function toggleFocus(topicId) {
     if (activeFocusId.value === topicId) clearFocus();
     else { 
         activeFocusId.value = topicId; 
-        showOnlyFocus.value = false; // Reset isolatie bij wissel
+        showOnlyFocus.value = false; 
         nextTick(() => drawConnections()); 
     }
   }
@@ -197,17 +187,15 @@
   function clearFocus() { 
       activeFocusId.value = null; 
       connectionsPath.value = ''; 
-      showOnlyFocus.value = false; // Reset de knop
+      showOnlyFocus.value = false;
   }
 
-  // Items openen
   function openDetails(item) { geselecteerdItem.value = item; isDetailOpen.value = true; }
   function openNieuw() { editItem.value = null; isEditOpen.value = true; }
   function openEdit(item) { editItem.value = item; isEditOpen.value = true; }
   function updateHoofdFilter(p) { filterType.value = p.type; filterWaarde.value = p.value; clearFocus(); }
   function updateJaar(j) { startJaar.value = j; clearFocus(); }
 
-  // CRUD (Versimpeld)
   function saveChanges(updatedItem) {
       addToHistory();
       const index = agendaPunten.value.findIndex(i => i.id === updatedItem.id);
@@ -219,21 +207,16 @@
       if(confirm(`Verwijderen: "${item.title}"?`)) { addToHistory(); agendaPunten.value = agendaPunten.value.filter(i => i.id !== item.id); }
   }
 
-  // Historie
   function addToHistory() { historyStack.value.push(JSON.parse(JSON.stringify(agendaPunten.value))); futureStack.value = []; }
   function undo() { if (historyStack.value.length) { futureStack.value.push(JSON.parse(JSON.stringify(agendaPunten.value))); agendaPunten.value = historyStack.value.pop(); } }
   function redo() { if (futureStack.value.length) { historyStack.value.push(JSON.parse(JSON.stringify(agendaPunten.value))); agendaPunten.value = futureStack.value.pop(); } }
-  function downloadBackup() { /* ...bestaande code... */ }
-  function triggerImport() { fileInput.value.click(); }
   function handleFileUpload(e) { /* ...bestaande code... */ }
 
-  // SVG Drawing Logic
   function drawConnections() {
     if (!activeFocusId.value || !timelineRef.value) return;
     const topicId = activeFocusId.value;
     const cards = Array.from(timelineRef.value.querySelectorAll(`[id^='card-${topicId}-']`));
     
-    // Sorteer kaarten op positie (van boven naar beneden)
     cards.sort((a, b) => a.getBoundingClientRect().top - b.getBoundingClientRect().top);
 
     if (cards.length < 2) { connectionsPath.value = ''; return; }
@@ -319,9 +302,23 @@
         </div>
     </div>
 
+    <div class="controls-bar no-print">
+        <button class="toggle-filters-btn" @click="isFiltersOpen = !isFiltersOpen">
+            {{ isFiltersOpen ? '🔼 Filters Verbergen' : '🔽 Filters & Zoeken Tonen' }}
+        </button>
+    </div>
+
+    <div v-show="isFiltersOpen">
+        <FilterBar 
+            :jaren="uniekeJaren" 
+            @change-filter="updateHoofdFilter" 
+            @change-jaar="updateJaar" 
+        />
+    </div>
+
     <div v-if="viewMode === 'grid' || viewMode === 'dots'">
         <SidebarNav :groepen="gegroepeerdeLijst" />
-        <FilterBar :jaren="uniekeJaren" @change-filter="updateHoofdFilter" @change-jaar="updateJaar" />
+        
         <SwimlaneHeaders v-if="viewMode === 'grid'" />
 
         <div class="container" ref="timelineRef" :class="{ 'view-dots': viewMode === 'dots' }">
@@ -349,7 +346,7 @@
         <ReportView :items="gefilterdeEvents" />
     </div>
 
-   <div v-else-if="viewMode === 'agenda'" class="container">
+    <div v-else-if="viewMode === 'agenda'" class="container">
         <AgendaView 
         :items="gefilterdeEvents" 
         :activeFilter="filterWaarde"
@@ -400,6 +397,30 @@ header.collapsed { max-height: 0; padding: 0; opacity: 0; pointer-events: none; 
 
 .container { max-width: 1400px; margin: 0 auto; padding: 20px; position: relative; min-height: 80vh; }
 
+/* NIEUWE STIJL VOOR FILTER TOGGLE */
+.controls-bar {
+    text-align: center;
+    padding: 10px;
+    background: #f4f7f6;
+    border-bottom: 1px solid #ddd;
+}
+.toggle-filters-btn {
+    background: white;
+    border: 1px solid #ccc;
+    padding: 6px 15px;
+    border-radius: 20px;
+    color: #555;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-weight: 600;
+}
+.toggle-filters-btn:hover {
+    background: #eef2f5;
+    color: #075895;
+    border-color: #075895;
+}
+
 /* FIX: Z-INDEX LIJN NAAR ACHTEREN */
 #connections-layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 1; } 
 .connection-line { fill: none; stroke-width: 3; stroke-linecap: round; stroke-dasharray: 10; animation: dash 30s linear infinite; opacity: 0.8; }
@@ -413,10 +434,8 @@ header.collapsed { max-height: 0; padding: 0; opacity: 0; pointer-events: none; 
 .grid-layout { display: grid; gap: 15px; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); }
 @media (min-width: 1100px) { .grid-layout { grid-template-columns: repeat(7, 1fr); align-items: start; } }
 
-/* Focus Dimming Effect */
 main.has-focus .month-block { z-index: 10; } 
 main.has-focus .card-wrapper { opacity: 0.2; filter: grayscale(100%); transition: opacity 0.3s; }
-/* Maar als Isolatie aan staat, verbergen we de rest helemaal (wordt geregeld via gefilterdeEvents), styling hier is voor focus zonder isolatie */
 
 /* Floating Controls */
 .floating-controls {
