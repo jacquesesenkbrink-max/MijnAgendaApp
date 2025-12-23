@@ -2,8 +2,8 @@
 import { ref, watch } from 'vue'
 
 const props = defineProps({
-  isOpen: Boolean,
-  editItem: Object,
+  show: Boolean,        // AANGEPAST: matcht nu met App.vue (:show)
+  item: Object,         // AANGEPAST: matcht nu met App.vue (:item)
   availableDates: {
     type: Object,
     default: () => ({})
@@ -12,15 +12,16 @@ const props = defineProps({
 
 const emit = defineEmits(['close', 'save'])
 
-const formData = ref({
+// Leeg formulier template
+const defaultForm = {
   id: null,
   title: '',
-  indiener: '',
-  portefeuillehouder: '',
-  domein: '',
-  status: 'Concept',
-  prioriteit: 'Normaal',
-  toelichting: '',
+  indiener: '',             // Nieuw veld
+  portefeuillehouder: '',   // Nieuw veld
+  domein: '',               // Nieuw veld
+  status: 'Concept',        // Nieuw veld
+  prioriteit: 'Normaal',    // Nieuw veld
+  toelichting: '',          // Nieuw veld
   schedule: {
     PFO: '',
     DBBesluit: '',
@@ -29,31 +30,37 @@ const formData = ref({
     ABBrief: '',
     Delta: '',
     ABBesluit: ''
-  }
-})
+  },
+  // Oude velden behouden voor backward compatibility
+  ph: '', 
+  dir: '',
+  strategicLabel: '',
+  comments: ''
+}
 
-// Wanneer de modal opent of het item wijzigt, vul de velden
-watch(() => props.editItem, (newItem) => {
+const formData = ref({ ...defaultForm })
+
+// Wanneer het venster opent of het item wijzigt
+watch(() => props.item, (newItem) => {
   if (newItem) {
-    // We maken een diepe kopie om referenties te verbreken tijdens het editen
-    formData.value = JSON.parse(JSON.stringify(newItem))
+    // We maken een kopie van het item
+    const copy = JSON.parse(JSON.stringify(newItem))
     
-    // Zorg dat schedule object bestaat, ook als het in de data ontbreekt
-    if (!formData.value.schedule) {
-      formData.value.schedule = {
-        PFO: '',
-        DBBesluit: '',
-        DBSchrift: '',
-        DBInformeel: '',
-        ABBrief: '',
-        Delta: '',
-        ABBesluit: ''
-      }
-    }
+    // Zorg dat het schedule object bestaat
+    if (!copy.schedule) copy.schedule = { ...defaultForm.schedule }
+    
+    formData.value = copy
+  } else {
+    // Reset naar leeg bij "Nieuw"
+    formData.value = JSON.parse(JSON.stringify(defaultForm))
+    formData.value.id = Date.now() // Tijdelijk ID voor nieuwe items
   }
 }, { immediate: true })
 
 const save = () => {
+  // Sync oude velden met nieuwe voor compatibility (optioneel)
+  if(formData.value.portefeuillehouder) formData.value.ph = formData.value.portefeuillehouder
+  
   emit('save', formData.value)
 }
 
@@ -63,17 +70,17 @@ const cancel = () => {
 </script>
 
 <template>
-  <div v-if="isOpen" class="modal-overlay" @click.self="cancel">
+  <div v-if="show" class="modal-overlay" @click.self="cancel">
     <div class="modal-content">
       <div class="modal-header">
-        <h2>Agendapunt Bewerken</h2>
+        <h2>{{ item ? 'Agendapunt Bewerken' : 'Nieuw Agendapunt' }}</h2>
         <button class="close-btn" @click="cancel">&times;</button>
       </div>
 
       <div class="modal-body">
         <div class="form-group">
-          <label>Onderwerp</label>
-          <input type="text" v-model="formData.title" placeholder="Bijv. Jaarstukken 2024">
+          <label>Onderwerp Titel</label>
+          <input type="text" v-model="formData.title" placeholder="Bijv. Jaarstukken 2024" autofocus>
         </div>
 
         <div class="grid-2">
@@ -82,21 +89,31 @@ const cancel = () => {
             <input type="text" v-model="formData.indiener">
           </div>
           <div class="form-group">
-            <label>Portefeuillehouder</label>
+            <label>Portefeuillehouder (PH)</label>
             <select v-model="formData.portefeuillehouder">
               <option value="">-- Selecteer --</option>
-              <option>Burgemeester</option>
-              <option>Wethouder Financiën</option>
-              <option>Wethouder Ruimte</option>
-              <option>Wethouder Sociaal</option>
+              <option>D.S. Schoonman</option>
+              <option>H.J. Pereboom</option>
+              <option>N. Koks</option>
+              <option>J.C.G. Wijnen</option>
+              <option>M. Wesselink</option>
+              <option>F. Stienstra</option>
             </select>
           </div>
         </div>
 
         <div class="grid-2">
           <div class="form-group">
-            <label>Domein / Team</label>
-            <input type="text" v-model="formData.domein">
+            <label>Strategisch Label</label>
+            <select v-model="formData.strategicLabel">
+               <option value="">-- Kies Label --</option>
+               <option>Beleid</option>
+               <option>Uitvoering</option>
+               <option>Kaders</option>
+               <option>Organisatiegesteldheid</option>
+               <option>Externe ontwikkelingen</option>
+               <option>Evaluatie</option>
+            </select>
           </div>
           <div class="form-group">
             <label>Status</label>
@@ -110,8 +127,8 @@ const cancel = () => {
         </div>
 
         <div class="form-group">
-          <label>Toelichting</label>
-          <textarea v-model="formData.toelichting" rows="3"></textarea>
+          <label>Toelichting / Opmerkingen</label>
+          <textarea v-model="formData.comments" rows="3" placeholder="Interne notities..."></textarea>
         </div>
 
         <hr class="divider">
@@ -232,11 +249,13 @@ const cancel = () => {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  background: #f8f9fa;
 }
 
 .modal-header h2 {
   margin: 0;
   font-size: 1.25rem;
+  color: #2c3e50;
 }
 
 .close-btn {
@@ -246,6 +265,7 @@ const cancel = () => {
   cursor: pointer;
   color: #666;
 }
+.close-btn:hover { color: #000; }
 
 .modal-body {
   padding: 24px;
@@ -275,19 +295,20 @@ const cancel = () => {
 .form-group label {
   display: block;
   margin-bottom: 6px;
-  font-weight: 500;
+  font-weight: 600;
   font-size: 0.9rem;
-  color: #374151;
+  color: #34495e;
 }
 
 .form-group input,
 .form-group select,
 .form-group textarea {
   width: 100%;
-  padding: 8px 12px;
+  padding: 10px;
   border: 1px solid #d1d5db;
   border-radius: 4px;
   font-size: 0.95rem;
+  font-family: inherit;
 }
 
 .form-group input:focus,
@@ -321,23 +342,32 @@ const cancel = () => {
 }
 
 .btn-cancel {
-  padding: 8px 16px;
+  padding: 10px 20px;
   background: white;
   border: 1px solid #d1d5db;
   border-radius: 4px;
   cursor: pointer;
+  font-weight: bold;
+  color: #555;
 }
+.btn-cancel:hover { background: #f0f0f0; }
 
 .btn-save {
-  padding: 8px 16px;
-  background: #2563eb;
+  padding: 10px 20px;
+  background: #27ae60;
   color: white;
   border: none;
   border-radius: 4px;
   cursor: pointer;
+  font-weight: bold;
 }
 
 .btn-save:hover {
-  background: #1d4ed8;
+  background: #219150;
+}
+
+/* Mobiel aanpassing */
+@media (max-width: 600px) {
+    .grid-2 { grid-template-columns: 1fr; }
 }
 </style>
