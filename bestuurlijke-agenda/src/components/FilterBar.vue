@@ -88,6 +88,7 @@ function kiesPH() {
       <button class="filter-btn btn-strat" :class="{ selected: actiefFilter === 'Evaluatie' }" @click="kiesLabel('Evaluatie')">Evaluatie</button>
       <button class="filter-btn btn-strat" :class="{ selected: actiefFilter === 'Organisatiegesteldheid' }" @click="kiesLabel('Organisatiegesteldheid')">Organisatie</button>
       <button class="filter-btn btn-strat" :class="{ selected: actiefFilter === 'Externe ontwikkelingen' }" @click="kiesLabel('Externe ontwikkelingen')">Externe ontw.</button>
+      <button class="filter-btn btn-strat" :class="{ selected: actiefFilter === 'P&C' }" @click="kiesLabel('P&C')">P&C</button>
     </div>
 
     <div class="filter-divider"><span>Periode</span></div>
