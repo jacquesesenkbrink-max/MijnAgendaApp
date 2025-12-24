@@ -1,57 +1,49 @@
 <script setup>
 import { computed } from 'vue';
 
+// We ontvangen de gefilterde items. 
+// Let op: dit zijn "events", dus we moeten ze terugbrengen naar unieke onderwerpen (topics).
 const props = defineProps({
   items: Array
 });
 
-// We groeperen de 'events' (die nu losse regels zijn) terug naar unieke items.
-// Dit voorkomt dubbele regels voor hetzelfde agendapunt.
-const uniqueItems = computed(() => {
-    const itemMap = new Map();
+// Helper voor kleuren bolletjes
+const typeColors = { 
+  'PFO': 'var(--c-pfo)', 
+  'DBBesluit': 'var(--c-db-besluit)', 
+  'DBInformeel': 'var(--c-db-informeel)',
+  'ABBesluit': 'var(--c-ab-besluit)', 
+  'Delta': 'var(--c-delta)' 
+};
 
-    props.items.forEach(event => {
-        // We gebruiken het topicId om items te groeperen
-        const id = event.topicId;
-        
-        if (!itemMap.has(id)) {
-            // Als dit item nog niet bestaat, maken we een basis entry
-            itemMap.set(id, {
-                id: id,
-                title: event.title,
-                ph: event.ph,
-                dir: event.dir,
-                strategicLabel: event.strategicLabel,
-                administrativeContact: event.originalItem?.administrativeContact || '',
-                // We houden een lijstje bij van de planningen
-                schedule: {} 
+// --- 1. TRANSFORMATIE: VAN EVENTS NAAR UNIEKE TOPICS ---
+const uniqueTopics = computed(() => {
+    const topicMap = new Map();
+
+    props.items.forEach(ev => {
+        // We gebruiken het ID van het originele item om te groeperen
+        if (!topicMap.has(ev.topicId)) {
+            topicMap.set(ev.topicId, {
+                id: ev.topicId,
+                title: ev.title,
+                ph: ev.ph,
+                dir: ev.dir,
+                contact: ev.originalItem.administrativeContact,
+                label: ev.strategicLabel,
+                // We pakken de VOLLEDIGE planning van het originele item
+                schedule: ev.originalItem.schedule || {}
             });
         }
-
-        // Voeg de datum toe aan de juiste fase in het schedule object
-        const entry = itemMap.get(id);
-        
-        // Sla de datum op onder het type (bijv. 'PFO', 'DBBesluit')
-        // We slaan ook het volledige event op als je later tooltips wilt
-        entry.schedule[event.type] = {
-            dateDisplay: event.dateDisplay,
-            dateObj: event.dateObj
-        };
     });
 
-    // Converteer de Map terug naar een Array en sorteer eventueel (bijv. op titel)
-    return Array.from(itemMap.values()).sort((a, b) => a.title.localeCompare(b.title));
+    // Omzetten naar array en sorteren (bijv. op datum van PFO, of als die leeg is, op titel)
+    return Array.from(topicMap.values()).sort((a, b) => {
+        const dateA = a.schedule.PFO ? new Date(a.schedule.PFO.split('-').reverse().join('-')) : new Date(9999, 11, 31);
+        const dateB = b.schedule.PFO ? new Date(b.schedule.PFO.split('-').reverse().join('-')) : new Date(9999, 11, 31);
+        return dateA - dateB;
+    });
 });
 
-// Hulpfunctie om te checken of een datum in het verleden ligt (voor styling)
-function isPast(dateObj) {
-    if (!dateObj) return false;
-    const today = new Date();
-    today.setHours(0,0,0,0);
-    return dateObj < today;
-}
-
-// Print functie
 function printReport() {
     window.print();
 }
@@ -59,201 +51,173 @@ function printReport() {
 
 <template>
   <div class="report-container">
-    <div class="report-header no-print">
-        <h2>📄 Compact Tabeloverzicht</h2>
-        <button @click="printReport" class="print-btn">🖨️ Print Tabel</button>
+    <div class="report-header">
+        <div class="header-title">
+            <h2>📄 Compact Tabeloverzicht</h2>
+            <small>Totaal: {{ uniqueTopics.length }} onderwerpen in huidige selectie</small>
+        </div>
+        <button class="print-btn no-print" @click="printReport">🖨️ Print Tabel</button>
     </div>
 
-    <div v-if="uniqueItems.length === 0" class="empty-msg">
-        Geen items gevonden met de huidige filters.
+    <div class="table-responsive">
+        <table class="matrix-table">
+            <thead>
+                <tr>
+                    <th style="width: 25%;">Onderwerp</th>
+                    <th style="width: 15%;">Betrokkenen</th>
+                    <th style="width: 10%;">Label</th>
+                    
+                    <th class="col-date">PFO</th>
+                    <th class="col-date">Informeel DB</th> <th class="col-date">DB Besluit</th>
+                    <th class="col-date">Delta</th>        <th class="col-date">AB Besluit</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr v-for="topic in uniqueTopics" :key="topic.id">
+                    <td>
+                        <div class="topic-title">{{ topic.title }}</div>
+                    </td>
+
+                    <td>
+                        <div class="meta-text"><strong>PH:</strong> {{ topic.ph }}</div>
+                        <div v-if="topic.contact" class="meta-text">🗣️ {{ topic.contact }}</div>
+                        <div class="meta-text" style="color:#999">Dir: {{ topic.dir }}</div>
+                    </td>
+
+                    <td>
+                        <span v-if="topic.label" class="label-badge">{{ topic.label }}</span>
+                    </td>
+
+                    <td class="cell-date">
+                        <div v-if="topic.schedule.PFO" class="date-pill" style="border-left-color: var(--c-pfo)">
+                            <span class="dot" style="background: var(--c-pfo)"></span>
+                            {{ topic.schedule.PFO }}
+                        </div>
+                    </td>
+
+                    <td class="cell-date">
+                        <div v-if="topic.schedule.DBInformeel" class="date-pill" style="border-left-color: var(--c-db-informeel)">
+                            <span class="dot" style="background: var(--c-db-informeel)"></span>
+                            {{ topic.schedule.DBInformeel }}
+                        </div>
+                    </td>
+
+                    <td class="cell-date">
+                        <div v-if="topic.schedule.DBBesluit" class="date-pill" style="border-left-color: var(--c-db-besluit)">
+                            <span class="dot" style="background: var(--c-db-besluit)"></span>
+                            {{ topic.schedule.DBBesluit }}
+                        </div>
+                    </td>
+
+                    <td class="cell-date">
+                        <div v-if="topic.schedule.Delta" class="date-pill" style="border-left-color: var(--c-delta)">
+                            <span class="dot" style="background: var(--c-delta)"></span>
+                            {{ topic.schedule.Delta }}
+                        </div>
+                    </td>
+
+                    <td class="cell-date">
+                        <div v-if="topic.schedule.ABBesluit" class="date-pill" style="border-left-color: var(--c-ab-besluit)">
+                            <span class="dot" style="background: var(--c-ab-besluit)"></span>
+                            {{ topic.schedule.ABBesluit }}
+                        </div>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+
+        <div v-if="uniqueTopics.length === 0" class="empty-msg">
+            Geen onderwerpen gevonden met de huidige filters.
+        </div>
     </div>
-
-    <table v-else class="report-table">
-        <thead>
-            <tr>
-                <th style="width: 25%">Onderwerp</th>
-                <th style="width: 10%">Betrokkenen</th>
-                <th style="width: 10%">Label</th>
-                
-                <th style="width: 15%" class="date-col-header">PFO</th>
-                <th style="width: 15%" class="date-col-header">DB</th>
-                <th style="width: 15%" class="date-col-header">AB / Delta</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr v-for="item in uniqueItems" :key="item.id">
-                <td>
-                    <div class="title">{{ item.title }}</div>
-                    <div class="sub-text" v-if="item.administrativeContact">
-                        🗣️ {{ item.administrativeContact }}
-                    </div>
-                </td>
-
-                <td>
-                    <div class="ph-tag" v-if="item.ph">{{ item.ph }}</div>
-                    <div class="dir-text" v-if="item.dir">Dir: {{ item.dir }}</div>
-                </td>
-
-                <td>
-                    <span v-if="item.strategicLabel" class="label-badge">{{ item.strategicLabel }}</span>
-                </td>
-
-                <td class="date-cell">
-                    <div v-if="item.schedule.PFO" class="date-badge pfo" :class="{ past: isPast(item.schedule.PFO.dateObj) }">
-                        <span class="dot"></span> {{ item.schedule.PFO.dateDisplay }}
-                    </div>
-                </td>
-
-                <td class="date-cell">
-                    <div v-if="item.schedule.DBBesluit" class="date-badge db-besluit" :class="{ past: isPast(item.schedule.DBBesluit.dateObj) }">
-                        <span class="dot"></span> {{ item.schedule.DBBesluit.dateDisplay }}
-                    </div>
-                    <div v-if="item.schedule.DBInformeel" class="date-badge db-informeel" :class="{ past: isPast(item.schedule.DBInformeel.dateObj) }">
-                        <span class="dot"></span> Info: {{ item.schedule.DBInformeel.dateDisplay }}
-                    </div>
-                </td>
-
-                <td class="date-cell">
-                    <div v-if="item.schedule.ABBesluit" class="date-badge ab" :class="{ past: isPast(item.schedule.ABBesluit.dateObj) }">
-                        <span class="dot"></span> AB: {{ item.schedule.ABBesluit.dateDisplay }}
-                    </div>
-                    <div v-if="item.schedule.Delta" class="date-badge delta" :class="{ past: isPast(item.schedule.Delta.dateObj) }">
-                        <span class="dot"></span> Delta: {{ item.schedule.Delta.dateDisplay }}
-                    </div>
-                </td>
-            </tr>
-        </tbody>
-    </table>
   </div>
 </template>
 
 <style scoped>
-.report-container {
-    background: white;
-    padding: 20px;
-    border-radius: 8px;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-    overflow-x: auto;
+.report-container { 
+    background: white; 
+    padding: 25px; 
+    border-radius: 8px; 
+    box-shadow: 0 4px 15px rgba(0,0,0,0.05); 
 }
 
-.report-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 20px;
-    padding-bottom: 10px;
-    border-bottom: 1px solid #eee;
+.report-header { 
+    display: flex; 
+    justify-content: space-between; 
+    align-items: center; 
+    margin-bottom: 20px; 
+    border-bottom: 2px solid #f0f0f0; 
+    padding-bottom: 15px;
 }
 
-.print-btn {
-    background: #2c3e50;
-    color: white;
-    border: none;
-    padding: 8px 15px;
-    border-radius: 4px;
-    cursor: pointer;
-    font-weight: bold;
+.header-title h2 { margin: 0; color: #2c3e50; }
+.header-title small { color: #7f8c8d; }
+
+.print-btn { 
+    background: #2c3e50; color: white; border: none; 
+    padding: 8px 16px; border-radius: 4px; cursor: pointer; font-weight: bold; 
+}
+.print-btn:hover { background: #34495e; }
+
+.table-responsive { overflow-x: auto; }
+
+.matrix-table { 
+    width: 100%; 
+    border-collapse: separate; 
+    border-spacing: 0; 
+    font-size: 0.9rem; 
 }
 
-.empty-msg {
-    text-align: center;
-    color: #777;
-    font-style: italic;
-    padding: 40px;
-}
-
-.report-table {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: 0.9rem;
-}
-
-.report-table th {
+.matrix-table th { 
+    background: #f8fafc; 
+    color: #64748b; 
+    font-weight: 700; 
+    text-transform: uppercase; 
+    font-size: 0.75rem; 
+    padding: 12px 15px; 
+    border-bottom: 2px solid #e2e8f0; 
     text-align: left;
-    padding: 12px 8px;
-    background-color: #f8f9fa;
-    border-bottom: 2px solid #ddd;
-    color: #555;
-    font-weight: bold;
 }
 
-.report-table td {
-    padding: 10px 8px;
-    border-bottom: 1px solid #eee;
-    vertical-align: top;
+.matrix-table td { 
+    padding: 12px 15px; 
+    border-bottom: 1px solid #f1f5f9; 
+    vertical-align: top; 
 }
 
-.title {
-    font-weight: 600;
-    color: #2c3e50;
-    margin-bottom: 4px;
+.matrix-table tr:last-child td { border-bottom: none; }
+.matrix-table tr:hover td { background-color: #fcfcfc; }
+
+/* Inhoud Styling */
+.topic-title { font-weight: 600; color: #2c3e50; line-height: 1.4; }
+.meta-text { font-size: 0.8rem; color: #555; margin-bottom: 2px; }
+
+.label-badge { 
+    background: #eef2f6; color: #475569; 
+    padding: 4px 8px; border-radius: 12px; 
+    font-size: 0.75rem; font-weight: 600; white-space: nowrap;
 }
 
-.sub-text {
-    font-size: 0.8rem;
-    color: #888;
-}
-
-.ph-tag {
-    font-weight: bold;
-    font-size: 0.85rem;
-    color: #34495e;
-}
-
-.dir-text {
-    font-size: 0.8rem;
-    color: #7f8c8d;
-}
-
-.label-badge {
-    background: #eef2f5;
-    color: #555;
-    padding: 3px 8px;
-    border-radius: 12px;
-    font-size: 0.75rem;
-    display: inline-block;
-}
-
-/* Datum Badges */
-.date-cell {
-    white-space: nowrap;
-}
-
-.date-badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    padding: 2px 0;
-    margin-bottom: 4px;
-    font-size: 0.85rem;
-    color: #333;
-}
-
-.date-badge.past {
-    opacity: 0.5;
-    text-decoration: line-through;
+/* Datum Styling */
+.col-date { width: 110px; }
+.date-pill {
+    display: flex; align-items: center; gap: 6px;
+    font-family: monospace; font-size: 0.85rem; color: #333;
+    background: #fff; 
+    /* Subtiel randje links voor kleurherkenning */
+    border-left: 3px solid #ccc; 
+    padding-left: 8px;
 }
 
 .dot {
-    width: 10px;
-    height: 10px;
-    border-radius: 50%;
-    display: inline-block;
-    flex-shrink: 0;
+    width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0;
 }
 
-/* Kleuren van de bolletjes (overeenkomstig met CSS vars) */
-.pfo .dot { background-color: var(--c-pfo); }
-.db-besluit .dot { background-color: var(--c-db-besluit); }
-.db-informeel .dot { background-color: var(--c-db-informeel); }
-.ab .dot { background-color: var(--c-ab-besluit); }
-.delta .dot { background-color: var(--c-delta); }
+.empty-msg { text-align: center; padding: 40px; color: #999; font-style: italic; }
 
 @media print {
     .no-print { display: none; }
     .report-container { box-shadow: none; padding: 0; }
-    .report-table { font-size: 0.8rem; }
-    /* Zorg dat achtergrondkleuren (bolletjes) geprint worden */
-    .dot { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .matrix-table th { background: #eee !important; color: #000; }
 }
 </style>
