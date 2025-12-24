@@ -2,14 +2,15 @@
 import { ref, computed } from 'vue';
 
 const props = defineProps({
-  items: Array
+  items: Array,
+  isAdmin: Boolean // NIEUW: We ontvangen de admin status
 });
 
 // Event om naar de parent te sturen voor navigatie
 const emit = defineEmits(['navigate-to-topic']);
 
 // --- STATE ---
-const isCompact = ref(false); // Default op 'Gedetailleerd' zoals gevraagd, maar switchbaar
+const isCompact = ref(false); 
 
 // --- COMPUTED: STATISTIEKEN ---
 const monthNames = ["Januari", "Februari", "Maart", "April", "Mei", "Juni", "Juli", "Augustus", "September", "Oktober", "November", "December"];
@@ -34,7 +35,6 @@ const busyMonths = computed(() => monthStats.value.filter(m => m.count > 7).map(
 
 // --- COMPUTED: COMPACTE LIJST (UNIEKE ONDERWERPEN) ---
 const compactItems = computed(() => {
-    // We gebruiken een Map om unieke items op te slaan op basis van ID
     const uniqueMap = new Map();
     
     props.items.forEach(ev => {
@@ -43,7 +43,6 @@ const compactItems = computed(() => {
         uniqueMap.set(item.id, item);
     });
 
-    // Terug naar array en sorteren (bijv. op titel of PFO datum, hier titel)
     return Array.from(uniqueMap.values()).sort((a, b) => a.title.localeCompare(b.title));
 });
 
@@ -153,7 +152,7 @@ const typeLabels = {
                 </td>
                 <td>
                     <strong>{{ ev.title }}</strong>
-                    <div v-if="ev.comments" class="table-note">Opmerking: {{ ev.comments }}</div>
+                    <div v-if="isAdmin && ev.comments" class="table-note">Opmerking: {{ ev.comments }}</div>
                 </td>
                 <td>
                     <small>PH: {{ ev.ph || '-' }}<br>
@@ -188,7 +187,7 @@ const typeLabels = {
             >
                 <td>
                     <strong>{{ item.title }}</strong>
-                    <div v-if="item.comments" class="table-note">{{ item.comments }}</div>
+                    <div v-if="isAdmin && item.comments" class="table-note">{{ item.comments }}</div>
                 </td>
                 <td>
                     {{ item.ph }}

@@ -334,7 +334,7 @@
             <h1>Bestuurlijke Planning WDODelta</h1>
             <p class="subtitle">Vue Versie v11.5 (PH Strict Trace)</p>
         </div>
-        </div>
+    </div>
     
     <div class="header-actions">
       <div class="view-toggle">
@@ -431,6 +431,7 @@
     <div v-else-if="viewMode === 'table'" class="container">
         <ReportView 
           :items="gefilterdeEvents" 
+          :isAdmin="isAdmin"
           @navigate-to-topic="navigateToTopic" 
         />
     </div>
@@ -554,7 +555,6 @@ main.has-focus .card-wrapper { opacity: 0.2; filter: grayscale(100%); transition
 
 @keyframes popIn { from { transform: translate(-50%, 50px); } to { transform: translate(-50%, 0); } }
 
-/* NIEUW: Zwevende Admin Knop Stijl */
 .admin-floating-btn {
     position: fixed;
     bottom: 20px;
@@ -579,7 +579,7 @@ main.has-focus .card-wrapper { opacity: 0.2; filter: grayscale(100%); transition
     background: #34495e;
 }
 .admin-floating-btn.active {
-    background: #e74c3c; /* Rood als je bent ingelogd (om uit te loggen) */
+    background: #e74c3c; 
     border-color: #c0392b;
 }
 </style>
