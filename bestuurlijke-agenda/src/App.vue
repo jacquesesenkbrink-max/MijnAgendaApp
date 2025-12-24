@@ -155,15 +155,9 @@
                 // Toon alle fases van items die bij deze PH horen
                 list = list.filter(e => {
                     const item = e.originalItem;
-                    
-                    // VEILIGE CHECK: Split de string en kijk of de exacte naam erin zit
-                    // Dit voorkomt dat 'Jan' ook matcht met 'Jansen'
                     const phList = item.ph ? item.ph.split('/').map(n => n.trim()) : [];
                     const matchesPH = phList.includes(filterPH.value);
-                    
-                    // Check of het item wel een PFO fase heeft (anders hoort het niet in dit filter)
                     const hasPFO = !!item.schedule.PFO; 
-                    
                     return matchesPH && hasPFO;
                 });
             } 
@@ -230,20 +224,14 @@
     }
   }
 
-  // NIEUW: Navigeer vanuit tabel naar grid kaartje
+  // Navigeer vanuit tabel naar grid kaartje
   function navigateToTopic(topicId) {
-      // 1. Schakel view om
       viewMode.value = 'grid';
-      
-      // 2. Zet focus (zodat lijntjes tekenen)
       activeFocusId.value = topicId;
       showOnlyFocus.value = false;
 
-      // 3. Wacht tot Vue de DOM heeft geupdate (switchen van view kost tijd)
       nextTick(() => {
-          // Zoek de elementen. We proberen de fases in logische volgorde van links naar rechts.
           const preferredOrder = ['PFO', 'DBBesluit', 'DBInformeel', 'Delta', 'ABBesluit'];
-          
           let targetEl = null;
 
           for (const type of preferredOrder) {
@@ -251,15 +239,12 @@
               const el = document.getElementById(id);
               if (el) {
                   targetEl = el;
-                  break; // Gevonden! Stop met zoeken, want dit is de meest linkse.
+                  break; 
               }
           }
 
           if (targetEl) {
-              // Scrollen met wat marge zodat het mooi in het midden komt
               targetEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
-              
-              // Teken de lijntjes opnieuw voor de zekerheid
               drawConnections();
           }
       });
@@ -349,12 +334,7 @@
             <h1>Bestuurlijke Planning WDODelta</h1>
             <p class="subtitle">Vue Versie v11.5 (PH Strict Trace)</p>
         </div>
-        <div class="login-container">
-            <button class="login-btn" @click="handleAdminClick" :class="{ active: isAdmin }">
-                {{ isAdmin ? '🔓 Uitloggen' : '🔒 Admin Login' }}
-            </button>
         </div>
-    </div>
     
     <div class="header-actions">
       <div class="view-toggle">
@@ -481,6 +461,16 @@
     </div>
 
   </main>
+
+  <button 
+    class="admin-floating-btn" 
+    @click="handleAdminClick" 
+    :class="{ active: isAdmin }" 
+    :title="isAdmin ? 'Klik om uit te loggen' : 'Klik om in te loggen'"
+  >
+    {{ isAdmin ? '🔓 Uitloggen' : '🔒 Admin Login' }}
+  </button>
+
 </template>
 
 <style scoped>
@@ -563,4 +553,33 @@ main.has-focus .card-wrapper { opacity: 0.2; filter: grayscale(100%); transition
 .toggle-btn.active { background: #27ae60; color: white; }
 
 @keyframes popIn { from { transform: translate(-50%, 50px); } to { transform: translate(-50%, 0); } }
+
+/* NIEUW: Zwevende Admin Knop Stijl */
+.admin-floating-btn {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    z-index: 1000;
+    background: #2c3e50;
+    color: white;
+    border: 2px solid white;
+    padding: 10px 20px;
+    border-radius: 30px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+    cursor: pointer;
+    font-weight: bold;
+    transition: all 0.3s;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.admin-floating-btn:hover {
+    transform: scale(1.05) translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0,0,0,0.4);
+    background: #34495e;
+}
+.admin-floating-btn.active {
+    background: #e74c3c; /* Rood als je bent ingelogd (om uit te loggen) */
+    border-color: #c0392b;
+}
 </style>
