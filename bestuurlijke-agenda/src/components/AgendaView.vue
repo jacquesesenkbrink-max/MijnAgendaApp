@@ -194,7 +194,7 @@ function resetFilters() {
         
         <p class="intro-text">
             Beheer tijden/locaties en filter de lijst voor export.
-            <span v-if="isAdmin"><strong>(Admin modus actief: U kunt volgorde en tijdsduur aanpassen)</strong></span>
+            <span v-if="isAdmin"><strong>(Admin modus actief: U kunt volgorde, tijdsduur en soort stuk aanpassen)</strong></span>
         </p>
 
         <div class="filters-bar">
@@ -233,11 +233,13 @@ function resetFilters() {
             <div class="meeting-meta no-print">
                 <div class="input-group">
                     <label>🕐 Tijdstip:</label>
-                    <input v-model="meetingMeta[meeting.key + '_time']" placeholder="bijv. 09:00 - 10:30" />
+                    <input v-if="isAdmin" v-model="meetingMeta[meeting.key + '_time']" placeholder="bijv. 09:00 - 10:30" />
+                    <span v-else>{{ meetingMeta[meeting.key + '_time'] || '-' }}</span>
                 </div>
                 <div class="input-group">
                     <label>📍 Bespreekruimte:</label>
-                    <input v-model="meetingMeta[meeting.key + '_room']" placeholder="bijv. Kamer 3.02" />
+                    <input v-if="isAdmin" v-model="meetingMeta[meeting.key + '_room']" placeholder="bijv. Kamer 3.02" />
+                    <span v-else>{{ meetingMeta[meeting.key + '_room'] || '-' }}</span>
                 </div>
             </div>
 
@@ -294,6 +296,7 @@ function resetFilters() {
                         
                         <td v-if="getDocOptions(meeting.type).length > 0">
                             <select 
+                                v-if="isAdmin"
                                 class="no-print doc-type-select" 
                                 v-model="meetingMeta[item.uniqueId + '_docType']"
                             >
@@ -303,7 +306,7 @@ function resetFilters() {
                                 </option>
                             </select>
 
-                            <div class="print-only doc-type-print">
+                            <div :class="{ 'print-only': isAdmin, 'doc-type-text': !isAdmin }">
                                 {{ meetingMeta[item.uniqueId + '_docType'] || '-' }}
                             </div>
                         </td>
@@ -410,7 +413,7 @@ function resetFilters() {
     width: 100%; padding: 6px; border: 1px solid #ddd;
     border-radius: 4px; font-size: 0.9rem; background-color: #f9f9f9;
 }
-.doc-type-print { font-weight: bold; font-size: 0.9rem; }
+.doc-type-text { font-size: 0.9rem; color: #2c3e50; }
 
 /* Sort Buttons */
 .sort-col { display: flex; flex-direction: column; gap: 2px; align-items: center; }
@@ -436,7 +439,7 @@ function resetFilters() {
     .meeting-header { background: #eee !important; -webkit-print-color-adjust: exact; }
     body { background: white; }
     .agenda-view-container { width: 100%; max-width: none; }
-    /* Zorg dat duur wel zichtbaar blijft als tekst */
+    /* Zorg dat input velden verborgen zijn en text zichtbaar */
     .duration-input { display: none; }
     .duration-text { display: block; }
 }
