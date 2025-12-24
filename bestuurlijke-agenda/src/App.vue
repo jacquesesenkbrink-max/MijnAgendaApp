@@ -17,6 +17,12 @@
   import AgendaView from './components/AgendaView.vue';
   import DateManager from './components/DateManager.vue';
 
+  // --- CONFIGURATIE ---
+  // We gebruiken 'v2' om te forceren dat de nieuwe items.js wordt geladen
+  // en de oude cache (zonder P&C items) wordt genegeerd.
+  const STORAGE_KEY_DATA = 'mijn-agenda-data-v2';
+  const STORAGE_KEY_DATES = 'mijn-agenda-dates-v2';
+
   // --- DATA & STATE ---
   const agendaPunten = ref([]); 
   const viewMode = ref('grid'); 
@@ -56,19 +62,7 @@
 
   // --- INITIALISATIE ---
   onMounted(() => {
-    const opgeslagen = localStorage.getItem('mijn-agenda-data');
-    if (opgeslagen) {
-      agendaPunten.value = JSON.parse(opgeslagen);
-    } else {
-      agendaPunten.value = defaultItems;
-    }
-
-    const opgeslagenDatums = localStorage.getItem('mijn-agenda-dates');
-    if (opgeslagenDatums) {
-        activeDates.value = JSON.parse(opgeslagenDatums);
-    } else {
-        activeDates.value = JSON.parse(JSON.stringify(defaultDates));
-    }
+    loadData();
 
     if (sessionStorage.getItem('is-admin') === 'true') {
         isAdmin.value = true;
@@ -76,8 +70,36 @@
     window.addEventListener('resize', drawConnections);
   });
 
+  function loadData() {
+    // Probeer data uit local storage te halen (v2)
+    const opgeslagen = localStorage.getItem(STORAGE_KEY_DATA);
+    if (opgeslagen) {
+      agendaPunten.value = JSON.parse(opgeslagen);
+    } else {
+      // Als er niets staat (of we zitten op een nieuwe versie), laad de import
+      console.log("Geen opgeslagen data gevonden, loading defaults...");
+      agendaPunten.value = JSON.parse(JSON.stringify(defaultItems));
+    }
+
+    const opgeslagenDatums = localStorage.getItem(STORAGE_KEY_DATES);
+    if (opgeslagenDatums) {
+        activeDates.value = JSON.parse(opgeslagenDatums);
+    } else {
+        activeDates.value = JSON.parse(JSON.stringify(defaultDates));
+    }
+  }
+
+  // Functie om handmatig data te resetten naar items.js (nuttig tijdens testen)
+  function resetToDefaults() {
+    if(confirm("Weet je zeker dat je alle data wilt resetten naar de standaard items.js? Je kwijt gemaakte wijzigingen in de browser.")) {
+        agendaPunten.value = JSON.parse(JSON.stringify(defaultItems));
+        activeDates.value = JSON.parse(JSON.stringify(defaultDates));
+        alert("Data is gereset. De nieuwe P&C items zouden nu zichtbaar moeten zijn.");
+    }
+  }
+
   watch(agendaPunten, (nieuweLijst) => {
-    localStorage.setItem('mijn-agenda-data', JSON.stringify(nieuweLijst));
+    localStorage.setItem(STORAGE_KEY_DATA, JSON.stringify(nieuweLijst));
     if(activeFocusId.value) nextTick(() => drawConnections());
   }, { deep: true });
 
@@ -97,7 +119,7 @@
   });
 
   function saveDates() {
-    localStorage.setItem('mijn-agenda-dates', JSON.stringify(activeDates.value));
+    localStorage.setItem(STORAGE_KEY_DATES, JSON.stringify(activeDates.value));
   }
 
   // --- LOGICA & TRANSFORMATIE ---
@@ -167,7 +189,8 @@
             }
         }
         else {
-            // Label filter
+            // Label filter (Hier wordt P&C gefilterd)
+            // We zorgen dat we ook items pakken die P&C heten
             list = list.filter(e => e.strategicLabel === filterWaarde.value);
         }
     }
@@ -332,7 +355,7 @@
         <input type="file" ref="fileInput" @change="handleFileUpload" style="display: none" accept=".json">
         <div class="header-content">
             <h1>Bestuurlijke Planning WDODelta</h1>
-            <p class="subtitle">Vue Versie v11.5 (PH Strict Trace)</p>
+            <p class="subtitle">Vue Versie v11.6 (P&C Fix)</p>
         </div>
     </div>
     
@@ -349,6 +372,7 @@
             <div class="admin-group">
                 <span class="label">Acties:</span>
                 <button class="action-btn new" @click="openNieuw">+ Nieuw</button>
+                <button class="action-btn" @click="resetToDefaults" style="background: #e67e22;">🔄 Data Resetten</button>
             </div>
             <div class="admin-group">
                 <span class="label">Data:</span>
@@ -412,7 +436,7 @@
           </svg>
 
           <div v-if="gegroepeerdeLijst.length === 0" class="empty-state">
-             Geen punten gevonden. Probeer een ander filter.
+             Geen punten gevonden. Probeer een ander filter of ander jaar.
           </div>
           
           <div v-for="groep in gegroepeerdeLijst" :key="groep.sortKey" :id="'maand-' + groep.sortKey" class="month-block">
