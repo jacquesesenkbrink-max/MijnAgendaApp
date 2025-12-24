@@ -40,18 +40,25 @@ const statusColors = {
 const borderColor = computed(() => colors[props.event.type] || '#ccc');
 const phaseLabel = computed(() => labels[props.event.type] || props.event.type);
 
-// CRUCIALE WIJZIGING: Status per fase ophalen
-// We kijken in 'scheduleStatus' of er voor deze fase (bv. PFO) een status is.
+// Status per fase ophalen
 const currentStatus = computed(() => {
     const item = props.event.originalItem;
     if (item.scheduleStatus && item.scheduleStatus[props.event.type]) {
         return item.scheduleStatus[props.event.type];
     }
-    return 'Concept'; // Standaard waarde als er niks is ingevuld
+    return 'Concept'; 
 });
 
 // Tooltip tekst
 const tooltipText = computed(() => `${props.event.title} (${props.event.dateDisplay}) - ${currentStatus.value}`);
+
+// Helper om datums netjes te sorteren voor de lijst onderaan
+const sortedSchedule = computed(() => {
+    const s = props.event.originalItem.schedule || {};
+    // Probeer logische volgorde, of anders alfabetisch/datum
+    // We kunnen hier simpelweg de entries teruggeven
+    return Object.entries(s).map(([type, date]) => ({ type, date }));
+});
 </script>
 
 <template>
@@ -94,6 +101,9 @@ const tooltipText = computed(() => `${props.event.title} (${props.event.dateDisp
             
             <div class="role-grid">
                 <div class="role-item"><strong>PH:</strong> {{ event.ph }}</div>
+                
+                <div class="role-item" v-if="event.dir"><strong>Dir:</strong> {{ event.dir }}</div>
+
                 <div v-if="event.originalItem.administrativeContact" class="role-item highlight-contact">
                     <strong>🗣️:</strong> {{ event.originalItem.administrativeContact }}
                 </div>
@@ -108,6 +118,30 @@ const tooltipText = computed(() => `${props.event.title} (${props.event.dateDisp
                     👁 Details
                 </div>
             </div>
+
+            <div class="full-data-display">
+                <div class="data-divider"></div>
+                
+                <div v-if="event.originalItem.toelichting" class="extra-info-block">
+                    <em>{{ event.originalItem.toelichting }}</em>
+                </div>
+
+                <div class="extra-roles">
+                    <div v-if="event.originalItem.colleaguePH"><strong>Mede-PH:</strong> {{ event.originalItem.colleaguePH }}</div>
+                    <div v-if="event.originalItem.headOfDept"><strong>Afd. Hoofd:</strong> {{ event.originalItem.headOfDept }}</div>
+                </div>
+
+                <div class="schedule-list" v-if="sortedSchedule.length > 0">
+                    <strong>Planning:</strong>
+                    <ul>
+                        <li v-for="item in sortedSchedule" :key="item.type">
+                            <span class="sched-type">{{ labels[item.type] || item.type }}:</span> 
+                            <span class="sched-date">{{ item.date }}</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
         </template>
     </div>
   </div>
@@ -121,6 +155,7 @@ const tooltipText = computed(() => `${props.event.title} (${props.event.dateDisp
     transition: all 0.3s ease; position: relative; cursor: pointer;
     min-height: 140px; 
     opacity: 1; filter: grayscale(0%);
+    display: flex; flex-direction: column; /* Zorgt dat content rekt */
 }
 .card-wrapper:hover { transform: translateY(-3px); box-shadow: 0 8px 15px rgba(0,0,0,0.15); }
 
@@ -158,6 +193,8 @@ const tooltipText = computed(() => `${props.event.title} (${props.event.dateDisp
 .card-wrapper.view-dots.is-focused { border: 3px solid white; box-shadow: 0 0 0 3px #333; transform: scale(1.3); }
 
 /* --- INTERNE ELEMENTEN --- */
+.content { flex: 1; display: flex; flex-direction: column; }
+
 .header-row { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.5rem; }
 .date-badge { font-family: monospace; font-size: 0.75rem; color: #666; font-weight: bold; }
 
@@ -178,24 +215,47 @@ h3 { margin: 0; font-size: 0.75rem; text-transform: uppercase; color: #999; }
 h4 { margin: 0 0 10px 0; color: #2c3e50; font-size: 0.9rem; line-height: 1.3; }
 
 .role-grid { font-size: 0.75rem; color: #666; margin-bottom: 10px; }
+.role-item { margin-bottom: 2px; }
+
 .comments-box { background: #fff3cd; color: #856404; padding: 5px; border-radius: 4px; font-size: 0.75rem; margin-bottom: 5px; }
 
 .highlight-contact {
     color: #2c3e50;
-    margin-top: 2px;
+    margin-top: 4px;
     font-weight: 500;
     background: rgba(0,0,0,0.03);
     padding: 2px 4px;
     border-radius: 3px;
+    display: inline-block;
 }
 
 .actions { display: flex; gap: 5px; }
 .btn-icon { background: none; border: none; cursor: pointer; font-size: 1rem; opacity: 0.5; transition: 0.2s; }
 .btn-icon:hover { opacity: 1; transform: scale(1.2); }
 
-.card-footer { border-top: 1px solid #eee; padding-top: 5px; text-align: right; }
-.card-action-btn { font-size: 0.75rem; font-weight: bold; color: #3498db; text-transform: uppercase; cursor: pointer; }
+.card-footer { border-top: 1px solid #eee; padding-top: 5px; text-align: right; margin-top: auto; }
+.card-action-btn { font-size: 0.75rem; font-weight: bold; color: #3498db; text-transform: uppercase; cursor: pointer; display: inline-block; }
 .card-action-btn:hover { text-decoration: underline; }
+
+/* --- NIEUW: EXTRA DATA SECTIE --- */
+.full-data-display {
+    margin-top: 8px;
+    font-size: 0.75rem;
+    color: #555;
+    background: #fdfdfd;
+    padding: 5px;
+    border-radius: 4px;
+}
+.data-divider { border-top: 1px dashed #eee; margin-bottom: 8px; }
+
+.extra-info-block { margin-bottom: 6px; color: #777; line-height: 1.2; }
+.extra-roles { margin-bottom: 6px; }
+
+.schedule-list strong { display: block; margin-bottom: 2px; color: #333; }
+.schedule-list ul { list-style: none; padding: 0; margin: 0; }
+.schedule-list li { display: flex; justify-content: space-between; border-bottom: 1px solid #f0f0f0; padding: 1px 0; }
+.sched-type { color: #888; }
+.sched-date { font-weight: bold; color: #2c3e50; }
 
 @media (min-width: 1100px) {
     .col-PFO { grid-column: 1; }
