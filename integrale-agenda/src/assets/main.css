@@ -15,18 +15,17 @@
 
     /* --- Functional Phase Mapping --- */
     
-    /* DB Besluit -> Primary Blue */
-    --c-db-besluit: var(--wdod-blue);  
-    
-    /* AB Besluit -> Corporate Red */
-    --c-ab-besluit: var(--wdod-red);  
+    /* NIEUW: Ambtelijke Voorbereiding */
+    --c-pow: #3498db;          /* PO Water - Blauw */
+    --c-poo: #9b59b6;          /* PO Organisatie - Paars */
+    --c-dt:  #e67e22;          /* Directieteam - Oranje */
 
-    /* Delta -> Corporate Green */
-    --c-delta: var(--wdod-green);       
-
-    /* PFO & Informeel */
+    /* Bestaand: Bestuurlijk */
     --c-pfo: #5b2c6f;          /* Deep Purple */
+    --c-db-besluit: var(--wdod-blue);  
     --c-db-informeel: #1d7e91; /* Teal/Grey-Blue */
+    --c-delta: var(--wdod-green);       
+    --c-ab-besluit: var(--wdod-red);  
 }
 
 body {

@@ -254,7 +254,8 @@
       showOnlyFocus.value = false;
 
       nextTick(() => {
-          const preferredOrder = ['PFO', 'DBBesluit', 'DBInformeel', 'Delta', 'ABBesluit'];
+          // Uitgebreide lijst voor integrale navigatie
+          const preferredOrder = ['POW', 'POO', 'DT', 'PFO', 'DBBesluit', 'DBInformeel', 'Delta', 'ABBesluit'];
           let targetEl = null;
 
           for (const type of preferredOrder) {
@@ -554,9 +555,11 @@ header.collapsed { max-height: 0; padding: 0; opacity: 0; pointer-events: none; 
 .month-header::before { content: ''; position: absolute; left: 0; right: 0; top: 50%; height: 1px; background: #ccc; z-index: -1; }
 .month-badge { background-color: #fff; color: #2c3e50; border: 2px solid #2c3e50; padding: 5px 20px; border-radius: 30px; font-weight: bold; }
 .grid-layout { display: grid; gap: 15px; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); }
+
+/* AANGEPAST: Grid columns nu 8 breed */
 @media (min-width: 1100px) { 
     .grid-layout { 
-        grid-template-columns: repeat(5, 1fr); 
+        grid-template-columns: repeat(8, 1fr); 
         align-items: start; 
     } 
 }

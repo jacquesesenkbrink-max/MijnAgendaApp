@@ -10,8 +10,13 @@ const props = defineProps({
 
 const emit = defineEmits(['edit', 'delete', 'toggle-focus', 'open-details']);
 
-// Kleuren per fase (Gremium)
+// Kleuren per fase (Gremium) - Uitgebreid met Ambtelijk
 const colors = { 
+  // Nieuw
+  'POW': 'var(--c-pow)',
+  'POO': 'var(--c-poo)',
+  'DT': 'var(--c-dt)',
+  // Bestaand
   'PFO':'var(--c-pfo)', 
   'DBBesluit':'var(--c-db-besluit)', 
   'DBInformeel': 'var(--c-db-informeel)',
@@ -19,8 +24,11 @@ const colors = {
   'ABBesluit':'var(--c-ab-besluit)'
 };
 
-// Labels voor weergave fases
+// Labels voor weergave fases - Uitgebreid met Ambtelijk
 const labels = { 
+  'POW': 'PO Water',
+  'POO': 'PO Organisatie',
+  'DT': 'Directieteam',
   'PFO':'PFO', 
   'DBBesluit':'DB Besluit', 
   'DBInformeel': 'Informeel DB', 
@@ -206,11 +214,18 @@ h4 { margin: 0 0 10px 0; color: #2c3e50; font-size: 0.9rem; line-height: 1.3; }
 .card-action-btn { font-size: 0.75rem; font-weight: bold; color: #3498db; text-transform: uppercase; cursor: pointer; display: inline-block; }
 .card-action-btn:hover { text-decoration: underline; }
 
+/* AANGEPAST: Grid posities voor 8 kolommen */
 @media (min-width: 1100px) {
-    .col-PFO { grid-column: 1; }
-    .col-DBBesluit { grid-column: 2; }
-    .col-DBInformeel { grid-column: 3; }
-    .col-Delta { grid-column: 4; }
-    .col-ABBesluit { grid-column: 5; }
+    /* Ambtelijke Voorbereiding (Eerste 3 kolommen) */
+    .col-POW { grid-column: 1; }
+    .col-POO { grid-column: 2; }
+    .col-DT  { grid-column: 3; }
+
+    /* Bestuurlijke Besluitvorming (Verschoven naar 4-8) */
+    .col-PFO { grid-column: 4; }
+    .col-DBBesluit { grid-column: 5; }
+    .col-DBInformeel { grid-column: 6; }
+    .col-Delta { grid-column: 7; }
+    .col-ABBesluit { grid-column: 8; }
 }
 </style>

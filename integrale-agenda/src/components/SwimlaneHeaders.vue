@@ -1,6 +1,10 @@
 <script setup>
 // We definiëren de headers hier zodat we ze een kleur kunnen geven
+// VOLGORDE: Eerst ambtelijk, dan bestuurlijk
 const headers = [
+  { label: 'PO Water', color: 'var(--c-pow)' },
+  { label: 'PO Org', color: 'var(--c-poo)' },
+  { label: 'DT', color: 'var(--c-dt)' },
   { label: 'Portefeuille overleg', color: 'var(--c-pfo)' },
   { label: 'Formeel DB', color: 'var(--c-db-besluit)' },
   { label: 'Informeel DB', color: 'var(--c-db-informeel)' },
@@ -45,8 +49,8 @@ const headers = [
 
 .headers-grid {
   display: grid;
-  /* 5 kolommen, even breed + de gap die ook in App.vue wordt gebruikt */
-  grid-template-columns: repeat(5, 1fr); 
+  /* AANGEPAST: 8 kolommen in plaats van 5 */
+  grid-template-columns: repeat(8, 1fr); 
   gap: 15px; 
 }
 
