@@ -422,6 +422,7 @@
         :items="gefilterdeEvents" 
         :activeFilter="filterWaarde"
         :activeFocusId="activeFocusId" 
+        :isAdmin="isAdmin"
         @toggle-focus="toggleFocus"
         @item-click="openDetails" 
         />

@@ -3,10 +3,11 @@ import { ref, computed, onMounted, watch } from 'vue';
 
 const props = defineProps({
   items: Array,
-  activeFilter: String
+  activeFilter: String,
+  isAdmin: Boolean
 });
 
-// Opslag voor vergaderdetails (tijd/locatie/soort stuk)
+// Opslag voor vergaderdetails (tijd/locatie/soort stuk) én volgorde/tijdsduur
 const meetingMeta = ref({});
 
 // Filters
@@ -20,6 +21,11 @@ onMounted(() => {
 watch(meetingMeta, (newVal) => {
   localStorage.setItem('meeting-meta-data', JSON.stringify(newVal));
 }, { deep: true });
+
+// --- HELPER FUNCTIE VOOR VOLGORDE ---
+function getMeetingOrder(meetingKey) {
+    return meetingMeta.value[meetingKey + '_sortOrder'] || [];
+}
 
 // --- 1. DATA TRANSFORMATIE ---
 const agendaMeetings = computed(() => {
@@ -63,6 +69,30 @@ const agendaMeetings = computed(() => {
         meetingsMap[meetingKey].items.push(ev);
     });
 
+    // NU SORTEREN PER MEETING OP BASIS VAN OPGESLAGEN VOLGORDE
+    Object.values(meetingsMap).forEach(meeting => {
+        const orderArr = getMeetingOrder(meeting.key);
+        if (orderArr.length > 0) {
+            meeting.items.sort((a, b) => {
+                const idxA = orderArr.indexOf(a.uniqueId);
+                const idxB = orderArr.indexOf(b.uniqueId);
+                
+                // Als beide items een opgeslagen positie hebben
+                if (idxA !== -1 && idxB !== -1) return idxA - idxB;
+                
+                // Als alleen A in de lijst staat, komt die eerst
+                if (idxA !== -1) return -1;
+                
+                // Als alleen B in de lijst staat, komt die eerst
+                if (idxB !== -1) return 1;
+                
+                // Anders behoud originele volgorde (of sorteer op ID als fallback)
+                return 0;
+            });
+        }
+    });
+
+    // Sorteer meetings zelf op datum
     return Object.values(meetingsMap).sort((a, b) => a.dateObj - b.dateObj);
 });
 
@@ -90,6 +120,25 @@ const filteredMeetings = computed(() => {
     });
 });
 
+// --- ACTIES VOOR ADMIN (VOLGORDE) ---
+function moveItem(meeting, index, direction) {
+    const items = [...meeting.items]; // Kopieer huidige gesorteerde items
+    const targetIndex = index + direction;
+    
+    // Check grenzen
+    if (targetIndex < 0 || targetIndex >= items.length) return;
+    
+    // Wissel items in de array
+    const temp = items[index];
+    items[index] = items[targetIndex];
+    items[targetIndex] = temp;
+    
+    // Sla de NIEUWE volgorde van ID's op in meetingMeta
+    const newOrder = items.map(i => i.uniqueId);
+    meetingMeta.value[meeting.key + '_sortOrder'] = newOrder;
+}
+
+
 // --- HELPERS ---
 function mapTypeToTitle(type) {
     const labels = { 
@@ -109,22 +158,11 @@ function getDayName(dateObj) {
 // Bepaal de opties voor 'Soort Stuk' op basis van vergadering type
 function getDocOptions(type) {
     if (type.startsWith('DB')) {
-        return [
-            'Bespreekstuk', 
-            'Hamerstuk', 
-            'Schriftelijke mededeling', 
-            'Nader te bepalen'
-        ];
+        return ['Bespreekstuk', 'Hamerstuk', 'Schriftelijke mededeling', 'Nader te bepalen'];
     }
     if (type.startsWith('AB')) {
-        return [
-            'Bespreekstuk', 
-            'Hamerstuk', 
-            'Brief van DB aan AB', 
-            'Nader te bepalen'
-        ];
+        return ['Bespreekstuk', 'Hamerstuk', 'Brief van DB aan AB', 'Nader te bepalen'];
     }
-    // Voor PFO of andere types geen specifieke opties (kolom wordt verborgen of leeg)
     return [];
 }
 
@@ -156,6 +194,7 @@ function resetFilters() {
         
         <p class="intro-text">
             Beheer tijden/locaties en filter de lijst voor export.
+            <span v-if="isAdmin"><strong>(Admin modus actief: U kunt volgorde en tijdsduur aanpassen)</strong></span>
         </p>
 
         <div class="filters-bar">
@@ -210,7 +249,12 @@ function resetFilters() {
             <table class="agenda-table">
                 <thead>
                     <tr>
+                        <th v-if="isAdmin" style="width: 40px" class="no-print">Volgorde</th>
+                        
                         <th style="width: 30px">#</th>
+                        
+                        <th style="width: 80px">Tijd</th>
+                        
                         <th>Onderwerp</th>
                         <th v-if="getDocOptions(meeting.type).length > 0" style="width: 160px">Soort Stuk</th>
                         <th style="width: 150px">Betrokkenen</th>
@@ -219,7 +263,31 @@ function resetFilters() {
                 </thead>
                 <tbody>
                     <tr v-for="(item, index) in meeting.items" :key="item.uniqueId">
+                        
+                        <td v-if="isAdmin" class="no-print sort-col">
+                            <button class="sort-btn" @click="moveItem(meeting, index, -1)" :disabled="index === 0">▲</button>
+                            <button class="sort-btn" @click="moveItem(meeting, index, 1)" :disabled="index === meeting.items.length - 1">▼</button>
+                        </td>
+
                         <td class="index-col">{{ index + 1 }}.</td>
+
+                        <td>
+                            <div v-if="isAdmin" class="no-print">
+                                <input 
+                                    type="number" 
+                                    class="duration-input" 
+                                    v-model="meetingMeta[item.uniqueId + '_duration']" 
+                                    placeholder="min"
+                                >
+                            </div>
+                            <div v-if="!isAdmin || meetingMeta[item.uniqueId + '_duration']" class="duration-text">
+                                <span v-if="meetingMeta[item.uniqueId + '_duration']">
+                                    {{ meetingMeta[item.uniqueId + '_duration'] }} min
+                                </span>
+                                <span v-else style="color:#ccc">-</span>
+                            </div>
+                        </td>
+
                         <td>
                             <div class="topic-title">{{ item.title }}</div>
                         </td>
@@ -339,17 +407,26 @@ function resetFilters() {
 
 /* Doc type select */
 .doc-type-select {
-    width: 100%;
-    padding: 6px;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    font-size: 0.9rem;
-    background-color: #f9f9f9;
+    width: 100%; padding: 6px; border: 1px solid #ddd;
+    border-radius: 4px; font-size: 0.9rem; background-color: #f9f9f9;
 }
-.doc-type-print {
-    font-weight: bold;
-    font-size: 0.9rem;
+.doc-type-print { font-weight: bold; font-size: 0.9rem; }
+
+/* Sort Buttons */
+.sort-col { display: flex; flex-direction: column; gap: 2px; align-items: center; }
+.sort-btn {
+    background: #f0f0f0; border: 1px solid #ccc; cursor: pointer;
+    font-size: 0.6rem; padding: 2px 6px; border-radius: 3px; color: #555;
 }
+.sort-btn:hover:not(:disabled) { background: #e0e0e0; color: #000; }
+.sort-btn:disabled { opacity: 0.3; cursor: default; }
+
+/* Duration Input */
+.duration-input {
+    width: 60px; padding: 4px; border: 1px solid #ddd; 
+    border-radius: 4px; text-align: center; font-size: 0.9rem;
+}
+.duration-text { font-weight: bold; color: #2980b9; font-size: 0.9rem; }
 
 /* PRINT STYLES */
 @media print {
@@ -359,5 +436,8 @@ function resetFilters() {
     .meeting-header { background: #eee !important; -webkit-print-color-adjust: exact; }
     body { background: white; }
     .agenda-view-container { width: 100%; max-width: none; }
+    /* Zorg dat duur wel zichtbaar blijft als tekst */
+    .duration-input { display: none; }
+    .duration-text { display: block; }
 }
 </style>
