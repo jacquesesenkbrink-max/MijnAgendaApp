@@ -237,8 +237,8 @@ const cancel = () => {
 
         <hr class="divider">
 
-        <h3>J. Planning & Status</h3>
-        <p class="hint-text">Selecteer per fase de datum én de status (Concept/Afgerond).</p>
+        <h3>Planning & Status</h3>
+        <p class="hint-text">Selecteer per fase de datum én de status.</p>
         
         <div class="date-grid">
             <div class="form-group schedule-block">
