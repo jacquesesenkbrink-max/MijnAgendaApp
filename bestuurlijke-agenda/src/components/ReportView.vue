@@ -3,7 +3,7 @@ import { ref, computed } from 'vue';
 
 const props = defineProps({
   items: Array,
-  isAdmin: Boolean // NIEUW: We ontvangen de admin status
+  isAdmin: Boolean
 });
 
 // Event om naar de parent te sturen voor navigatie
@@ -35,6 +35,9 @@ const busyMonths = computed(() => monthStats.value.filter(m => m.count > 7).map(
 
 // --- COMPUTED: COMPACTE LIJST (UNIEKE ONDERWERPEN) ---
 const compactItems = computed(() => {
+    // We gebruiken een Map om de items te ontdubbelen.
+    // Omdat 'props.items' al gesorteerd is op datum (vanuit App.vue), 
+    // zal de invoegvolgorde in de Map automatisch chronologisch zijn op basis van de EERSTE keer dat een item voorkomt.
     const uniqueMap = new Map();
     
     props.items.forEach(ev => {
@@ -43,7 +46,8 @@ const compactItems = computed(() => {
         uniqueMap.set(item.id, item);
     });
 
-    return Array.from(uniqueMap.values()).sort((a, b) => a.title.localeCompare(b.title));
+    // We geven de waarden terug in invoegvolgorde (dus CHRONOLOGISCH ipv alfabetisch)
+    return Array.from(uniqueMap.values());
 });
 
 // --- HELPERS ---
@@ -124,7 +128,7 @@ const typeLabels = {
     </div>
 
     <div class="list-header">
-        <h3>{{ isCompact ? 'Compact Overzicht per Onderwerp' : 'Gedetailleerd Tijdlijn Overzicht' }}</h3>
+        <h3>{{ isCompact ? 'Compact Overzicht (Chronologisch)' : 'Gedetailleerd Tijdlijn Overzicht' }}</h3>
         <p class="hint-text">💡 Klik op een rij om naar het kaartje te springen.</p>
     </div>
     
@@ -171,11 +175,12 @@ const typeLabels = {
             <tr>
                 <th>Onderwerp</th>
                 <th style="width:100px">PH</th>
-                <th class="col-date">PFO</th>
-                <th class="col-date">Inf. DB</th>
-                <th class="col-date">DB Besluit</th>
-                <th class="col-date">Delta</th>
-                <th class="col-date">AB Besluit</th>
+                
+                <th class="col-date col-pfo">PFO</th>
+                <th class="col-date col-inf">Inf. DB</th>
+                <th class="col-date col-db">DB Besluit</th>
+                <th class="col-date col-delta">Delta</th>
+                <th class="col-date col-ab">AB Besluit</th>
             </tr>
         </thead>
         <tbody>
@@ -269,7 +274,24 @@ const typeLabels = {
 .table-note { color: #c0392b; font-style: italic; font-size: 0.75rem; margin-top: 4px; }
 
 /* Compact Table specifics */
-.compact-table th.col-date { width: 90px; text-align: center; font-size: 0.8rem; }
-.compact-table td.center-text { text-align: center; white-space: nowrap; }
+.compact-table th.col-date { 
+    width: 90px; 
+    text-align: center; 
+    font-size: 0.8rem;
+    border-top-width: 3px;
+    border-top-style: solid;
+}
+/* Kleuren per kolom header voor herkenbaarheid */
+.compact-table th.col-pfo   { border-top-color: var(--c-pfo); }
+.compact-table th.col-inf   { border-top-color: var(--c-db-informeel); }
+.compact-table th.col-db    { border-top-color: var(--c-db-besluit); }
+.compact-table th.col-delta { border-top-color: var(--c-delta); }
+.compact-table th.col-ab    { border-top-color: var(--c-ab-besluit); }
+
+.compact-table td.center-text { 
+    text-align: center; 
+    white-space: nowrap; 
+    font-variant-numeric: tabular-nums; /* Zorgt dat getallen mooi onder elkaar lijnen */
+}
 .compact-table th { white-space: nowrap; }
 </style>
