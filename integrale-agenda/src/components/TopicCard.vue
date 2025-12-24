@@ -10,21 +10,23 @@ const props = defineProps({
 
 const emit = defineEmits(['edit', 'delete', 'toggle-focus', 'open-details']);
 
-// Kleuren per fase (Gremium) - Uitgebreid met Ambtelijk
+// Kleuren per fase (Gremium) - Nu compleet met ABBrief
 const colors = { 
-  // Nieuw
+  // Ambtelijk
   'POW': 'var(--c-pow)',
   'POO': 'var(--c-poo)',
   'DT': 'var(--c-dt)',
-  // Bestaand
+  
+  // Bestuurlijk
   'PFO':'var(--c-pfo)', 
   'DBBesluit':'var(--c-db-besluit)', 
   'DBInformeel': 'var(--c-db-informeel)',
   'Delta':'var(--c-delta)',
-  'ABBesluit':'var(--c-ab-besluit)'
+  'ABBesluit':'var(--c-ab-besluit)',
+  'ABBrief': 'var(--c-ab-besluit)' // Zelfde kleur als besluit
 };
 
-// Labels voor weergave fases - Uitgebreid met Ambtelijk
+// Labels voor weergave fases
 const labels = { 
   'POW': 'PO Water',
   'POO': 'PO Organisatie',
@@ -33,7 +35,8 @@ const labels = {
   'DBBesluit':'DB Besluit', 
   'DBInformeel': 'Informeel DB', 
   'Delta':'Delta',
-  'ABBesluit':'AB Besluit'
+  'ABBesluit':'AB Besluit',
+  'ABBrief': 'Brief aan AB'
 };
 
 // Kleuren voor de Status badges
@@ -132,7 +135,7 @@ const tooltipText = computed(() => `${props.event.title} (${props.event.dateDisp
     transition: all 0.3s ease; position: relative; cursor: pointer;
     min-height: 140px; 
     opacity: 1; filter: grayscale(0%);
-    display: flex; flex-direction: column; /* Zorgt dat content rekt */
+    display: flex; flex-direction: column; 
 }
 .card-wrapper:hover { transform: translateY(-3px); box-shadow: 0 8px 15px rgba(0,0,0,0.15); }
 
@@ -214,18 +217,21 @@ h4 { margin: 0 0 10px 0; color: #2c3e50; font-size: 0.9rem; line-height: 1.3; }
 .card-action-btn { font-size: 0.75rem; font-weight: bold; color: #3498db; text-transform: uppercase; cursor: pointer; display: inline-block; }
 .card-action-btn:hover { text-decoration: underline; }
 
-/* AANGEPAST: Grid posities voor 8 kolommen */
+/* LAYOUT UPDATE: Nu 8 kolommen */
 @media (min-width: 1100px) {
-    /* Ambtelijke Voorbereiding (Eerste 3 kolommen) */
+    /* Ambtelijk */
     .col-POW { grid-column: 1; }
     .col-POO { grid-column: 2; }
     .col-DT  { grid-column: 3; }
 
-    /* Bestuurlijke Besluitvorming (Verschoven naar 4-8) */
+    /* Bestuurlijk */
     .col-PFO { grid-column: 4; }
     .col-DBBesluit { grid-column: 5; }
     .col-DBInformeel { grid-column: 6; }
     .col-Delta { grid-column: 7; }
+    
+    /* AB combineert Besluit en Brief */
     .col-ABBesluit { grid-column: 8; }
+    .col-ABBrief { grid-column: 8; } 
 }
 </style>
