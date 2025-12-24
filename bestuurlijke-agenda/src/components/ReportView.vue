@@ -1,13 +1,11 @@
 <script setup>
 import { computed } from 'vue';
 
-// We ontvangen de gefilterde items. 
-// Let op: dit zijn "events", dus we moeten ze terugbrengen naar unieke onderwerpen (topics).
 const props = defineProps({
   items: Array
 });
 
-// Helper voor kleuren bolletjes
+// Kleurenconfiguratie voor de bolletjes
 const typeColors = { 
   'PFO': 'var(--c-pfo)', 
   'DBBesluit': 'var(--c-db-besluit)', 
@@ -16,12 +14,35 @@ const typeColors = {
   'Delta': 'var(--c-delta)' 
 };
 
-// --- 1. TRANSFORMATIE: VAN EVENTS NAAR UNIEKE TOPICS ---
+// Helper: converteer DD-MM-YYYY string naar Date object
+const parseDate = (dateStr) => {
+    if (!dateStr) return null;
+    const [day, month, year] = dateStr.split('-');
+    return new Date(year, month - 1, day);
+};
+
+// Helper: Vind de eerstvolgende datum in een schedule voor sortering
+const getEarliestDate = (schedule) => {
+    // We checken de datums in logische volgorde
+    const dates = [
+        schedule.PFO, 
+        schedule.DBInformeel, 
+        schedule.DBBesluit, 
+        schedule.Delta, 
+        schedule.ABBesluit
+    ].map(parseDate).filter(d => d !== null);
+
+    // Return de vroegste datum, of een datum ver in de toekomst als er geen is
+    if (dates.length === 0) return new Date(9999, 11, 31);
+    return new Date(Math.min(...dates));
+};
+
+// --- TRANSFORMATIE & SORTERING ---
 const uniqueTopics = computed(() => {
     const topicMap = new Map();
 
+    // 1. Groeperen op Topic ID
     props.items.forEach(ev => {
-        // We gebruiken het ID van het originele item om te groeperen
         if (!topicMap.has(ev.topicId)) {
             topicMap.set(ev.topicId, {
                 id: ev.topicId,
@@ -30,16 +51,15 @@ const uniqueTopics = computed(() => {
                 dir: ev.dir,
                 contact: ev.originalItem.administrativeContact,
                 label: ev.strategicLabel,
-                // We pakken de VOLLEDIGE planning van het originele item
                 schedule: ev.originalItem.schedule || {}
             });
         }
     });
 
-    // Omzetten naar array en sorteren (bijv. op datum van PFO, of als die leeg is, op titel)
+    // 2. Sorteren op de eerst beschikbare datum in de keten
     return Array.from(topicMap.values()).sort((a, b) => {
-        const dateA = a.schedule.PFO ? new Date(a.schedule.PFO.split('-').reverse().join('-')) : new Date(9999, 11, 31);
-        const dateB = b.schedule.PFO ? new Date(b.schedule.PFO.split('-').reverse().join('-')) : new Date(9999, 11, 31);
+        const dateA = getEarliestDate(a.schedule);
+        const dateB = getEarliestDate(b.schedule);
         return dateA - dateB;
     });
 });
@@ -54,9 +74,9 @@ function printReport() {
     <div class="report-header">
         <div class="header-title">
             <h2>📄 Compact Tabeloverzicht</h2>
-            <small>Totaal: {{ uniqueTopics.length }} onderwerpen in huidige selectie</small>
+            <small>Totaal: {{ uniqueTopics.length }} onderwerpen</small>
         </div>
-        <button class="print-btn no-print" @click="printReport">🖨️ Print Tabel</button>
+        <button class="print-btn no-print" @click="printReport">🖨️ Print</button>
     </div>
 
     <div class="table-responsive">
@@ -68,8 +88,10 @@ function printReport() {
                     <th style="width: 10%;">Label</th>
                     
                     <th class="col-date">PFO</th>
-                    <th class="col-date">Informeel DB</th> <th class="col-date">DB Besluit</th>
-                    <th class="col-date">Delta</th>        <th class="col-date">AB Besluit</th>
+                    <th class="col-date">Inf. DB</th>
+                    <th class="col-date">DB</th>
+                    <th class="col-date">Delta</th>
+                    <th class="col-date">AB</th>
                 </tr>
             </thead>
             <tbody>
@@ -89,35 +111,35 @@ function printReport() {
                     </td>
 
                     <td class="cell-date">
-                        <div v-if="topic.schedule.PFO" class="date-pill" style="border-left-color: var(--c-pfo)">
+                        <div v-if="topic.schedule.PFO" class="date-pill">
                             <span class="dot" style="background: var(--c-pfo)"></span>
                             {{ topic.schedule.PFO }}
                         </div>
                     </td>
 
                     <td class="cell-date">
-                        <div v-if="topic.schedule.DBInformeel" class="date-pill" style="border-left-color: var(--c-db-informeel)">
+                        <div v-if="topic.schedule.DBInformeel" class="date-pill">
                             <span class="dot" style="background: var(--c-db-informeel)"></span>
                             {{ topic.schedule.DBInformeel }}
                         </div>
                     </td>
 
                     <td class="cell-date">
-                        <div v-if="topic.schedule.DBBesluit" class="date-pill" style="border-left-color: var(--c-db-besluit)">
+                        <div v-if="topic.schedule.DBBesluit" class="date-pill">
                             <span class="dot" style="background: var(--c-db-besluit)"></span>
                             {{ topic.schedule.DBBesluit }}
                         </div>
                     </td>
 
                     <td class="cell-date">
-                        <div v-if="topic.schedule.Delta" class="date-pill" style="border-left-color: var(--c-delta)">
+                        <div v-if="topic.schedule.Delta" class="date-pill">
                             <span class="dot" style="background: var(--c-delta)"></span>
                             {{ topic.schedule.Delta }}
                         </div>
                     </td>
 
                     <td class="cell-date">
-                        <div v-if="topic.schedule.ABBesluit" class="date-pill" style="border-left-color: var(--c-ab-besluit)">
+                        <div v-if="topic.schedule.ABBesluit" class="date-pill">
                             <span class="dot" style="background: var(--c-ab-besluit)"></span>
                             {{ topic.schedule.ABBesluit }}
                         </div>
@@ -199,18 +221,22 @@ function printReport() {
 }
 
 /* Datum Styling */
-.col-date { width: 110px; }
+.col-date { width: 105px; } /* Iets smaller gemaakt voor strakke look */
+
 .date-pill {
-    display: flex; align-items: center; gap: 6px;
-    font-family: monospace; font-size: 0.85rem; color: #333;
-    background: #fff; 
-    /* Subtiel randje links voor kleurherkenning */
-    border-left: 3px solid #ccc; 
-    padding-left: 8px;
+    display: flex; 
+    align-items: center; 
+    gap: 8px;
+    font-size: 0.85rem; 
+    color: #333;
+    /* Geen border-left meer, geen monospace meer */
 }
 
 .dot {
-    width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0;
+    width: 10px; 
+    height: 10px; 
+    border-radius: 50%; 
+    flex-shrink: 0;
 }
 
 .empty-msg { text-align: center; padding: 40px; color: #999; font-style: italic; }
