@@ -1,5 +1,5 @@
 export const items = [
-  // --- BESTAANDE ITEMS (HUIDIGE PERIODE) ---
+  // --- BESTAANDE ITEMS (GEÜPDATET MET NIEUWE VELDEN) ---
   { 
     id: 1, 
     title: "Archiefverordening 2025", 
@@ -9,6 +9,7 @@ export const items = [
     headOfDept: "J. vd. Geer", 
     dir: "M. Werges", 
     strategicLabel: "Beleid", 
+    toelichting: "21/10 aangemeld als hamerstuk. 07/11 mail van Marieke met doorschuiven.", 
     comments: "21/10 aangemeld als hamerstuk. 07/11 mail van Marieke met doorschuiven.",
     schedule: { PFO: "25-11-2025", DBBesluit: "02-12-2025", ABBrief: "03-02-2026" },
     scheduleStatus: { PFO: "Afgerond", DBBesluit: "Geagendeerd", ABBrief: "Concept" }
@@ -21,6 +22,8 @@ export const items = [
     headOfDept: "J. vd. Geer", 
     dir: "I. Geveke", 
     strategicLabel: "Organisatiegesteldheid", 
+    toelichting: "Sessie over samenwerking en rollen.",
+    comments: "",
     schedule: { DBInformeel: "06-01-2026" },
     scheduleStatus: { DBInformeel: "Concept" }
   },
@@ -55,6 +58,7 @@ export const items = [
     headOfDept: "J. vd. Geer", 
     dir: "M. Boersen", 
     strategicLabel: "Kaders", 
+    toelichting: "Besluit analyse fase en koers vaststellen. Belangrijk voor verdere uitrol.",
     comments: "besluit analyse fase en koers vaststellen",
     schedule: { PFO: "20-01-2026", DBBesluit: "27-01-2026" },
     scheduleStatus: { PFO: "Concept", DBBesluit: "Concept" }
@@ -67,6 +71,7 @@ export const items = [
     headOfDept: "P. Schoonen", 
     dir: "I. Geveke", 
     strategicLabel: "Organisatiegesteldheid", 
+    toelichting: "Opdrachtnemer is Berenschot, uitvoerende dhr. Vincent Jansen.",
     comments: "Opdrachtnemer is Berenschot",
     schedule: { PFO: "03-02-2026", DBBesluit: "10-02-2026", Delta: "03-03-2026" },
     scheduleStatus: { PFO: "Concept", DBBesluit: "Concept", Delta: "Concept" }
@@ -80,7 +85,7 @@ export const items = [
     dir: "M. Boersen", 
     strategicLabel: "Kaders", 
     toelichting: "PFO op 02 / 03 februari.",
-    schedule: { PFO: "03-02-2026", Delta: "10-03-2026" },
+    schedule: { PFO: "03-02-2026", Delta: "17-03-2026" }, // Delta aangepast naar eerstvolgende valide datum
     scheduleStatus: { PFO: "Concept", Delta: "Concept" }
   },
   { 
@@ -92,6 +97,7 @@ export const items = [
     headOfDept: "J. vd. Geer", 
     dir: "M. Boersen", 
     strategicLabel: "Kaders", 
+    toelichting: "Besluitvorming DB en ter informatie AB.",
     schedule: { PFO: "21-04-2026", DBBesluit: "05-05-2026", ABBrief: "26-05-2026" },
     scheduleStatus: { PFO: "Concept", DBBesluit: "Concept", ABBrief: "Concept" }
   },
@@ -103,6 +109,7 @@ export const items = [
     headOfDept: "R. Wierda", 
     dir: "M. Boersen", 
     strategicLabel: "Uitvoering", 
+    toelichting: "Check bij Mira voor planning? Welke data of rechtstreeks door naar AB 03-02?",
     schedule: { PFO: "25-11-2025", DBBesluit: "02-12-2025", ABBrief: "03-02-2026" },
     scheduleStatus: { PFO: "Afgerond", DBBesluit: "Afgerond", ABBrief: "Ingediend" }
   },
@@ -114,6 +121,7 @@ export const items = [
     headOfDept: "F. Kroes", 
     dir: "M. Werges", 
     strategicLabel: "Uitvoering", 
+    toelichting: "(één van de) deelnemer(s) sluit(en) digitaal aan.",
     schedule: { PFO: "06-01-2026", DBBesluit: "13-01-2026" },
     scheduleStatus: { PFO: "Ingediend", DBBesluit: "Concept" }
   },
@@ -148,7 +156,7 @@ export const items = [
     dir: "M. Boersen", 
     strategicLabel: "Uitvoering", 
     toelichting: "Uitwijk PFO is 10/03/26.",
-    schedule: { PFO: "17-02-2026", DBBesluit: "17-03-2026", Delta: "07-04-2026" },
+    schedule: { PFO: "17-02-2026", DBBesluit: "17-03-2026", Delta: "14-04-2026" },
     scheduleStatus: { PFO: "Concept", DBBesluit: "Concept", Delta: "Concept" }
   },
   { 
@@ -160,6 +168,7 @@ export const items = [
     headOfDept: "J. vd. Geer", 
     dir: "M. Boersen", 
     strategicLabel: "Externe ontwikkelingen", 
+    toelichting: "Miranda in de lead, Folkert meenemen. Doorgeschoven.",
     schedule: { PFO: "08-12-2025", DBBesluit: "16-12-2025", ABBrief: "03-02-2026" },
     scheduleStatus: { PFO: "Afgerond", DBBesluit: "Ingediend", ABBrief: "Concept" }
   },
@@ -183,6 +192,7 @@ export const items = [
     headOfDept: "J. vd. Geer", 
     dir: "M. Boersen", 
     strategicLabel: "Uitvoering", 
+    toelichting: "40 minuten is voldoende.",
     schedule: { DBInformeel: "20-01-2026" },
     scheduleStatus: { DBInformeel: "Concept" }
   },
@@ -194,6 +204,7 @@ export const items = [
     headOfDept: "J. vd. Geer", 
     dir: "M. Boersen", 
     strategicLabel: "Evaluatie", 
+    toelichting: "Geagendeerd ter informeren DB, er wordt deze datum nog niet om een besluit gevraagd.",
     schedule: { PFO: "02-02-2026", DBBesluit: "10-02-2026" },
     scheduleStatus: { PFO: "Concept", DBBesluit: "Concept" }
   },
@@ -216,7 +227,7 @@ export const items = [
     headOfDept: "M. Nicolai", 
     dir: "M. Boersen", 
     strategicLabel: "Uitvoering", 
-    toelichting: "Projectbesluit door DB, krediet door AB.",
+    toelichting: "Vervolg op PFO 25/11. Projectbesluit door DB, krediet door AB.",
     schedule: { PFO: "24-03-2026", DBBesluit: "14-04-2026", Delta: "05-05-2026" },
     scheduleStatus: { PFO: "Concept", DBBesluit: "Concept", Delta: "Concept" }
   },
@@ -228,6 +239,7 @@ export const items = [
     headOfDept: "C. Beekmans", 
     dir: "M. Boersen", 
     strategicLabel: "Beleid", 
+    toelichting: "Na overleg met PFH op 14 november volgt meer info over datum.",
     schedule: { PFO: "06-01-2026", DBBesluit: "13-01-2026" },
     scheduleStatus: { PFO: "Ingediend", DBBesluit: "Concept" }
   },
@@ -250,6 +262,7 @@ export const items = [
     headOfDept: "C. Beekmans", 
     dir: "M. Boersen", 
     strategicLabel: "Uitvoering", 
+    toelichting: "Deadlines zijn krap, 05 maart is er een BBG.",
     schedule: { PFO: "10-03-2026", DBBesluit: "17-03-2026", Delta: "14-04-2026", ABBesluit: "28-04-2026" },
     scheduleStatus: { PFO: "Concept", DBBesluit: "Concept", Delta: "Concept", ABBesluit: "Concept" }
   },
@@ -272,6 +285,7 @@ export const items = [
     headOfDept: "J. Vlot", 
     dir: "M. Boersen", 
     strategicLabel: "Uitvoering", 
+    toelichting: "Vervolg op 01/04 en 27/10.",
     schedule: { PFO: "24-11-2025", DBBesluit: "02-12-2025", ABBrief: "03-02-2026" },
     scheduleStatus: { PFO: "Afgerond", DBBesluit: "Afgerond", ABBrief: "Concept" }
   },
@@ -294,6 +308,7 @@ export const items = [
     headOfDept: "J. Vlot", 
     dir: "M. Werges", 
     strategicLabel: "Uitvoering", 
+    toelichting: "DB Voorstel en brief AB.",
     schedule: { PFO: "06-01-2026", DBBesluit: "13-01-2026", ABBrief: "03-02-2026" },
     scheduleStatus: { PFO: "Ingediend", DBBesluit: "Concept", ABBrief: "Concept" }
   },
@@ -309,231 +324,213 @@ export const items = [
     scheduleStatus: { PFO: "Ingediend", DBBesluit: "Concept", Delta: "Concept" }
   },
 
-  // --- DUMMY ITEMS (INCLUSIEF P&C CYCLUS) 2026-2028 ---
-
-  // P&C 2026
+  // --- NIEUWE DUMMY ITEMS 2026-2028 ---
+  
+  // 2026 Q3/Q4
   {
-    id: 1001,
-    title: "Resultaat Perspectieven Dialoog 2026",
-    ph: "D.S. Schoonman",
-    colleaguePH: "Allen",
-    on: "A. van der Horst",
-    headOfDept: "J. vd. Geer",
-    dir: "M. Werges",
-    strategicLabel: "P&C",
-    toelichting: "Resultaat van de dialoog, ter bespreking in DB.",
-    schedule: { PFO: "16-03-2026", DBBesluit: "24-03-2026" },
+    id: 101,
+    title: "Tussentijdse rapportage Kaderrichtlijn Water (KRW)",
+    ph: "F. Stienstra",
+    on: "K. van der Meer",
+    headOfDept: "R. Wierda",
+    dir: "M. Boersen", 
+    strategicLabel: "Kaders",
+    toelichting: "Voortgangsrapportage voor Brussel.",
+    schedule: { PFO: "07-09-2026", DBBesluit: "15-09-2026", Delta: "06-10-2026" },
+    scheduleStatus: { PFO: "Concept", DBBesluit: "Concept", Delta: "Concept" }
+  },
+  {
+    id: 102,
+    title: "Vervanging Automatisering Gemalen Cluster Noord",
+    ph: "H.J. Pereboom",
+    on: "T. Bakker",
+    headOfDept: "R. Wierda",
+    dir: "M. Boersen",
+    strategicLabel: "Uitvoering",
+    toelichting: "Aanbestedingsresultaat en gunning.",
+    schedule: { PFO: "21-09-2026", DBBesluit: "29-09-2026" },
     scheduleStatus: { PFO: "Concept", DBBesluit: "Concept" }
   },
   {
-    id: 1002,
-    title: "Jaarrekening 2025",
-    ph: "D.S. Schoonman",
-    colleaguePH: "Allen",
-    on: "P. Jansen",
+    id: 103,
+    title: "Visie Recreatie en Medegebruik 2027+",
+    ph: "F. Stienstra",
+    colleaguePH: "D.S. Schoonman",
+    on: "J. Willems",
     headOfDept: "J. vd. Geer",
-    dir: "M. Werges",
-    strategicLabel: "P&C",
-    toelichting: "Verantwoording over het boekjaar 2025.",
-    schedule: { PFO: "25-05-2026", DBBesluit: "02-06-2026", Delta: "09-06-2026", ABBesluit: "30-06-2026" },
-    scheduleStatus: { PFO: "Concept", DBBesluit: "Concept", Delta: "Concept", ABBesluit: "Concept" }
+    dir: "I. Geveke",
+    strategicLabel: "Beleid",
+    toelichting: "Eerste verkenning met stakeholders.",
+    schedule: { DBInformeel: "20-10-2026" },
+    scheduleStatus: { DBInformeel: "Concept" }
   },
   {
-    id: 1003,
-    title: "1e Bestuursrapportage 2026 (Berap)",
+    id: 104,
+    title: "Begroting 2027: Kaderbrief",
     ph: "D.S. Schoonman",
-    colleaguePH: "Allen",
-    on: "A. van der Horst",
+    on: "M. de Vries, P. Jansen",
     headOfDept: "J. vd. Geer",
     dir: "M. Werges",
     strategicLabel: "P&C",
-    schedule: { PFO: "25-05-2026", DBBesluit: "02-06-2026", Delta: "09-06-2026", ABBesluit: "30-06-2026" },
-    scheduleStatus: { PFO: "Concept", DBBesluit: "Concept", Delta: "Concept", ABBesluit: "Concept" }
+    toelichting: "Start van de begrotingscyclus 2027.",
+    schedule: { PFO: "02-11-2026", DBBesluit: "10-11-2026", ABBesluit: "24-11-2026" },
+    scheduleStatus: { PFO: "Concept", DBBesluit: "Concept", ABBesluit: "Concept" }
   },
   {
-    id: 1004,
-    title: "Begrotingsbrief 2027",
-    ph: "D.S. Schoonman",
-    colleaguePH: "Allen",
-    on: "P. Jansen",
-    headOfDept: "J. vd. Geer",
-    dir: "M. Werges",
-    strategicLabel: "P&C",
-    toelichting: "Kaders voor de begroting 2027.",
-    schedule: { PFO: "25-05-2026", DBBesluit: "02-06-2026", Delta: "09-06-2026", ABBesluit: "30-06-2026" },
-    scheduleStatus: { PFO: "Concept", DBBesluit: "Concept", Delta: "Concept", ABBesluit: "Concept" }
-  },
-  {
-    id: 1005,
-    title: "2e Bestuursrapportage 2026 (Berap)",
-    ph: "D.S. Schoonman",
-    colleaguePH: "Allen",
-    on: "A. van der Horst",
-    headOfDept: "J. vd. Geer",
-    dir: "M. Werges",
-    strategicLabel: "P&C",
-    schedule: { PFO: "24-08-2026", DBBesluit: "01-09-2026", Delta: "08-09-2026", ABBesluit: "29-09-2026" },
-    scheduleStatus: { PFO: "Concept", DBBesluit: "Concept", Delta: "Concept", ABBesluit: "Concept" }
-  },
-  {
-    id: 1006,
-    title: "Begroting 2027",
-    ph: "D.S. Schoonman",
-    colleaguePH: "Allen",
-    on: "P. Jansen",
-    headOfDept: "J. vd. Geer",
-    dir: "M. Werges",
-    strategicLabel: "P&C",
-    toelichting: "Vaststelling begroting en tarieven 2027.",
-    schedule: { PFO: "24-08-2026", DBBesluit: "01-09-2026", Delta: "08-09-2026", ABBesluit: "29-09-2026" },
-    scheduleStatus: { PFO: "Concept", DBBesluit: "Concept", Delta: "Concept", ABBesluit: "Concept" }
+    id: 105,
+    title: "Renovatie RWZI Dalfsen - Voorlopig Ontwerp",
+    ph: "M. Wesselink",
+    on: "S. Timmer",
+    headOfDept: "J. Vlot",
+    dir: "M. Boersen",
+    strategicLabel: "Uitvoering",
+    schedule: { PFO: "16-11-2026", DBBesluit: "24-11-2026" },
+    scheduleStatus: { PFO: "Concept", DBBesluit: "Concept" }
   },
 
-  // P&C 2027
+  // 2027
   {
-    id: 2001,
-    title: "Resultaat Perspectieven Dialoog 2027",
+    id: 201,
+    title: "Participatiebeleid Evaluatie 2024-2026",
+    ph: "F. Stienstra",
+    on: "L. Groen",
+    headOfDept: "P. Schoonen",
+    dir: "I. Geveke",
+    strategicLabel: "Evaluatie",
+    toelichting: "Wat ging goed in de gebiedsprocessen?",
+    schedule: { DBInformeel: "12-01-2027" },
+    scheduleStatus: { DBInformeel: "Concept" }
+  },
+  {
+    id: 202,
+    title: "HWBP Project: IJsselkade Deventer - Voorkeursalternatief",
+    ph: "J.C.G. Wijnen",
+    colleaguePH: "H.J. Pereboom",
+    on: "R. Visser",
+    headOfDept: "C. Beekmans",
+    dir: "M. Boersen",
+    strategicLabel: "Uitvoering",
+    toelichting: "Groot project, veel impact op omgeving.",
+    schedule: { PFO: "08-02-2027", DBBesluit: "16-02-2027", Delta: "23-03-2027", ABBesluit: "30-03-2027" },
+    scheduleStatus: { PFO: "Concept", DBBesluit: "Concept", Delta: "Concept", ABBesluit: "Concept" }
+  },
+  {
+    id: 203,
+    title: "Jaarstukken 2026 en Resultaatbestemming",
     ph: "D.S. Schoonman",
-    colleaguePH: "Allen",
     on: "A. van der Horst",
     headOfDept: "J. vd. Geer",
     dir: "M. Werges",
     strategicLabel: "P&C",
-    schedule: { PFO: "22-03-2027", DBBesluit: "30-03-2027" },
+    schedule: { PFO: "19-04-2027", DBBesluit: "27-04-2027", ABBesluit: "25-05-2027" },
+    scheduleStatus: { PFO: "Concept", DBBesluit: "Concept", ABBesluit: "Concept" }
+  },
+  {
+    id: 204,
+    title: "Verkoop Oude Werf Meppel",
+    ph: "H.J. Pereboom",
+    on: "B. Kuipers",
+    headOfDept: "F. Kroes",
+    dir: "M. Werges",
+    strategicLabel: "Uitvoering",
+    toelichting: "Definitieve verkoop en overdracht.",
+    schedule: { PFO: "17-05-2027", DBBesluit: "25-05-2027" },
     scheduleStatus: { PFO: "Concept", DBBesluit: "Concept" }
   },
   {
-    id: 2002,
-    title: "Jaarrekening 2026",
-    ph: "D.S. Schoonman",
-    colleaguePH: "Allen",
-    on: "P. Jansen",
+    id: 205,
+    title: "Klimaatadaptatie Strategie 2030 Update",
+    ph: "N. Koks",
+    colleaguePH: "J.C.G. Wijnen",
+    on: "E. Smeets",
     headOfDept: "J. vd. Geer",
-    dir: "M. Werges",
-    strategicLabel: "P&C",
-    schedule: { PFO: "31-05-2027", DBBesluit: "08-06-2027", Delta: "15-06-2027", ABBesluit: "29-06-2027" },
-    scheduleStatus: { PFO: "Concept", DBBesluit: "Concept", Delta: "Concept", ABBesluit: "Concept" }
+    dir: "I. Geveke",
+    strategicLabel: "Beleid",
+    schedule: { PFO: "06-09-2027", DBBesluit: "14-09-2027", Delta: "05-10-2027" },
+    scheduleStatus: { PFO: "Concept", DBBesluit: "Concept", Delta: "Concept" }
   },
   {
-    id: 2003,
-    title: "1e Bestuursrapportage 2027 (Berap)",
-    ph: "D.S. Schoonman",
-    colleaguePH: "Allen",
-    on: "A. van der Horst",
-    headOfDept: "J. vd. Geer",
+    id: 206,
+    title: "Innovatiefonds Watertechnologie - Toekenning Subsidies",
+    ph: "M. Wesselink",
+    on: "P. De Jong",
+    headOfDept: "P. Schoonen",
     dir: "M. Werges",
-    strategicLabel: "P&C",
-    schedule: { PFO: "31-05-2027", DBBesluit: "08-06-2027", Delta: "15-06-2027", ABBesluit: "29-06-2027" },
-    scheduleStatus: { PFO: "Concept", DBBesluit: "Concept", Delta: "Concept", ABBesluit: "Concept" }
-  },
-  {
-    id: 2004,
-    title: "Begrotingsbrief 2028",
-    ph: "D.S. Schoonman",
-    colleaguePH: "Allen",
-    on: "P. Jansen",
-    headOfDept: "J. vd. Geer",
-    dir: "M. Werges",
-    strategicLabel: "P&C",
-    schedule: { PFO: "31-05-2027", DBBesluit: "08-06-2027", Delta: "15-06-2027", ABBesluit: "29-06-2027" },
-    scheduleStatus: { PFO: "Concept", DBBesluit: "Concept", Delta: "Concept", ABBesluit: "Concept" }
-  },
-  {
-    id: 2005,
-    title: "2e Bestuursrapportage 2027 (Berap)",
-    ph: "D.S. Schoonman",
-    colleaguePH: "Allen",
-    on: "A. van der Horst",
-    headOfDept: "J. vd. Geer",
-    dir: "M. Werges",
-    strategicLabel: "P&C",
-    schedule: { PFO: "23-08-2027", DBBesluit: "31-08-2027", Delta: "07-09-2027", ABBesluit: "28-09-2027" },
-    scheduleStatus: { PFO: "Concept", DBBesluit: "Concept", Delta: "Concept", ABBesluit: "Concept" }
-  },
-  {
-    id: 2006,
-    title: "Begroting 2028",
-    ph: "D.S. Schoonman",
-    colleaguePH: "Allen",
-    on: "P. Jansen",
-    headOfDept: "J. vd. Geer",
-    dir: "M. Werges",
-    strategicLabel: "P&C",
-    schedule: { PFO: "23-08-2027", DBBesluit: "31-08-2027", Delta: "07-09-2027", ABBesluit: "28-09-2027" },
-    scheduleStatus: { PFO: "Concept", DBBesluit: "Concept", Delta: "Concept", ABBesluit: "Concept" }
+    strategicLabel: "Organisatiegesteldheid",
+    schedule: { DBInformeel: "19-10-2027" },
+    scheduleStatus: { DBInformeel: "Concept" }
   },
 
-  // P&C 2028
+  // 2028
   {
-    id: 3001,
-    title: "Resultaat Perspectieven Dialoog 2028",
+    id: 301,
+    title: "Mid-term Review Bestuursakkoord",
     ph: "D.S. Schoonman",
     colleaguePH: "Allen",
-    on: "A. van der Horst",
+    on: "Bestuursadviseurs",
     headOfDept: "J. vd. Geer",
-    dir: "M. Werges",
-    strategicLabel: "P&C",
-    schedule: { PFO: "20-03-2028", DBBesluit: "28-03-2028" },
+    dir: "I. Geveke",
+    strategicLabel: "Evaluatie",
+    toelichting: "Halverwege de bestuursperiode: staan we nog op koers?",
+    schedule: { DBInformeel: "11-01-2028" },
+    scheduleStatus: { DBInformeel: "Concept" }
+  },
+  {
+    id: 302,
+    title: "Aanpassing Legger Oppervlaktewateren 2028",
+    ph: "H.J. Pereboom",
+    on: "G. Huisman",
+    headOfDept: "F. Kroes",
+    dir: "M. Boersen",
+    strategicLabel: "Beleid",
+    toelichting: "Periodieke herziening.",
+    schedule: { PFO: "06-03-2028", DBBesluit: "14-03-2028", ABBesluit: "28-03-2028" },
+    scheduleStatus: { PFO: "Concept", DBBesluit: "Concept", ABBesluit: "Concept" }
+  },
+  {
+    id: 303,
+    title: "Groot Onderhoud Sluis Eefde (Samenwerking RWS)",
+    ph: "N. Koks",
+    on: "M. van Veen",
+    headOfDept: "M. Nicolai",
+    dir: "M. Boersen",
+    strategicLabel: "Uitvoering",
+    schedule: { PFO: "15-05-2028", DBBesluit: "23-05-2028" },
     scheduleStatus: { PFO: "Concept", DBBesluit: "Concept" }
   },
   {
-    id: 3002,
-    title: "Jaarrekening 2027",
+    id: 304,
+    title: "Personeelsplan en Formatie 2029",
     ph: "D.S. Schoonman",
-    colleaguePH: "Allen",
-    on: "P. Jansen",
-    headOfDept: "J. vd. Geer",
+    on: "HR Manager",
+    headOfDept: "P. Schoonen",
     dir: "M. Werges",
-    strategicLabel: "P&C",
-    schedule: { PFO: "29-05-2028", DBBesluit: "06-06-2028", Delta: "13-06-2028", ABBesluit: "27-06-2028" },
-    scheduleStatus: { PFO: "Concept", DBBesluit: "Concept", Delta: "Concept", ABBesluit: "Concept" }
+    strategicLabel: "Organisatiegesteldheid",
+    schedule: { DBInformeel: "22-08-2028" },
+    scheduleStatus: { DBInformeel: "Concept" }
   },
   {
-    id: 3003,
-    title: "1e Bestuursrapportage 2028 (Berap)",
-    ph: "D.S. Schoonman",
-    colleaguePH: "Allen",
-    on: "A. van der Horst",
-    headOfDept: "J. vd. Geer",
+    id: 305,
+    title: "Investeringskrediet Nieuwe Hoofdkantoor Vleugel",
+    ph: "H.J. Pereboom",
+    colleaguePH: "D.S. Schoonman",
+    on: "Facilitair",
+    headOfDept: "F. Kroes",
     dir: "M. Werges",
-    strategicLabel: "P&C",
-    schedule: { PFO: "29-05-2028", DBBesluit: "06-06-2028", Delta: "13-06-2028", ABBesluit: "27-06-2028" },
-    scheduleStatus: { PFO: "Concept", DBBesluit: "Concept", Delta: "Concept", ABBesluit: "Concept" }
+    strategicLabel: "Uitvoering",
+    toelichting: "Besluit over de uitbreiding van de kantoorfaciliteiten.",
+    schedule: { PFO: "04-09-2028", DBBesluit: "12-09-2028", ABBesluit: "26-09-2028" },
+    scheduleStatus: { PFO: "Concept", DBBesluit: "Concept", ABBesluit: "Concept" }
   },
   {
-    id: 3004,
-    title: "Begrotingsbrief 2029",
-    ph: "D.S. Schoonman",
-    colleaguePH: "Allen",
-    on: "P. Jansen",
-    headOfDept: "J. vd. Geer",
-    dir: "M. Werges",
-    strategicLabel: "P&C",
-    schedule: { PFO: "29-05-2028", DBBesluit: "06-06-2028", Delta: "13-06-2028", ABBesluit: "27-06-2028" },
-    scheduleStatus: { PFO: "Concept", DBBesluit: "Concept", Delta: "Concept", ABBesluit: "Concept" }
-  },
-  {
-    id: 3005,
-    title: "2e Bestuursrapportage 2028 (Berap)",
-    ph: "D.S. Schoonman",
-    colleaguePH: "Allen",
-    on: "A. van der Horst",
-    headOfDept: "J. vd. Geer",
-    dir: "M. Werges",
-    strategicLabel: "P&C",
-    schedule: { PFO: "21-08-2028", DBBesluit: "29-08-2028", Delta: "05-09-2028", ABBesluit: "26-09-2028" },
-    scheduleStatus: { PFO: "Concept", DBBesluit: "Concept", Delta: "Concept", ABBesluit: "Concept" }
-  },
-  {
-    id: 3006,
-    title: "Begroting 2029",
-    ph: "D.S. Schoonman",
-    colleaguePH: "Allen",
-    on: "P. Jansen",
-    headOfDept: "J. vd. Geer",
-    dir: "M. Werges",
-    strategicLabel: "P&C",
-    schedule: { PFO: "21-08-2028", DBBesluit: "29-08-2028", Delta: "05-09-2028", ABBesluit: "26-09-2028" },
+    id: 306,
+    title: "HWBP: Versterking Vechtdijken Traject C - Definitief Ontwerp",
+    ph: "J.C.G. Wijnen",
+    on: "K. Dijkstra",
+    headOfDept: "C. Beekmans",
+    dir: "M. Boersen",
+    strategicLabel: "Uitvoering",
+    schedule: { PFO: "13-11-2028", DBBesluit: "21-11-2028", Delta: "28-11-2028", ABBesluit: "19-12-2028" },
     scheduleStatus: { PFO: "Concept", DBBesluit: "Concept", Delta: "Concept", ABBesluit: "Concept" }
   }
 ];
