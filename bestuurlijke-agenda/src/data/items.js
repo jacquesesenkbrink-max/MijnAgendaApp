@@ -143,7 +143,7 @@ export const items = [
     on: "I. van Lohuizen", 
     headOfDept: "F. Kroes", 
     dir: "M. Werges", 
-    strategicLabel: "Beleid", 
+    strategicLabel: "P&C", // AANGEPAST: Was Beleid, nu P&C om filter te testen
     schedule: { PFO: "20-01-2026", DBBesluit: "27-01-2026", ABBrief: "03-02-2026" },
     scheduleStatus: { PFO: "Concept", DBBesluit: "Concept", ABBrief: "Concept" }
   },
@@ -323,6 +323,18 @@ export const items = [
     schedule: { PFO: "06-01-2026", DBBesluit: "13-01-2026", Delta: "03-03-2026" },
     scheduleStatus: { PFO: "Ingediend", DBBesluit: "Concept", Delta: "Concept" }
   },
+  // NIEUW ITEM OM P&C TE TESTEN IN VROEG 2026
+  { 
+    id: 42, 
+    title: "Voorjaarsnota 2026: Eerste schets", 
+    ph: "D.S. Schoonman", 
+    on: "M. de Vries", 
+    headOfDept: "J. vd. Geer", 
+    dir: "M. Werges", 
+    strategicLabel: "P&C", 
+    schedule: { PFO: "02-02-2026", DBBesluit: "10-02-2026" },
+    scheduleStatus: { PFO: "Concept", DBBesluit: "Concept" }
+  },
 
   // --- NIEUWE DUMMY ITEMS 2026-2028 ---
   
@@ -332,7 +344,7 @@ export const items = [
     title: "Tussentijdse rapportage Kaderrichtlijn Water (KRW)",
     ph: "F. Stienstra",
     on: "K. van der Meer",
-    headOfDept: "R. Wierda",
+    headOfDept: "R. Wierda", 
     dir: "M. Boersen", 
     strategicLabel: "Kaders",
     toelichting: "Voortgangsrapportage voor Brussel.",
