@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed } from 'vue';
+import { ref, computed, nextTick } from 'vue';
 
 const props = defineProps({
   items: Array,
@@ -15,16 +15,25 @@ const isCompact = ref(false);
 // --- COMPUTED: STATISTIEKEN ---
 const monthNames = ["Januari", "Februari", "Maart", "April", "Mei", "Juni", "Juli", "Augustus", "September", "Oktober", "November", "December"];
 
+// Helper om van een Date object een "YYYY-MM" key te maken
+function getMonthKey(dateObj) {
+    if (!dateObj || dateObj.getFullYear() === 9999) return '9999-99';
+    const year = dateObj.getFullYear();
+    const monthIndex = dateObj.getMonth();
+    return `${year}-${String(monthIndex+1).padStart(2, '0')}`;
+}
+
 const monthStats = computed(() => {
     const stats = {};
     props.items.forEach(ev => {
-        if (!ev.dateObj || ev.dateObj.getFullYear() === 9999) return;
-        const year = ev.dateObj.getFullYear();
-        const monthIndex = ev.dateObj.getMonth();
-        const key = `${year}-${String(monthIndex+1).padStart(2, '0')}`;
+        if (!ev.dateObj) return;
+        const key = getMonthKey(ev.dateObj);
         
         if (!stats[key]) {
-            stats[key] = { name: `${monthNames[monthIndex]} ${year}`, count: 0, sortKey: key };
+            const year = ev.dateObj.getFullYear();
+            const monthIndex = ev.dateObj.getMonth();
+            const label = year === 9999 ? 'Datum onbekend' : `${monthNames[monthIndex]} ${year}`;
+            stats[key] = { name: label, count: 0, sortKey: key };
         }
         stats[key].count++;
     });
@@ -35,20 +44,45 @@ const busyMonths = computed(() => monthStats.value.filter(m => m.count > 7).map(
 
 // --- COMPUTED: COMPACTE LIJST (UNIEKE ONDERWERPEN) ---
 const compactItems = computed(() => {
-    // We gebruiken een Map om de items te ontdubbelen.
-    // Omdat 'props.items' al gesorteerd is op datum (vanuit App.vue), 
-    // zal de invoegvolgorde in de Map automatisch chronologisch zijn op basis van de EERSTE keer dat een item voorkomt.
     const uniqueMap = new Map();
-    
     props.items.forEach(ev => {
         const item = ev.originalItem;
         if (!item || uniqueMap.has(item.id)) return;
         uniqueMap.set(item.id, item);
     });
-
-    // We geven de waarden terug in invoegvolgorde (dus CHRONOLOGISCH ipv alfabetisch)
     return Array.from(uniqueMap.values());
 });
+
+// --- NAVIGATION & SCROLL ---
+
+// Check of de huidige rij een nieuwe maand start t.o.v. de vorige rij
+function isNewMonth(index) {
+    if (index === 0) return true;
+    const currentKey = getMonthKey(props.items[index].dateObj);
+    const prevKey = getMonthKey(props.items[index - 1].dateObj);
+    return currentKey !== prevKey;
+}
+
+// Scroll naar de specifieke maand in de tabel
+function scrollToMonth(sortKey) {
+    // Forceer gedetailleerde weergave, anders zijn de rijen er niet
+    isCompact.value = false;
+
+    // Wacht tot Vue de DOM heeft geüpdatet
+    nextTick(() => {
+        const element = document.getElementById(`anchor-${sortKey}`);
+        if (element) {
+            element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            // Kleine highlight effect
+            element.classList.add('highlight-flash');
+            setTimeout(() => element.classList.remove('highlight-flash'), 1500);
+        }
+    });
+}
+
+function scrollToTop() {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+}
 
 // --- HELPERS ---
 function getStatusClass(count) {
@@ -119,11 +153,15 @@ const typeLabels = {
     <div v-if="!isCompact" class="report-dashboard">
         <div 
             v-for="stat in monthStats" :key="stat.sortKey" 
-            class="dashboard-card" :class="'border-' + getStatusClass(stat.count)"
+            class="dashboard-card clickable-card" 
+            :class="'border-' + getStatusClass(stat.count)"
+            @click="scrollToMonth(stat.sortKey)"
+            title="Klik om naar deze maand te springen"
         >
             <h5>{{ stat.name }}</h5>
             <div class="count">{{ stat.count }}</div>
             <div class="status" :class="getStatusClass(stat.count)">{{ getStatusText(stat.count) }}</div>
+            <div class="hover-hint">Ga naar ↓</div>
         </div>
     </div>
 
@@ -143,30 +181,46 @@ const typeLabels = {
             </tr>
         </thead>
         <tbody>
-            <tr 
-                v-for="ev in items" 
-                :key="ev.uniqueId" 
-                @click="handleRowClick(ev.topicId)"
-                class="clickable-row"
-            >
-                <td>{{ ev.dateDisplay }}</td>
-                <td>
-                    <span class="status-dot" :style="{ background: typeColors[ev.type] || '#ccc' }"></span>
-                    {{ typeLabels[ev.type] || ev.type }}
-                </td>
-                <td>
-                    <strong>{{ ev.title }}</strong>
-                    <div v-if="isAdmin && ev.comments" class="table-note">Opmerking: {{ ev.comments }}</div>
-                </td>
-                <td>
-                    <small>PH: {{ ev.ph || '-' }}<br>
-                    <span v-if="ev.originalItem.administrativeContact">
-                        <strong>🗣️: {{ ev.originalItem.administrativeContact }}</strong><br>
-                    </span>
-                    Dir: {{ ev.dir || '-' }}</small>
-                </td>
-                <td><small>{{ ev.strategicLabel || '-' }}</small></td>
-            </tr>
+            <template v-for="(ev, index) in items" :key="ev.uniqueId">
+                
+                <tr 
+                    v-if="isNewMonth(index)" 
+                    :id="'anchor-' + getMonthKey(ev.dateObj)"
+                    class="month-divider-row"
+                >
+                    <td colspan="5">
+                        <div class="month-divider-content">
+                            <span>📅 {{ monthNames[ev.dateObj.getMonth()] }} {{ ev.dateObj.getFullYear() }}</span>
+                            <button class="back-to-top-btn" @click.stop="scrollToTop" title="Terug naar overzicht">
+                                ⬆ Overzicht
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+
+                <tr 
+                    @click="handleRowClick(ev.topicId)"
+                    class="clickable-row"
+                >
+                    <td>{{ ev.dateDisplay }}</td>
+                    <td>
+                        <span class="status-dot" :style="{ background: typeColors[ev.type] || '#ccc' }"></span>
+                        {{ typeLabels[ev.type] || ev.type }}
+                    </td>
+                    <td>
+                        <strong>{{ ev.title }}</strong>
+                        <div v-if="isAdmin && ev.comments" class="table-note">Opmerking: {{ ev.comments }}</div>
+                    </td>
+                    <td>
+                        <small>PH: {{ ev.ph || '-' }}<br>
+                        <span v-if="ev.originalItem.administrativeContact">
+                            <strong>🗣️: {{ ev.originalItem.administrativeContact }}</strong><br>
+                        </span>
+                        Dir: {{ ev.dir || '-' }}</small>
+                    </td>
+                    <td><small>{{ ev.strategicLabel || '-' }}</small></td>
+                </tr>
+            </template>
         </tbody>
     </table>
 
@@ -248,7 +302,17 @@ const typeLabels = {
 .dashboard-card {
     background: #fff; border: 1px solid #ddd; border-radius: 6px; padding: 15px 10px;
     text-align: center; box-shadow: 0 2px 4px rgba(0,0,0,0.05); border-top-width: 4px; border-top-style: solid;
+    position: relative; transition: transform 0.2s, box-shadow 0.2s;
 }
+.clickable-card { cursor: pointer; }
+.clickable-card:hover { transform: translateY(-3px); box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
+.clickable-card:active { transform: translateY(0); }
+
+.hover-hint { 
+    display: none; font-size: 0.7rem; color: #3498db; margin-top: 5px; font-weight: bold; 
+}
+.clickable-card:hover .hover-hint { display: block; }
+
 .dashboard-card.border-low { border-top-color: #27ae60; }
 .dashboard-card.border-med { border-top-color: #e67e22; }
 .dashboard-card.border-high { border-top-color: #c0392b; }
@@ -264,11 +328,29 @@ const typeLabels = {
 /* TABLE STYLING */
 .report-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; margin-top: 10px; }
 .report-table th, .report-table td { border: 1px solid #ddd; padding: 10px 10px; text-align: left; vertical-align: top; }
-.report-table th { background-color: #2c3e50; color: white; position: sticky; top: 0; font-weight: 600; }
+.report-table th { background-color: #2c3e50; color: white; position: sticky; top: 0; font-weight: 600; z-index: 10; }
 .report-table tr:nth-child(even) { background-color: #f9f9f9; }
 
 .clickable-row { cursor: pointer; transition: background-color 0.15s; }
 .clickable-row:hover { background-color: #e3f2fd !important; }
+
+/* MONTH DIVIDER ROW */
+.month-divider-row { background-color: #eaf2f8 !important; border-top: 2px solid #3498db; scroll-margin-top: 60px; }
+.month-divider-row td { padding: 8px 15px; }
+.month-divider-content { display: flex; justify-content: space-between; align-items: center; font-weight: bold; color: #2c3e50; font-size: 1rem; }
+
+.back-to-top-btn {
+    background: transparent; border: 1px solid #3498db; color: #3498db; 
+    border-radius: 4px; padding: 2px 8px; font-size: 0.75rem; cursor: pointer;
+}
+.back-to-top-btn:hover { background: #3498db; color: white; }
+
+/* Flash effect for anchor jump */
+@keyframes flashHighlight {
+    0% { background-color: #ffeaa7; }
+    100% { background-color: #eaf2f8; }
+}
+.highlight-flash { animation: flashHighlight 1.5s ease-out; }
 
 .status-dot { height: 10px; width: 10px; border-radius: 50%; display: inline-block; margin-right: 6px; }
 .table-note { color: #c0392b; font-style: italic; font-size: 0.75rem; margin-top: 4px; }
@@ -281,7 +363,6 @@ const typeLabels = {
     border-top-width: 3px;
     border-top-style: solid;
 }
-/* Kleuren per kolom header voor herkenbaarheid */
 .compact-table th.col-pfo   { border-top-color: var(--c-pfo); }
 .compact-table th.col-inf   { border-top-color: var(--c-db-informeel); }
 .compact-table th.col-db    { border-top-color: var(--c-db-besluit); }
@@ -291,7 +372,7 @@ const typeLabels = {
 .compact-table td.center-text { 
     text-align: center; 
     white-space: nowrap; 
-    font-variant-numeric: tabular-nums; /* Zorgt dat getallen mooi onder elkaar lijnen */
+    font-variant-numeric: tabular-nums; 
 }
 .compact-table th { white-space: nowrap; }
 </style>
