@@ -10,7 +10,7 @@ function sluit() {
   emit('close');
 }
 
-// Lijst opgeschoond: DBSchrift en ABBrief verwijderd
+// Lijst opgeschoond: DBSchrift en ABBrief verwijderd voor weergave in flow
 const fases = [
   { key: 'PFO', label: 'PFO', color: 'var(--c-pfo)' },
   { key: 'DBBesluit', label: 'DB Besluit', color: 'var(--c-db-besluit)' },
@@ -28,13 +28,47 @@ const fases = [
       
       <div v-if="item">
         <h2>{{ item.title }}</h2>
-        <div class="meta-info">
-            <span><strong>PH:</strong> {{ item.ph }}</span>
-            <span><strong>Dir:</strong> {{ item.dir }}</span>
+        
+        <div class="meta-grid">
+            <div class="meta-item">
+                <span class="label">PH:</span>
+                <span class="value">{{ item.ph }}</span>
+            </div>
             
-            <span v-if="item.administrativeContact" style="grid-column: span 2;">
-                <strong>🗣️ Aanspreekpunt:</strong> {{ item.administrativeContact }}
-            </span>
+            <div class="meta-item" v-if="item.colleaguePH">
+                <span class="label">Mede-PH:</span>
+                <span class="value">{{ item.colleaguePH }}</span>
+            </div>
+
+            <div class="meta-item">
+                <span class="label">Directeur:</span>
+                <span class="value">{{ item.dir }}</span>
+            </div>
+
+            <div class="meta-item" v-if="item.headOfDept">
+                <span class="label">Afd. Hoofd:</span>
+                <span class="value">{{ item.headOfDept }}</span>
+            </div>
+
+            <div class="meta-item" v-if="item.on">
+                <span class="label">Ondersteuning:</span>
+                <span class="value">{{ item.on }}</span>
+            </div>
+            
+            <div class="meta-item" v-else-if="item.administrativeContact">
+                <span class="label">Aanspreekpunt:</span>
+                <span class="value">{{ item.administrativeContact }}</span>
+            </div>
+
+            <div class="meta-item" v-if="item.strategicLabel">
+                <span class="label">Label:</span>
+                <span class="value strategic-tag">{{ item.strategicLabel }}</span>
+            </div>
+        </div>
+
+        <div v-if="item.toelichting" class="description-block">
+            <strong>Toelichting:</strong>
+            <p>{{ item.toelichting }}</p>
         </div>
         
         <hr>
@@ -71,10 +105,12 @@ const fases = [
   background: white;
   padding: 2rem;
   border-radius: 8px;
-  width: 90%;
-  max-width: 500px;
+  width: 95%;
+  max-width: 600px; /* Iets breder voor meer info */
   position: relative;
   box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+  max-height: 90vh;
+  overflow-y: auto;
 }
 
 .close-btn {
@@ -87,19 +123,58 @@ const fases = [
 }
 .close-btn:hover { color: #000; }
 
-h2 { margin-top: 0; color: #2c3e50; font-size: 1.4rem; }
+h2 { margin-top: 0; color: #2c3e50; font-size: 1.4rem; margin-bottom: 1rem; line-height: 1.3; }
 h3 { font-size: 1rem; margin-top: 20px; color: #666; text-transform: uppercase; }
 
-.meta-info {
+/* Nieuwe Grid Stijl */
+.meta-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 10px;
+    gap: 12px;
     background: #f4f7f6;
-    padding: 10px;
-    border-radius: 4px;
+    padding: 15px;
+    border-radius: 6px;
     margin-bottom: 15px;
     font-size: 0.9rem;
 }
+
+.meta-item {
+    display: flex;
+    flex-direction: column;
+}
+
+.meta-item .label {
+    font-size: 0.75rem;
+    color: #888;
+    text-transform: uppercase;
+    font-weight: bold;
+    margin-bottom: 2px;
+}
+
+.meta-item .value {
+    color: #2c3e50;
+    font-weight: 500;
+}
+
+.strategic-tag {
+    display: inline-block;
+    background: #e2e8f0;
+    color: #475569;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 0.8rem;
+}
+
+.description-block {
+    background: #fff;
+    border-left: 4px solid #3498db;
+    padding: 10px;
+    color: #555;
+    font-size: 0.95rem;
+    margin-bottom: 15px;
+}
+.description-block strong { display: block; margin-bottom: 4px; color: #333; }
+.description-block p { margin: 0; line-height: 1.5; font-style: italic; }
 
 .flow-list {
     background: #f9f9f9;
@@ -122,4 +197,8 @@ h3 { font-size: 1rem; margin-top: 20px; color: #666; text-transform: uppercase; 
 
 .flow-date { font-family: monospace; color: #ccc; }
 .flow-date.has-date { color: #2c3e50; font-weight: bold; }
+
+@media (max-width: 500px) {
+    .meta-grid { grid-template-columns: 1fr; }
+}
 </style>

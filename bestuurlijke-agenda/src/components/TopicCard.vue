@@ -51,14 +51,6 @@ const currentStatus = computed(() => {
 
 // Tooltip tekst
 const tooltipText = computed(() => `${props.event.title} (${props.event.dateDisplay}) - ${currentStatus.value}`);
-
-// Helper om datums netjes te sorteren voor de lijst onderaan
-const sortedSchedule = computed(() => {
-    const s = props.event.originalItem.schedule || {};
-    // Probeer logische volgorde, of anders alfabetisch/datum
-    // We kunnen hier simpelweg de entries teruggeven
-    return Object.entries(s).map(([type, date]) => ({ type, date }));
-});
 </script>
 
 <template>
@@ -116,29 +108,6 @@ const sortedSchedule = computed(() => {
             <div class="card-footer">
                 <div class="card-action-btn" @click.stop="$emit('open-details', event.originalItem)">
                     👁 Details
-                </div>
-            </div>
-
-            <div class="full-data-display">
-                <div class="data-divider"></div>
-                
-                <div v-if="event.originalItem.toelichting" class="extra-info-block">
-                    <em>{{ event.originalItem.toelichting }}</em>
-                </div>
-
-                <div class="extra-roles">
-                    <div v-if="event.originalItem.colleaguePH"><strong>Mede-PH:</strong> {{ event.originalItem.colleaguePH }}</div>
-                    <div v-if="event.originalItem.headOfDept"><strong>Afd. Hoofd:</strong> {{ event.originalItem.headOfDept }}</div>
-                </div>
-
-                <div class="schedule-list" v-if="sortedSchedule.length > 0">
-                    <strong>Planning:</strong>
-                    <ul>
-                        <li v-for="item in sortedSchedule" :key="item.type">
-                            <span class="sched-type">{{ labels[item.type] || item.type }}:</span> 
-                            <span class="sched-date">{{ item.date }}</span>
-                        </li>
-                    </ul>
                 </div>
             </div>
 
@@ -236,26 +205,6 @@ h4 { margin: 0 0 10px 0; color: #2c3e50; font-size: 0.9rem; line-height: 1.3; }
 .card-footer { border-top: 1px solid #eee; padding-top: 5px; text-align: right; margin-top: auto; }
 .card-action-btn { font-size: 0.75rem; font-weight: bold; color: #3498db; text-transform: uppercase; cursor: pointer; display: inline-block; }
 .card-action-btn:hover { text-decoration: underline; }
-
-/* --- NIEUW: EXTRA DATA SECTIE --- */
-.full-data-display {
-    margin-top: 8px;
-    font-size: 0.75rem;
-    color: #555;
-    background: #fdfdfd;
-    padding: 5px;
-    border-radius: 4px;
-}
-.data-divider { border-top: 1px dashed #eee; margin-bottom: 8px; }
-
-.extra-info-block { margin-bottom: 6px; color: #777; line-height: 1.2; }
-.extra-roles { margin-bottom: 6px; }
-
-.schedule-list strong { display: block; margin-bottom: 2px; color: #333; }
-.schedule-list ul { list-style: none; padding: 0; margin: 0; }
-.schedule-list li { display: flex; justify-content: space-between; border-bottom: 1px solid #f0f0f0; padding: 1px 0; }
-.sched-type { color: #888; }
-.sched-date { font-weight: bold; color: #2c3e50; }
 
 @media (min-width: 1100px) {
     .col-PFO { grid-column: 1; }
