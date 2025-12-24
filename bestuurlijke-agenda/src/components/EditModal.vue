@@ -14,7 +14,7 @@ const emit = defineEmits(['close', 'save'])
 
 // --- STANDAARD LIJSTEN ---
 const listPH = ['D.S. Schoonman', 'H.J. Pereboom', 'N. Koks', 'J.C.G. Wijnen', 'M. Wesselink', 'F. Stienstra'];
-const listDir = ['M. Werges', 'I. Geveke', 'M. Boersen']; // Afgeleid uit bestaande data
+const listDir = ['M. Werges', 'I. Geveke', 'M. Boersen'];
 const listHead = []; // Nog geen afdelingshoofden, dus leeg + 'Anders' optie
 const listLabels = ['Beleid', 'Uitvoering', 'Kaders', 'Organisatiegesteldheid', 'Externe ontwikkelingen', 'Evaluatie', 'P&C'];
 
@@ -22,13 +22,13 @@ const defaultForm = {
   id: null,
   title: '',
   ph: '',           // Portefeuillehouder
-  colleaguePH: '',  // Collega PH (Nieuw)
+  colleaguePH: '',  // Collega PH
   dir: '',          // Directeur
-  headOfDept: '',   // Afdelingshoofd (Nieuw)
+  headOfDept: '',   // Afdelingshoofd
   on: '',           // Steller (gemapt op 'on' voor compatibiliteit data)
   
   strategicLabel: '',
-  toelichting: '',  // Was 'comments' in data, maar soms 'toelichting' in form. We syncen dit.
+  toelichting: '',  // Was 'comments' in data
   comments: '',     // Voor de zekerheid beide behouden
   
   schedule: {
@@ -86,9 +86,9 @@ watch(() => props.item, (newItem) => {
 
     formData.value = copy;
 
-    // UI state goedzetten (detecteer of het 'Anders' is)
+    // UI state goedzetten
     setUiState('selPH', copy.ph, listPH);
-    setUiState('selColleaguePH', copy.colleaguePH, listPH); // Collega PH gebruikt zelfde lijst als PH
+    setUiState('selColleaguePH', copy.colleaguePH, listPH);
     setUiState('selDir', copy.dir, listDir);
     setUiState('selHead', copy.headOfDept, listHead);
     setUiState('selLabel', copy.strategicLabel, listLabels);
@@ -108,8 +108,6 @@ function handleSelectChange(uiField, dataField, value) {
     if (value !== 'Anders') {
         formData.value[dataField] = value;
     } else {
-        // Als gebruiker 'Anders' kiest, maken we het veld leeg zodat ze kunnen typen,
-        // of we behouden de huidige waarde als die er al stond (zodat je niet per ongeluk wist)
         if (listPH.includes(formData.value[dataField]) || listDir.includes(formData.value[dataField]) || listLabels.includes(formData.value[dataField])) {
             formData.value[dataField] = ''; 
         }
@@ -117,9 +115,7 @@ function handleSelectChange(uiField, dataField, value) {
 }
 
 const save = () => {
-  // Sync comments/toelichting voor zekerheid
   if(formData.value.toelichting) formData.value.comments = formData.value.toelichting;
-  
   emit('save', formData.value)
 }
 
@@ -139,13 +135,13 @@ const cancel = () => {
       <div class="modal-body">
         
         <div class="form-group">
-          <label>A. Onderwerp Titel</label>
+          <label>Onderwerp Titel</label>
           <input type="text" v-model="formData.title" placeholder="Bijv. Jaarstukken 2024" autofocus>
         </div>
 
         <div class="grid-2">
             <div class="form-group">
-                <label>B. Portefeuillehouder (PH)</label>
+                <label>Portefeuillehouder (PH)</label>
                 <select v-model="uiState.selPH" @change="handleSelectChange('selPH', 'ph', uiState.selPH)">
                     <option value="">-- Selecteer --</option>
                     <option v-for="opt in listPH" :key="opt" :value="opt">{{ opt }}</option>
@@ -161,7 +157,7 @@ const cancel = () => {
             </div>
 
             <div class="form-group">
-                <label>C. Collega Portefeuillehouder</label>
+                <label>Collega Portefeuillehouder</label>
                 <select v-model="uiState.selColleaguePH" @change="handleSelectChange('selColleaguePH', 'colleaguePH', uiState.selColleaguePH)">
                     <option value="">-- Geen --</option>
                     <option v-for="opt in listPH" :key="opt" :value="opt">{{ opt }}</option>
@@ -179,7 +175,7 @@ const cancel = () => {
 
         <div class="grid-2">
             <div class="form-group">
-                <label>D. Directeur</label>
+                <label>Directielid</label>
                 <select v-model="uiState.selDir" @change="handleSelectChange('selDir', 'dir', uiState.selDir)">
                     <option value="">-- Selecteer --</option>
                     <option v-for="opt in listDir" :key="opt" :value="opt">{{ opt }}</option>
@@ -195,7 +191,7 @@ const cancel = () => {
             </div>
 
             <div class="form-group">
-                <label>E. Afdelingshoofd</label>
+                <label>Afdelingshoofd</label>
                 <select v-model="uiState.selHead" @change="handleSelectChange('selHead', 'headOfDept', uiState.selHead)">
                     <option value="">-- Selecteer --</option>
                     <option v-for="opt in listHead" :key="opt" :value="opt">{{ opt }}</option>
@@ -213,12 +209,12 @@ const cancel = () => {
 
         <div class="grid-2">
             <div class="form-group">
-                <label>F. Steller (max 2 namen)</label>
-                <input type="text" v-model="formData.on" placeholder="Naam 1, Naam 2">
+                <label>Steller(s) (max 2 namen)</label>
+                <input type="text" v-model="formData.on" placeholder="Naam 1, Naam 2" class="input-steller">
             </div>
 
             <div class="form-group">
-                <label>G. Strategisch Label</label>
+                <label>Strategisch Label</label>
                 <select v-model="uiState.selLabel" @change="handleSelectChange('selLabel', 'strategicLabel', uiState.selLabel)">
                     <option value="">-- Kies Label --</option>
                     <option v-for="opt in listLabels" :key="opt" :value="opt">{{ opt }}</option>
@@ -235,7 +231,7 @@ const cancel = () => {
         </div>
 
         <div class="form-group">
-          <label>I. Toelichting / Opmerkingen</label>
+          <label>Toelichting en/of opmerkingen</label>
           <textarea v-model="formData.comments" rows="3" placeholder="Interne notities..."></textarea>
         </div>
 
@@ -346,6 +342,11 @@ const cancel = () => {
 .form-group label { display: block; margin-bottom: 6px; font-weight: 600; font-size: 0.9rem; color: #34495e; }
 .form-group input, .form-group textarea, .form-group select {
   width: 100%; padding: 10px; border: 1px solid #d1d5db; border-radius: 4px; font-size: 0.95rem; font-family: inherit;
+}
+
+/* NIEUW: Specifieke styling voor het steller veld om breedte te beperken */
+.input-steller {
+    max-width: 80%; /* Pas dit percentage aan naar wens, bijv. 70% of 300px */
 }
 
 /* Speciaal input veld voor 'Anders, nl...' */
