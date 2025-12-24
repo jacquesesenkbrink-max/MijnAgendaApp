@@ -40,9 +40,12 @@ const headers = [
 }
 
 .headers-content {
+  /* Exacte match met .container in App.vue qua max-width */
   max-width: 1400px; 
   margin: 0 auto; 
-  padding: 0 20px;
+  /* Padding moet overeenkomen met de horizontale padding van de content container */
+  padding: 0 20px; 
+  box-sizing: border-box;
 }
 
 .headers-grid {
@@ -50,6 +53,7 @@ const headers = [
   /* 8 kolommen voor de integrale keten */
   grid-template-columns: repeat(8, 1fr); 
   gap: 15px; 
+  width: 100%;
 }
 
 .header-item {
@@ -63,13 +67,12 @@ const headers = [
   letter-spacing: 0.05em;
   border-bottom-width: 5px; 
   border-bottom-style: solid;
-  border-right: 1px solid #f3f4f6;
+  /* Border-right verwijderd zodat de uitlijning puur op de grid-gap en kolommen leunt */
   display: flex;
   align-items: center;
   justify-content: center;
+  min-height: 50px; /* Zorgt voor consistente hoogte van de balk */
 }
-
-.header-item:last-child { border-right: none; }
 
 @media (max-width: 1100px) {
     .headers-wrapper { display: none; }

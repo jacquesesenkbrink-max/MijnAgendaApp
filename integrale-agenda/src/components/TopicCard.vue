@@ -10,7 +10,7 @@ const props = defineProps({
 
 const emit = defineEmits(['edit', 'delete', 'toggle-focus', 'open-details']);
 
-// Kleuren per fase (Gremium) - Nu compleet met ABBrief
+// Kleuren per fase (Gremium)
 const colors = { 
   // Ambtelijk
   'POW': 'var(--c-pow)',
@@ -23,7 +23,7 @@ const colors = {
   'DBInformeel': 'var(--c-db-informeel)',
   'Delta':'var(--c-delta)',
   'ABBesluit':'var(--c-ab-besluit)',
-  'ABBrief': 'var(--c-ab-besluit)' // Zelfde kleur als besluit
+  'ABBrief': 'var(--c-ab-besluit)' 
 };
 
 // Labels voor weergave fases
@@ -136,6 +136,10 @@ const tooltipText = computed(() => `${props.event.title} (${props.event.dateDisp
     min-height: 140px; 
     opacity: 1; filter: grayscale(0%);
     display: flex; flex-direction: column; 
+    
+    /* CRUCIAAL VOOR UITLIJNING: */
+    width: 100%; 
+    box-sizing: border-box;
 }
 .card-wrapper:hover { transform: translateY(-3px); box-shadow: 0 8px 15px rgba(0,0,0,0.15); }
 
