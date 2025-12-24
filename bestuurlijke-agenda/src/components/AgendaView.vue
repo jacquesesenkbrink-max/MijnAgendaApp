@@ -3,15 +3,14 @@ import { ref, computed, onMounted, watch } from 'vue';
 
 const props = defineProps({
   items: Array,
-  activeFilter: String // We ontvangen nu welk filter er in de App actief is (bijv. 'PFO')
+  activeFilter: String
 });
 
-// Opslag voor vergaderdetails (tijd/locatie)
+// Opslag voor vergaderdetails (tijd/locatie/soort stuk)
 const meetingMeta = ref({});
 
 // Filters
 const selectedDate = ref('');
-const selectedPH = ref('');
 
 onMounted(() => {
   const saved = localStorage.getItem('meeting-meta-data');
@@ -35,7 +34,7 @@ const agendaMeetings = computed(() => {
 
         let meetingKey = '';
         let meetingTitle = '';
-        let groupPh = ''; // Voor filtering
+        let groupPh = ''; 
 
         if (type === 'PFO') {
             // PFO splitsen we per PH
@@ -80,27 +79,11 @@ const uniqueDates = computed(() => {
     });
 });
 
-// Lijst met unieke PH's voor de dropdown (ZONDER 'Algemeen')
-const uniquePHs = computed(() => {
-    const phs = new Set();
-    agendaMeetings.value.forEach(m => {
-        // We voegen 'Algemeen' NIET toe aan de lijst
-        if (m.ph && m.ph !== 'Algemeen') {
-            phs.add(m.ph);
-        }
-    });
-    return Array.from(phs).sort();
-});
-
 // De gefilterde lijst die we tonen
 const filteredMeetings = computed(() => {
     return agendaMeetings.value.filter(meeting => {
         // Datum filter
         if (selectedDate.value && meeting.dateDisplay !== selectedDate.value) {
-            return false;
-        }
-        // PH filter (alleen actief als er iets gekozen is)
-        if (selectedPH.value && meeting.ph !== selectedPH.value) {
             return false;
         }
         return true;
@@ -123,6 +106,28 @@ function getDayName(dateObj) {
     return dateObj.toLocaleDateString('nl-NL', { weekday: 'long' });
 }
 
+// Bepaal de opties voor 'Soort Stuk' op basis van vergadering type
+function getDocOptions(type) {
+    if (type.startsWith('DB')) {
+        return [
+            'Bespreekstuk', 
+            'Hamerstuk', 
+            'Schriftelijke mededeling', 
+            'Nader te bepalen'
+        ];
+    }
+    if (type.startsWith('AB')) {
+        return [
+            'Bespreekstuk', 
+            'Hamerstuk', 
+            'Brief van DB aan AB', 
+            'Nader te bepalen'
+        ];
+    }
+    // Voor PFO of andere types geen specifieke opties (kolom wordt verborgen of leeg)
+    return [];
+}
+
 const typeColors = { 
   'PFO':'var(--c-pfo)', 
   'DBBesluit':'var(--c-db-besluit)', 
@@ -137,7 +142,6 @@ function printAgenda() {
 
 function resetFilters() {
     selectedDate.value = '';
-    selectedPH.value = '';
 }
 </script>
 
@@ -163,18 +167,8 @@ function resetFilters() {
                 </select>
             </div>
 
-            <div class="filter-group" v-if="activeFilter === 'PFO'">
-                <label>👤 Filter op Bestuurder:</label>
-                <select v-model="selectedPH">
-                    <option value="">-- Alle Bestuurders --</option>
-                    <option v-for="ph in uniquePHs" :key="ph" :value="ph">
-                        👤 {{ ph }}
-                    </option>
-                </select>
-            </div>
-
-            <button v-if="selectedDate || selectedPH" class="reset-link" @click="resetFilters">
-                Filters wissen
+            <button v-if="selectedDate" class="reset-link" @click="resetFilters">
+                Datumfilter wissen
             </button>
         </div>
     </div>
@@ -218,6 +212,7 @@ function resetFilters() {
                     <tr>
                         <th style="width: 30px">#</th>
                         <th>Onderwerp</th>
+                        <th v-if="getDocOptions(meeting.type).length > 0" style="width: 160px">Soort Stuk</th>
                         <th style="width: 150px">Betrokkenen</th>
                         <th style="width: 100px">Status</th>
                     </tr>
@@ -228,6 +223,23 @@ function resetFilters() {
                         <td>
                             <div class="topic-title">{{ item.title }}</div>
                         </td>
+                        
+                        <td v-if="getDocOptions(meeting.type).length > 0">
+                            <select 
+                                class="no-print doc-type-select" 
+                                v-model="meetingMeta[item.uniqueId + '_docType']"
+                            >
+                                <option value="">- Kies -</option>
+                                <option v-for="opt in getDocOptions(meeting.type)" :key="opt" :value="opt">
+                                    {{ opt }}
+                                </option>
+                            </select>
+
+                            <div class="print-only doc-type-print">
+                                {{ meetingMeta[item.uniqueId + '_docType'] || '-' }}
+                            </div>
+                        </td>
+
                         <td>
                             <div class="role-text" v-if="meeting.type !== 'PFO'">PH: {{ item.ph }}</div>
                             
@@ -324,6 +336,20 @@ function resetFilters() {
 .role-text { font-size: 0.8rem; color: #666; margin-bottom: 2px; }
 .role-text.highlight { font-weight: bold; color: #2c3e50; }
 .badge { background: #eee; padding: 2px 6px; border-radius: 4px; font-size: 0.75rem; color: #555; }
+
+/* Doc type select */
+.doc-type-select {
+    width: 100%;
+    padding: 6px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 0.9rem;
+    background-color: #f9f9f9;
+}
+.doc-type-print {
+    font-weight: bold;
+    font-size: 0.9rem;
+}
 
 /* PRINT STYLES */
 @media print {
