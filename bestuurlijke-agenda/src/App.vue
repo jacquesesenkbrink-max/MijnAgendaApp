@@ -230,6 +230,41 @@
     }
   }
 
+  // NIEUW: Navigeer vanuit tabel naar grid kaartje
+  function navigateToTopic(topicId) {
+      // 1. Schakel view om
+      viewMode.value = 'grid';
+      
+      // 2. Zet focus (zodat lijntjes tekenen)
+      activeFocusId.value = topicId;
+      showOnlyFocus.value = false;
+
+      // 3. Wacht tot Vue de DOM heeft geupdate (switchen van view kost tijd)
+      nextTick(() => {
+          // Zoek de elementen. We proberen de fases in logische volgorde van links naar rechts.
+          const preferredOrder = ['PFO', 'DBBesluit', 'DBInformeel', 'Delta', 'ABBesluit'];
+          
+          let targetEl = null;
+
+          for (const type of preferredOrder) {
+              const id = `card-${topicId}-${type}`;
+              const el = document.getElementById(id);
+              if (el) {
+                  targetEl = el;
+                  break; // Gevonden! Stop met zoeken, want dit is de meest linkse.
+              }
+          }
+
+          if (targetEl) {
+              // Scrollen met wat marge zodat het mooi in het midden komt
+              targetEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+              
+              // Teken de lijntjes opnieuw voor de zekerheid
+              drawConnections();
+          }
+      });
+  }
+
   function clearFocus() { 
       activeFocusId.value = null; 
       connectionsPath.value = ''; 
@@ -414,7 +449,10 @@
     </div>
 
     <div v-else-if="viewMode === 'table'" class="container">
-        <ReportView :items="gefilterdeEvents" />
+        <ReportView 
+          :items="gefilterdeEvents" 
+          @navigate-to-topic="navigateToTopic" 
+        />
     </div>
 
     <div v-else-if="viewMode === 'agenda'" class="container">
