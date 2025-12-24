@@ -48,7 +48,8 @@ const agendaMeetings = computed(() => {
             meetingKey = `${dateStr}_${type}_${groupPh}`;
             meetingTitle = `PFO ${groupPh}`;
         } else {
-            // DB en AB zijn "Algemeen"
+            // DB, AB en Ambtelijke overleggen zijn "Algemeen"
+            // Tenzij we POW/POO ook willen splitsen, maar voor nu is 1 lijst per datum prima
             groupPh = 'Algemeen'; 
             meetingKey = `${dateStr}_${type}`;
             meetingTitle = mapTypeToTitle(type);
@@ -145,7 +146,11 @@ function mapTypeToTitle(type) {
         'DBBesluit': 'DB Besluitvormend', 
         'DBInformeel': 'DB Informeel', 
         'ABBesluit': 'AB Vergadering', 
-        'Delta': 'Deltabijeenkomst'
+        'Delta': 'Deltabijeenkomst',
+        // Ambtelijke uitbreidingen
+        'POW': 'PO Water (Ambtelijk)',
+        'POO': 'PO Organisatie (Ambtelijk)',
+        'DT': 'Directieteam (DT)'
     };
     return labels[type] || type;
 }
@@ -163,15 +168,25 @@ function getDocOptions(type) {
     if (type.startsWith('AB')) {
         return ['Bespreekstuk', 'Hamerstuk', 'Brief van DB aan AB', 'Nader te bepalen'];
     }
+    // Nieuwe opties voor Ambtelijk
+    if (['POW', 'POO', 'DT'].includes(type)) {
+        return ['Nota concept', 'Oplegger', 'Presentatie', 'Mondeling'];
+    }
     return [];
 }
 
+// Kleuren definities (hier hardcoded zodat het direct werkt zonder CSS bestand aanpassing)
+// We gebruiken hex codes die passen bij de bestaande stijl
 const typeColors = { 
-  'PFO':'var(--c-pfo)', 
+  'PFO':'var(--c-pfo)',  // Bestaande CSS variabele
   'DBBesluit':'var(--c-db-besluit)', 
   'DBInformeel': 'var(--c-db-informeel)',
   'ABBesluit':'var(--c-ab-besluit)', 
-  'Delta':'var(--c-delta)' 
+  'Delta':'var(--c-delta)',
+  // Nieuwe kleuren voor ambtelijke stroom
+  'POW': '#3498db', // Blauw voor Water
+  'POO': '#9b59b6', // Paars voor Organisatie
+  'DT': '#e67e22'   // Oranje voor Directie
 };
 
 function printAgenda() {
@@ -188,12 +203,12 @@ function resetFilters() {
     
     <div class="no-print header-block">
         <div class="header-top">
-            <h2>🗓️ Agenda Samenstelling</h2>
+            <h2>🗓️ Agenda Samenstelling & Ambtelijke Voorbereiding</h2>
             <button @click="printAgenda" class="print-btn">🖨️ Print Lijst</button>
         </div>
         
         <p class="intro-text">
-            Beheer tijden/locaties en filter de lijst voor export.
+            Integraal overzicht van de bestuurlijke én ambtelijke agenda.
             <span v-if="isAdmin"><strong>(Admin modus actief: U kunt volgorde, tijdsduur en soort stuk aanpassen)</strong></span>
         </p>
 
@@ -312,7 +327,8 @@ function resetFilters() {
                         </td>
 
                         <td>
-                            <div class="role-text" v-if="meeting.type !== 'PFO'">PH: {{ item.ph }}</div>
+                            <div class="role-text" v-if="['PFO', 'POW', 'POO', 'DT'].includes(meeting.type) === false">PH: {{ item.ph }}</div>
+                            <div class="role-text" v-if="['POW', 'POO', 'DT'].includes(meeting.type)">Opsteller: {{ item.on }}</div>
                             
                             <div class="role-text highlight" v-if="item.originalItem && item.originalItem.administrativeContact">
                                 🗣️ {{ item.originalItem.administrativeContact }}

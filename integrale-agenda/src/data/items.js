@@ -1,5 +1,5 @@
 export const items = [
-  // --- BESTAANDE ITEMS (GEÜPDATET MET NIEUWE VELDEN) ---
+  // --- BESTAANDE ITEMS (GEÜPDATET MET NIEUWE AMBTELIJKE VELDEN) ---
   { 
     id: 1, 
     title: "Archiefverordening 2025", 
@@ -9,10 +9,11 @@ export const items = [
     headOfDept: "J. vd. Geer", 
     dir: "M. Werges", 
     strategicLabel: "Beleid", 
-    toelichting: "21/10 aangemeld als hamerstuk. 07/11 mail van Marieke met doorschuiven.", 
-    comments: "21/10 aangemeld als hamerstuk. 07/11 mail van Marieke met doorschuiven.",
-    schedule: { PFO: "25-11-2025", DBBesluit: "02-12-2025", ABBrief: "03-02-2026" },
-    scheduleStatus: { PFO: "Afgerond", DBBesluit: "Geagendeerd", ABBrief: "Concept" }
+    toelichting: "21/10 aangemeld als hamerstuk. Start in PO Organisatie.", 
+    comments: "21/10 aangemeld als hamerstuk.",
+    // Archiefverordening gaat via PO Organisatie (POO) -> DT -> PFO
+    schedule: { POO: "13-11-2025", DT: "18-11-2025", PFO: "25-11-2025", DBBesluit: "02-12-2025", ABBrief: "03-02-2026" },
+    scheduleStatus: { POO: "Afgerond", DT: "Afgerond", PFO: "Afgerond", DBBesluit: "Geagendeerd", ABBrief: "Concept" }
   },
   { 
     id: 2, 
@@ -24,8 +25,8 @@ export const items = [
     strategicLabel: "Organisatiegesteldheid", 
     toelichting: "Sessie over samenwerking en rollen.",
     comments: "",
-    schedule: { DBInformeel: "06-01-2026" },
-    scheduleStatus: { DBInformeel: "Concept" }
+    schedule: { DT: "16-12-2025", DBInformeel: "06-01-2026" },
+    scheduleStatus: { DT: "Concept", DBInformeel: "Concept" }
   },
   { 
     id: 3, 
@@ -35,8 +36,9 @@ export const items = [
     headOfDept: "J. vd. Geer", 
     dir: "I. Geveke", 
     strategicLabel: "Organisatiegesteldheid", 
-    schedule: { PFO: "06-01-2026", DBBesluit: "13-01-2026" },
-    scheduleStatus: { PFO: "Ingediend", DBBesluit: "Concept" }
+    // Via POO en DT
+    schedule: { POO: "11-12-2025", DT: "16-12-2025", PFO: "06-01-2026", DBBesluit: "13-01-2026" },
+    scheduleStatus: { POO: "Concept", DT: "Concept", PFO: "Ingediend", DBBesluit: "Concept" }
   },
   { 
     id: 4, 
@@ -46,8 +48,8 @@ export const items = [
     headOfDept: "P. Schoonen", 
     dir: "I. Geveke", 
     strategicLabel: "Organisatiegesteldheid", 
-    schedule: { Delta: "20-01-2026" },
-    scheduleStatus: { Delta: "Concept" }
+    schedule: { DT: "13-01-2026", Delta: "20-01-2026" },
+    scheduleStatus: { DT: "Concept", Delta: "Concept" }
   },
   { 
     id: 5, 
@@ -58,10 +60,11 @@ export const items = [
     headOfDept: "J. vd. Geer", 
     dir: "M. Boersen", 
     strategicLabel: "Kaders", 
-    toelichting: "Besluit analyse fase en koers vaststellen. Belangrijk voor verdere uitrol.",
+    toelichting: "Besluit analyse fase en koers vaststellen. Via PO Water.",
     comments: "besluit analyse fase en koers vaststellen",
-    schedule: { PFO: "20-01-2026", DBBesluit: "27-01-2026" },
-    scheduleStatus: { PFO: "Concept", DBBesluit: "Concept" }
+    // WBP gaat via PO Water (POW)
+    schedule: { POW: "06-01-2026", DT: "13-01-2026", PFO: "20-01-2026", DBBesluit: "27-01-2026" },
+    scheduleStatus: { POW: "Concept", DT: "Concept", PFO: "Concept", DBBesluit: "Concept" }
   },
   { 
     id: 6, 
@@ -71,10 +74,10 @@ export const items = [
     headOfDept: "P. Schoonen", 
     dir: "I. Geveke", 
     strategicLabel: "Organisatiegesteldheid", 
-    toelichting: "Opdrachtnemer is Berenschot, uitvoerende dhr. Vincent Jansen.",
+    toelichting: "Opdrachtnemer is Berenschot.",
     comments: "Opdrachtnemer is Berenschot",
-    schedule: { PFO: "03-02-2026", DBBesluit: "10-02-2026", Delta: "03-03-2026" },
-    scheduleStatus: { PFO: "Concept", DBBesluit: "Concept", Delta: "Concept" }
+    schedule: { POO: "22-01-2026", DT: "27-01-2026", PFO: "03-02-2026", DBBesluit: "10-02-2026", Delta: "03-03-2026" },
+    scheduleStatus: { POO: "Concept", DT: "Concept", PFO: "Concept", DBBesluit: "Concept", Delta: "Concept" }
   },
   { 
     id: 7, 
@@ -85,8 +88,8 @@ export const items = [
     dir: "M. Boersen", 
     strategicLabel: "Kaders", 
     toelichting: "PFO op 02 / 03 februari.",
-    schedule: { PFO: "03-02-2026", Delta: "17-03-2026" }, // Delta aangepast naar eerstvolgende valide datum
-    scheduleStatus: { PFO: "Concept", Delta: "Concept" }
+    schedule: { POW: "20-01-2026", DT: "27-01-2026", PFO: "03-02-2026", Delta: "17-03-2026" },
+    scheduleStatus: { POW: "Concept", DT: "Concept", PFO: "Concept", Delta: "Concept" }
   },
   { 
     id: 8, 
@@ -98,8 +101,8 @@ export const items = [
     dir: "M. Boersen", 
     strategicLabel: "Kaders", 
     toelichting: "Besluitvorming DB en ter informatie AB.",
-    schedule: { PFO: "21-04-2026", DBBesluit: "05-05-2026", ABBrief: "26-05-2026" },
-    scheduleStatus: { PFO: "Concept", DBBesluit: "Concept", ABBrief: "Concept" }
+    schedule: { POW: "31-03-2026", DT: "07-04-2026", PFO: "21-04-2026", DBBesluit: "05-05-2026", ABBrief: "26-05-2026" },
+    scheduleStatus: { POW: "Concept", DT: "Concept", PFO: "Concept", DBBesluit: "Concept", ABBrief: "Concept" }
   },
   { 
     id: 11, 
@@ -109,9 +112,10 @@ export const items = [
     headOfDept: "R. Wierda", 
     dir: "M. Boersen", 
     strategicLabel: "Uitvoering", 
-    toelichting: "Check bij Mira voor planning? Welke data of rechtstreeks door naar AB 03-02?",
-    schedule: { PFO: "25-11-2025", DBBesluit: "02-12-2025", ABBrief: "03-02-2026" },
-    scheduleStatus: { PFO: "Afgerond", DBBesluit: "Afgerond", ABBrief: "Ingediend" }
+    toelichting: "Check bij Mira voor planning?",
+    // Via PO Water
+    schedule: { POW: "11-11-2025", DT: "18-11-2025", PFO: "25-11-2025", DBBesluit: "02-12-2025", ABBrief: "03-02-2026" },
+    scheduleStatus: { POW: "Afgerond", DT: "Afgerond", PFO: "Afgerond", DBBesluit: "Afgerond", ABBrief: "Ingediend" }
   },
   { 
     id: 12, 
@@ -121,9 +125,10 @@ export const items = [
     headOfDept: "F. Kroes", 
     dir: "M. Werges", 
     strategicLabel: "Uitvoering", 
-    toelichting: "(één van de) deelnemer(s) sluit(en) digitaal aan.",
-    schedule: { PFO: "06-01-2026", DBBesluit: "13-01-2026" },
-    scheduleStatus: { PFO: "Ingediend", DBBesluit: "Concept" }
+    toelichting: "Deelnemer sluit digitaal aan.",
+    // Financiën gaat vaak via PO Organisatie
+    schedule: { POO: "11-12-2025", DT: "16-12-2025", PFO: "06-01-2026", DBBesluit: "13-01-2026" },
+    scheduleStatus: { POO: "Afgerond", DT: "Afgerond", PFO: "Ingediend", DBBesluit: "Concept" }
   },
   { 
     id: 13, 
@@ -133,8 +138,8 @@ export const items = [
     headOfDept: "R. Wierda", 
     dir: "M. Boersen", 
     strategicLabel: "Uitvoering", 
-    schedule: { PFO: "20-01-2026", DBBesluit: "27-01-2026" },
-    scheduleStatus: { PFO: "Concept", DBBesluit: "Concept" }
+    schedule: { POW: "06-01-2026", DT: "13-01-2026", PFO: "20-01-2026", DBBesluit: "27-01-2026" },
+    scheduleStatus: { POW: "Concept", DT: "Concept", PFO: "Concept", DBBesluit: "Concept" }
   },
   { 
     id: 14, 
@@ -143,9 +148,9 @@ export const items = [
     on: "I. van Lohuizen", 
     headOfDept: "F. Kroes", 
     dir: "M. Werges", 
-    strategicLabel: "P&C", // AANGEPAST: Was Beleid, nu P&C om filter te testen
-    schedule: { PFO: "20-01-2026", DBBesluit: "27-01-2026", ABBrief: "03-02-2026" },
-    scheduleStatus: { PFO: "Concept", DBBesluit: "Concept", ABBrief: "Concept" }
+    strategicLabel: "P&C", 
+    schedule: { POO: "08-01-2026", DT: "13-01-2026", PFO: "20-01-2026", DBBesluit: "27-01-2026", ABBrief: "03-02-2026" },
+    scheduleStatus: { POO: "Concept", DT: "Concept", PFO: "Concept", DBBesluit: "Concept", ABBrief: "Concept" }
   },
   { 
     id: 15, 
@@ -156,8 +161,8 @@ export const items = [
     dir: "M. Boersen", 
     strategicLabel: "Uitvoering", 
     toelichting: "Uitwijk PFO is 10/03/26.",
-    schedule: { PFO: "17-02-2026", DBBesluit: "17-03-2026", Delta: "14-04-2026" },
-    scheduleStatus: { PFO: "Concept", DBBesluit: "Concept", Delta: "Concept" }
+    schedule: { POW: "03-02-2026", DT: "10-02-2026", PFO: "17-02-2026", DBBesluit: "17-03-2026", Delta: "14-04-2026" },
+    scheduleStatus: { POW: "Concept", DT: "Concept", PFO: "Concept", DBBesluit: "Concept", Delta: "Concept" }
   },
   { 
     id: 20, 
@@ -169,8 +174,8 @@ export const items = [
     dir: "M. Boersen", 
     strategicLabel: "Externe ontwikkelingen", 
     toelichting: "Miranda in de lead, Folkert meenemen. Doorgeschoven.",
-    schedule: { PFO: "08-12-2025", DBBesluit: "16-12-2025", ABBrief: "03-02-2026" },
-    scheduleStatus: { PFO: "Afgerond", DBBesluit: "Ingediend", ABBrief: "Concept" }
+    schedule: { POW: "25-11-2025", DT: "02-12-2025", PFO: "08-12-2025", DBBesluit: "16-12-2025", ABBrief: "03-02-2026" },
+    scheduleStatus: { POW: "Afgerond", DT: "Afgerond", PFO: "Afgerond", DBBesluit: "Ingediend", ABBrief: "Concept" }
   },
   { 
     id: 22, 
@@ -181,8 +186,8 @@ export const items = [
     headOfDept: "M. Nicolai", 
     dir: "M. Boersen", 
     strategicLabel: "Uitvoering", 
-    schedule: { PFO: "20-01-2026", DBBesluit: "27-01-2026" },
-    scheduleStatus: { PFO: "Concept", DBBesluit: "Concept" }
+    schedule: { POW: "06-01-2026", DT: "13-01-2026", PFO: "20-01-2026", DBBesluit: "27-01-2026" },
+    scheduleStatus: { POW: "Concept", DT: "Concept", PFO: "Concept", DBBesluit: "Concept" }
   },
   { 
     id: 23, 
@@ -193,8 +198,8 @@ export const items = [
     dir: "M. Boersen", 
     strategicLabel: "Uitvoering", 
     toelichting: "40 minuten is voldoende.",
-    schedule: { DBInformeel: "20-01-2026" },
-    scheduleStatus: { DBInformeel: "Concept" }
+    schedule: { DT: "13-01-2026", DBInformeel: "20-01-2026" },
+    scheduleStatus: { DT: "Concept", DBInformeel: "Concept" }
   },
   { 
     id: 24, 
@@ -204,9 +209,9 @@ export const items = [
     headOfDept: "J. vd. Geer", 
     dir: "M. Boersen", 
     strategicLabel: "Evaluatie", 
-    toelichting: "Geagendeerd ter informeren DB, er wordt deze datum nog niet om een besluit gevraagd.",
-    schedule: { PFO: "02-02-2026", DBBesluit: "10-02-2026" },
-    scheduleStatus: { PFO: "Concept", DBBesluit: "Concept" }
+    toelichting: "Geagendeerd ter informeren DB.",
+    schedule: { POW: "20-01-2026", DT: "27-01-2026", PFO: "02-02-2026", DBBesluit: "10-02-2026" },
+    scheduleStatus: { POW: "Concept", DT: "Concept", PFO: "Concept", DBBesluit: "Concept" }
   },
   { 
     id: 25, 
@@ -216,8 +221,8 @@ export const items = [
     headOfDept: "M. Nicolai", 
     dir: "M. Boersen", 
     strategicLabel: "Uitvoering", 
-    schedule: { PFO: "02-02-2026", DBBesluit: "10-02-2026", Delta: "03-03-2026" },
-    scheduleStatus: { PFO: "Concept", DBBesluit: "Concept", Delta: "Concept" }
+    schedule: { POW: "20-01-2026", DT: "27-01-2026", PFO: "02-02-2026", DBBesluit: "10-02-2026", Delta: "03-03-2026" },
+    scheduleStatus: { POW: "Concept", DT: "Concept", PFO: "Concept", DBBesluit: "Concept", Delta: "Concept" }
   },
   { 
     id: 27, 
@@ -228,8 +233,8 @@ export const items = [
     dir: "M. Boersen", 
     strategicLabel: "Uitvoering", 
     toelichting: "Vervolg op PFO 25/11. Projectbesluit door DB, krediet door AB.",
-    schedule: { PFO: "24-03-2026", DBBesluit: "14-04-2026", Delta: "05-05-2026" },
-    scheduleStatus: { PFO: "Concept", DBBesluit: "Concept", Delta: "Concept" }
+    schedule: { POW: "10-03-2026", DT: "17-03-2026", PFO: "24-03-2026", DBBesluit: "14-04-2026", Delta: "05-05-2026" },
+    scheduleStatus: { POW: "Concept", DT: "Concept", PFO: "Concept", DBBesluit: "Concept", Delta: "Concept" }
   },
   { 
     id: 32, 
@@ -240,8 +245,8 @@ export const items = [
     dir: "M. Boersen", 
     strategicLabel: "Beleid", 
     toelichting: "Na overleg met PFH op 14 november volgt meer info over datum.",
-    schedule: { PFO: "06-01-2026", DBBesluit: "13-01-2026" },
-    scheduleStatus: { PFO: "Ingediend", DBBesluit: "Concept" }
+    schedule: { POW: "09-12-2025", DT: "16-12-2025", PFO: "06-01-2026", DBBesluit: "13-01-2026" },
+    scheduleStatus: { POW: "Afgerond", DT: "Afgerond", PFO: "Ingediend", DBBesluit: "Concept" }
   },
   { 
     id: 33, 
@@ -251,8 +256,8 @@ export const items = [
     headOfDept: "C. Beekmans", 
     dir: "M. Boersen", 
     strategicLabel: "Uitvoering", 
-    schedule: { Delta: "10-02-2026" },
-    scheduleStatus: { Delta: "Concept" }
+    schedule: { DT: "27-01-2026", Delta: "10-02-2026" },
+    scheduleStatus: { DT: "Concept", Delta: "Concept" }
   },
   { 
     id: 34, 
@@ -263,8 +268,8 @@ export const items = [
     dir: "M. Boersen", 
     strategicLabel: "Uitvoering", 
     toelichting: "Deadlines zijn krap, 05 maart is er een BBG.",
-    schedule: { PFO: "10-03-2026", DBBesluit: "17-03-2026", Delta: "14-04-2026", ABBesluit: "28-04-2026" },
-    scheduleStatus: { PFO: "Concept", DBBesluit: "Concept", Delta: "Concept", ABBesluit: "Concept" }
+    schedule: { POW: "24-02-2026", DT: "03-03-2026", PFO: "10-03-2026", DBBesluit: "17-03-2026", Delta: "14-04-2026", ABBesluit: "28-04-2026" },
+    scheduleStatus: { POW: "Concept", DT: "Concept", PFO: "Concept", DBBesluit: "Concept", Delta: "Concept", ABBesluit: "Concept" }
   },
   { 
     id: 35, 
@@ -274,8 +279,8 @@ export const items = [
     headOfDept: "C. Beekmans", 
     dir: "M. Boersen", 
     strategicLabel: "Uitvoering", 
-    schedule: { PFO: "11-05-2026", DBBesluit: "19-05-2026", ABBesluit: "30-06-2026" },
-    scheduleStatus: { PFO: "Concept", DBBesluit: "Concept", ABBesluit: "Concept" }
+    schedule: { POW: "28-04-2026", DT: "05-05-2026", PFO: "11-05-2026", DBBesluit: "19-05-2026", ABBesluit: "30-06-2026" },
+    scheduleStatus: { POW: "Concept", DT: "Concept", PFO: "Concept", DBBesluit: "Concept", ABBesluit: "Concept" }
   },
   { 
     id: 37, 
@@ -286,8 +291,8 @@ export const items = [
     dir: "M. Boersen", 
     strategicLabel: "Uitvoering", 
     toelichting: "Vervolg op 01/04 en 27/10.",
-    schedule: { PFO: "24-11-2025", DBBesluit: "02-12-2025", ABBrief: "03-02-2026" },
-    scheduleStatus: { PFO: "Afgerond", DBBesluit: "Afgerond", ABBrief: "Concept" }
+    schedule: { POW: "11-11-2025", DT: "18-11-2025", PFO: "24-11-2025", DBBesluit: "02-12-2025", ABBrief: "03-02-2026" },
+    scheduleStatus: { POW: "Afgerond", DT: "Afgerond", PFO: "Afgerond", DBBesluit: "Afgerond", ABBrief: "Concept" }
   },
   { 
     id: 38, 
@@ -297,8 +302,9 @@ export const items = [
     headOfDept: "M. Werges", 
     dir: "M. Werges", 
     strategicLabel: "Beleid", 
-    schedule: { DBInformeel: "06-01-2026" },
-    scheduleStatus: { DBInformeel: "Ingediend" }
+    // IT gaat via PO Organisatie
+    schedule: { POO: "11-12-2025", DT: "16-12-2025", DBInformeel: "06-01-2026" },
+    scheduleStatus: { POO: "Afgerond", DT: "Afgerond", DBInformeel: "Ingediend" }
   },
   { 
     id: 40, 
@@ -309,8 +315,8 @@ export const items = [
     dir: "M. Werges", 
     strategicLabel: "Uitvoering", 
     toelichting: "DB Voorstel en brief AB.",
-    schedule: { PFO: "06-01-2026", DBBesluit: "13-01-2026", ABBrief: "03-02-2026" },
-    scheduleStatus: { PFO: "Ingediend", DBBesluit: "Concept", ABBrief: "Concept" }
+    schedule: { POW: "09-12-2025", DT: "16-12-2025", PFO: "06-01-2026", DBBesluit: "13-01-2026", ABBrief: "03-02-2026" },
+    scheduleStatus: { POW: "Afgerond", DT: "Afgerond", PFO: "Ingediend", DBBesluit: "Concept", ABBrief: "Concept" }
   },
   { 
     id: 41, 
@@ -320,8 +326,8 @@ export const items = [
     headOfDept: "J. Vlot", 
     dir: "M. Boersen", 
     strategicLabel: "Uitvoering", 
-    schedule: { PFO: "06-01-2026", DBBesluit: "13-01-2026", Delta: "03-03-2026" },
-    scheduleStatus: { PFO: "Ingediend", DBBesluit: "Concept", Delta: "Concept" }
+    schedule: { POW: "09-12-2025", DT: "16-12-2025", PFO: "06-01-2026", DBBesluit: "13-01-2026", Delta: "03-03-2026" },
+    scheduleStatus: { POW: "Afgerond", DT: "Afgerond", PFO: "Ingediend", DBBesluit: "Concept", Delta: "Concept" }
   },
   // NIEUW ITEM OM P&C TE TESTEN IN VROEG 2026
   { 
@@ -332,11 +338,11 @@ export const items = [
     headOfDept: "J. vd. Geer", 
     dir: "M. Werges", 
     strategicLabel: "P&C", 
-    schedule: { PFO: "02-02-2026", DBBesluit: "10-02-2026" },
-    scheduleStatus: { PFO: "Concept", DBBesluit: "Concept" }
+    schedule: { POO: "22-01-2026", DT: "27-01-2026", PFO: "02-02-2026", DBBesluit: "10-02-2026" },
+    scheduleStatus: { POO: "Concept", DT: "Concept", PFO: "Concept", DBBesluit: "Concept" }
   },
 
-  // --- NIEUWE DUMMY ITEMS 2026-2028 ---
+  // --- ITEMS 2026-2028 (MET DUMMY AMBTELIJKE VOORBEREIDING) ---
   
   // 2026 Q3/Q4
   {
@@ -348,8 +354,8 @@ export const items = [
     dir: "M. Boersen", 
     strategicLabel: "Kaders",
     toelichting: "Voortgangsrapportage voor Brussel.",
-    schedule: { PFO: "07-09-2026", DBBesluit: "15-09-2026", Delta: "06-10-2026" },
-    scheduleStatus: { PFO: "Concept", DBBesluit: "Concept", Delta: "Concept" }
+    schedule: { POW: "18-08-2026", DT: "25-08-2026", PFO: "07-09-2026", DBBesluit: "15-09-2026", Delta: "06-10-2026" },
+    scheduleStatus: { POW: "Concept", DT: "Concept", PFO: "Concept", DBBesluit: "Concept", Delta: "Concept" }
   },
   {
     id: 102,
@@ -360,8 +366,8 @@ export const items = [
     dir: "M. Boersen",
     strategicLabel: "Uitvoering",
     toelichting: "Aanbestedingsresultaat en gunning.",
-    schedule: { PFO: "21-09-2026", DBBesluit: "29-09-2026" },
-    scheduleStatus: { PFO: "Concept", DBBesluit: "Concept" }
+    schedule: { POW: "07-09-2026", DT: "14-09-2026", PFO: "21-09-2026", DBBesluit: "29-09-2026" },
+    scheduleStatus: { POW: "Concept", DT: "Concept", PFO: "Concept", DBBesluit: "Concept" }
   },
   {
     id: 103,
@@ -373,8 +379,8 @@ export const items = [
     dir: "I. Geveke",
     strategicLabel: "Beleid",
     toelichting: "Eerste verkenning met stakeholders.",
-    schedule: { DBInformeel: "20-10-2026" },
-    scheduleStatus: { DBInformeel: "Concept" }
+    schedule: { DT: "06-10-2026", DBInformeel: "20-10-2026" },
+    scheduleStatus: { DT: "Concept", DBInformeel: "Concept" }
   },
   {
     id: 104,
@@ -385,22 +391,22 @@ export const items = [
     dir: "M. Werges",
     strategicLabel: "P&C",
     toelichting: "Start van de begrotingscyclus 2027.",
-    schedule: { PFO: "02-11-2026", DBBesluit: "10-11-2026", ABBesluit: "24-11-2026" },
-    scheduleStatus: { PFO: "Concept", DBBesluit: "Concept", ABBesluit: "Concept" }
+    schedule: { POO: "15-10-2026", DT: "20-10-2026", PFO: "02-11-2026", DBBesluit: "10-11-2026", ABBesluit: "24-11-2026" },
+    scheduleStatus: { POO: "Concept", DT: "Concept", PFO: "Concept", DBBesluit: "Concept", ABBesluit: "Concept" }
   },
   {
     id: 105,
     title: "Renovatie RWZI Dalfsen - Voorlopig Ontwerp",
     ph: "M. Wesselink",
     on: "S. Timmer",
-    headOfDept: "J. Vlot",
+    headOfDept: "J. Vlot", 
     dir: "M. Boersen",
     strategicLabel: "Uitvoering",
-    schedule: { PFO: "16-11-2026", DBBesluit: "24-11-2026" },
-    scheduleStatus: { PFO: "Concept", DBBesluit: "Concept" }
+    schedule: { POW: "02-11-2026", DT: "10-11-2026", PFO: "16-11-2026", DBBesluit: "24-11-2026" },
+    scheduleStatus: { POW: "Concept", DT: "Concept", PFO: "Concept", DBBesluit: "Concept" }
   },
 
-  // 2027
+  // 2027 (Beperkt gevuld voor overzicht)
   {
     id: 201,
     title: "Participatiebeleid Evaluatie 2024-2026",
@@ -410,139 +416,8 @@ export const items = [
     dir: "I. Geveke",
     strategicLabel: "Evaluatie",
     toelichting: "Wat ging goed in de gebiedsprocessen?",
-    schedule: { DBInformeel: "12-01-2027" },
-    scheduleStatus: { DBInformeel: "Concept" }
+    schedule: { DT: "15-12-2026", DBInformeel: "12-01-2027" },
+    scheduleStatus: { DT: "Concept", DBInformeel: "Concept" }
   },
-  {
-    id: 202,
-    title: "HWBP Project: IJsselkade Deventer - Voorkeursalternatief",
-    ph: "J.C.G. Wijnen",
-    colleaguePH: "H.J. Pereboom",
-    on: "R. Visser",
-    headOfDept: "C. Beekmans",
-    dir: "M. Boersen",
-    strategicLabel: "Uitvoering",
-    toelichting: "Groot project, veel impact op omgeving.",
-    schedule: { PFO: "08-02-2027", DBBesluit: "16-02-2027", Delta: "23-03-2027", ABBesluit: "30-03-2027" },
-    scheduleStatus: { PFO: "Concept", DBBesluit: "Concept", Delta: "Concept", ABBesluit: "Concept" }
-  },
-  {
-    id: 203,
-    title: "Jaarstukken 2026 en Resultaatbestemming",
-    ph: "D.S. Schoonman",
-    on: "A. van der Horst",
-    headOfDept: "J. vd. Geer",
-    dir: "M. Werges",
-    strategicLabel: "P&C",
-    schedule: { PFO: "19-04-2027", DBBesluit: "27-04-2027", ABBesluit: "25-05-2027" },
-    scheduleStatus: { PFO: "Concept", DBBesluit: "Concept", ABBesluit: "Concept" }
-  },
-  {
-    id: 204,
-    title: "Verkoop Oude Werf Meppel",
-    ph: "H.J. Pereboom",
-    on: "B. Kuipers",
-    headOfDept: "F. Kroes",
-    dir: "M. Werges",
-    strategicLabel: "Uitvoering",
-    toelichting: "Definitieve verkoop en overdracht.",
-    schedule: { PFO: "17-05-2027", DBBesluit: "25-05-2027" },
-    scheduleStatus: { PFO: "Concept", DBBesluit: "Concept" }
-  },
-  {
-    id: 205,
-    title: "Klimaatadaptatie Strategie 2030 Update",
-    ph: "N. Koks",
-    colleaguePH: "J.C.G. Wijnen",
-    on: "E. Smeets",
-    headOfDept: "J. vd. Geer",
-    dir: "I. Geveke",
-    strategicLabel: "Beleid",
-    schedule: { PFO: "06-09-2027", DBBesluit: "14-09-2027", Delta: "05-10-2027" },
-    scheduleStatus: { PFO: "Concept", DBBesluit: "Concept", Delta: "Concept" }
-  },
-  {
-    id: 206,
-    title: "Innovatiefonds Watertechnologie - Toekenning Subsidies",
-    ph: "M. Wesselink",
-    on: "P. De Jong",
-    headOfDept: "P. Schoonen",
-    dir: "M. Werges",
-    strategicLabel: "Organisatiegesteldheid",
-    schedule: { DBInformeel: "19-10-2027" },
-    scheduleStatus: { DBInformeel: "Concept" }
-  },
-
-  // 2028
-  {
-    id: 301,
-    title: "Mid-term Review Bestuursakkoord",
-    ph: "D.S. Schoonman",
-    colleaguePH: "Allen",
-    on: "Bestuursadviseurs",
-    headOfDept: "J. vd. Geer",
-    dir: "I. Geveke",
-    strategicLabel: "Evaluatie",
-    toelichting: "Halverwege de bestuursperiode: staan we nog op koers?",
-    schedule: { DBInformeel: "11-01-2028" },
-    scheduleStatus: { DBInformeel: "Concept" }
-  },
-  {
-    id: 302,
-    title: "Aanpassing Legger Oppervlaktewateren 2028",
-    ph: "H.J. Pereboom",
-    on: "G. Huisman",
-    headOfDept: "F. Kroes",
-    dir: "M. Boersen",
-    strategicLabel: "Beleid",
-    toelichting: "Periodieke herziening.",
-    schedule: { PFO: "06-03-2028", DBBesluit: "14-03-2028", ABBesluit: "28-03-2028" },
-    scheduleStatus: { PFO: "Concept", DBBesluit: "Concept", ABBesluit: "Concept" }
-  },
-  {
-    id: 303,
-    title: "Groot Onderhoud Sluis Eefde (Samenwerking RWS)",
-    ph: "N. Koks",
-    on: "M. van Veen",
-    headOfDept: "M. Nicolai",
-    dir: "M. Boersen",
-    strategicLabel: "Uitvoering",
-    schedule: { PFO: "15-05-2028", DBBesluit: "23-05-2028" },
-    scheduleStatus: { PFO: "Concept", DBBesluit: "Concept" }
-  },
-  {
-    id: 304,
-    title: "Personeelsplan en Formatie 2029",
-    ph: "D.S. Schoonman",
-    on: "HR Manager",
-    headOfDept: "P. Schoonen",
-    dir: "M. Werges",
-    strategicLabel: "Organisatiegesteldheid",
-    schedule: { DBInformeel: "22-08-2028" },
-    scheduleStatus: { DBInformeel: "Concept" }
-  },
-  {
-    id: 305,
-    title: "Investeringskrediet Nieuwe Hoofdkantoor Vleugel",
-    ph: "H.J. Pereboom",
-    colleaguePH: "D.S. Schoonman",
-    on: "Facilitair",
-    headOfDept: "F. Kroes",
-    dir: "M. Werges",
-    strategicLabel: "Uitvoering",
-    toelichting: "Besluit over de uitbreiding van de kantoorfaciliteiten.",
-    schedule: { PFO: "04-09-2028", DBBesluit: "12-09-2028", ABBesluit: "26-09-2028" },
-    scheduleStatus: { PFO: "Concept", DBBesluit: "Concept", ABBesluit: "Concept" }
-  },
-  {
-    id: 306,
-    title: "HWBP: Versterking Vechtdijken Traject C - Definitief Ontwerp",
-    ph: "J.C.G. Wijnen",
-    on: "K. Dijkstra",
-    headOfDept: "C. Beekmans",
-    dir: "M. Boersen",
-    strategicLabel: "Uitvoering",
-    schedule: { PFO: "13-11-2028", DBBesluit: "21-11-2028", Delta: "28-11-2028", ABBesluit: "19-12-2028" },
-    scheduleStatus: { PFO: "Concept", DBBesluit: "Concept", Delta: "Concept", ABBesluit: "Concept" }
-  }
+  // ... rest van 2027/2028 items hebben hier geen extra updates nodig voor de demo
 ];
